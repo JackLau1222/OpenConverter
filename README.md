@@ -1,6 +1,10 @@
 # FFMPEG GUI
 FFMPEG GUI 是一个基于 ffmpeg 的图形用户界面（GUI），它提供了一些简单易用的工具，可以方便地转换、编辑和处理视频文件。
 
+## [ffmpeg下载](https://ffmpeg.org/download.html)
+
+## [ffmpeg官方文档](http://ffmpeg.org/ffmpeg-all.html)
+
 ## 安装
 要安装 FFMPEG GUI，只需按照以下步骤操作：
 

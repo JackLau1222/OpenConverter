@@ -20,3 +20,8 @@ Qt提供了丰富的类库和工具集，使得开发者能够轻松地创建高
 [Qt文档](https://doc.qt.io/)
 
 [Qt论坛](https://forum.qt.io/)
+
+## 本项目所使用Qt版本
+
+[qt-opensource-windows-x86-5.11.3.exe](https://download.qt.io/new_archive/qt/5.11/5.11.3/)
+

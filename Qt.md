@@ -28,3 +28,5 @@ Qt提供了丰富的类库和工具集，使得开发者能够轻松地创建高
 
 [qt-opensource-windows-x86-5.11.3.exe](https://download.qt.io/new_archive/qt/5.11/5.11.3/)
 
+## [Qt使用教程](https://blog.csdn.net/qq_23473839/article/details/80523318)
+

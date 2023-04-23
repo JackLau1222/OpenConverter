@@ -9,7 +9,7 @@ git config --global user.email "你的邮箱"
 ## 操作仓库
 拉取远程仓库
 ```bash
-git clone URL
+git clone https://github.com/JackLau1222/ffmpeg-GUI
 ```
 添加一个名为test的cpp文件
 ```bash

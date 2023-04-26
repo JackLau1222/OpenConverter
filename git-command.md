@@ -41,7 +41,7 @@ touch test.cpp
 ```
 添加一个名为test的cpp文件（Windows）
 ```bash
-type nul > filename.txt
+type nul > test.cpp
 ```
 将此更改提交到缓冲区
 ```bash

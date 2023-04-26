@@ -3,7 +3,7 @@ FFMPEG GUI 是一个基于 ffmpeg 的图形用户界面（GUI），它提供了�
 
 本项目使用[Qt框架](/Qt.md)和[git](/git-command.md)仓库完成开发
 
-## [Git介绍](/git_command.md)
+## [Git介绍](/git-command.md)
 
 ## [Windows终端命令](/Windows-command.md)
 

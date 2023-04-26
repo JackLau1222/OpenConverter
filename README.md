@@ -3,6 +3,9 @@ FFMPEG GUI 是一个基于 ffmpeg 的图形用户界面（GUI），它提供了�
 
 本项目使用[Qt框架](/Qt.md)和[git](/git-command.md)仓库完成开发
 
+## [Git测试](/git_test)
+
+## [Qt工程文件学习模版](/project_learn)
 
 ### ffmpeg介绍
 FFmpeg是一套开源的跨平台音视频处理工具，可以用来录制、转换和流式传输音视频文件。FFmpeg由C语言编写而成，支持多种操作系统，包括Windows、Linux、macOS等。

@@ -1,6 +1,6 @@
 # [git](https://git-scm.com/downloads)
 
-## 信息
+## 信息配置
 ```bash
 git config --global user.name "你的用户名"
 git config --global user.email "你的邮箱"
@@ -11,6 +11,12 @@ git config --global user.email "你的邮箱"
 ```bash
 git clone https://github.com/JackLau1222/ffmpeg-GUI
 ```
+同步仓库(手动同步)
+```bash
+git fetch
+git merge
+````
+
 添加一个名为test的cpp文件
 ```bash
 touch test.cpp 

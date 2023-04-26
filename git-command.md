@@ -25,15 +25,23 @@ git config --global user.email "你的邮箱"
 ```bash
 git clone https://github.com/JackLau1222/ffmpeg-GUI
 ```
-同步仓库(手动同步)
+更新本地仓库(自动同步)
 ```bash
-git fetch
-git merge
+git pull 
+````
+更新本地仓库(手动同步)
+```bash
+git fetch 
+git merge 
 ````
 
-添加一个名为test的cpp文件
+添加一个名为test的cpp文件（Unix/Linux）
 ```bash
 touch test.cpp 
+```
+添加一个名为test的cpp文件（Windows）
+```bash
+type nul > filename.txt
 ```
 将此更改提交到缓冲区
 ```bash

@@ -55,3 +55,15 @@ git commit -a -m “add test.cpp”
 ```
 git push
 ```
+查看提交日志
+```
+git log
+```
+代码回滚
+```
+git reset --hard <commit_id>
+```
+使远程仓库回滚生效
+```
+git push orgin main --force
+```

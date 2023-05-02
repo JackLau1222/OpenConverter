@@ -70,3 +70,14 @@ git reset --hard <commit_id>
 ```
 git push orgin main --force
 ```
+
+## 查看可用分支
+```
+git branch
+```
+## 切换到可用分支
+```
+git checkout <branch-name>
+```
+
+

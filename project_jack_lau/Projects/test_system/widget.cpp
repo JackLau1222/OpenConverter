@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QScrollArea>
 #include <QTimer>
+#include <QMessageBox>
 
 
 Widget::Widget(QWidget *parent)
@@ -32,7 +33,7 @@ Widget::Widget(QWidget *parent)
     QRadioButton *rb12=new QRadioButton(tr("B"));
     QRadioButton *rb13=new QRadioButton(tr("C"));
     QRadioButton *rb14=new QRadioButton(tr("D"));
-    rb11->setChecked(true);
+    //rb11->setChecked(true);
     QVBoxLayout *vbox1=new QVBoxLayout;
     //vbox1->addWidget(gb1);
     vbox1->addWidget(rb11);
@@ -47,7 +48,7 @@ Widget::Widget(QWidget *parent)
     QRadioButton *rb22=new QRadioButton(tr("B"));
     QRadioButton *rb23=new QRadioButton(tr("C"));
     QRadioButton *rb24=new QRadioButton(tr("D"));
-    rb21->setChecked(true);
+    //rb21->setChecked(true);
     QVBoxLayout *vbox2=new QVBoxLayout;
 
     vbox2->addWidget(rb21);
@@ -63,7 +64,7 @@ Widget::Widget(QWidget *parent)
     QRadioButton *rb32=new QRadioButton(tr("B"));
     QRadioButton *rb33=new QRadioButton(tr("C"));
     QRadioButton *rb34=new QRadioButton(tr("D"));
-    rb31->setChecked(true);
+    //rb31->setChecked(true);
     QVBoxLayout *vbox3=new QVBoxLayout;
 
     vbox3->addWidget(rb31);
@@ -78,7 +79,7 @@ Widget::Widget(QWidget *parent)
     QRadioButton *rb42=new QRadioButton(tr("B"));
     QRadioButton *rb43=new QRadioButton(tr("C"));
     QRadioButton *rb44=new QRadioButton(tr("D"));
-    rb41->setChecked(true);
+    //rb41->setChecked(true);
     QVBoxLayout *vbox4=new QVBoxLayout;
 
     vbox4->addWidget(rb41);
@@ -118,14 +119,30 @@ Widget::Widget(QWidget *parent)
     setLayout(mainbox);
 
     QTimer *t=new QTimer;
+    t->start(1000);
     connect(t,&QTimer::timeout,[&](){
-        static int x;
-        pbr->setValue(x++);
-        rest->display(x);
+        static int x=5;
+        //pbr->setValue(x--);
+            rest->display(x--);
+        if(x==0)
+            endTest();
     });
-    t->start(100);
+
 
   }
+
+void Widget::endTest()
+{
+    QMessageBox::information(this,"test",QString("info"));
+}
+
+
+void Widget::progress_display()
+{
+
+
+}
+
 
 Widget::~Widget()
 {

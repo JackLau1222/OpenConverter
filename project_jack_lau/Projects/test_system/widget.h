@@ -22,6 +22,8 @@ public:
     QPushButton *push;
     QProgressBar *pbr;
     QLCDNumber *rest;
+    void progress_display();
+    void endTest();
 };
 
 #endif // WIDGET_H

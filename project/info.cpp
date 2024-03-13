@@ -1,12 +1,12 @@
-#include "core.h"
+#include "info.h"
 
 
-Core::Core()
+Info::Info()
 {
 
 }
 
-QString Core::enumToString(AVColorSpace e)
+QString Info::enumToString(AVColorSpace e)
 {
     static std::map<AVColorSpace, QString> colorSpaceMap;
 
@@ -27,7 +27,7 @@ QString Core::enumToString(AVColorSpace e)
     }
 }
 
-QString Core::enumToString(AVCodecID e)
+QString Info::enumToString(AVCodecID e)
 {
     static std::map<AVCodecID, QString> colorSpaceMap;
 
@@ -45,7 +45,7 @@ QString Core::enumToString(AVCodecID e)
     }
 }
 
-QString Core::enumToString(AVSampleFormat e)
+QString Info::enumToString(AVSampleFormat e)
 {
     static std::map<AVSampleFormat, QString> colorSpaceMap;
 
@@ -67,7 +67,7 @@ QString Core::enumToString(AVSampleFormat e)
     }
 }
 
-void Core::send_info(char *src, QuickInfo *info)
+void Info::send_info(char *src, QuickInfo *quickInfo)
 {
 
     int ret = 0;
@@ -80,29 +80,29 @@ void Core::send_info(char *src, QuickInfo *info)
     }
 
     //find the video stream from container
-    if((info->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0)) < 0){
+    if((quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0)) < 0){
         av_log(avCtx, AV_LOG_ERROR, "There is no video stream!\n");
         goto end;
     }
 
-    info->height = avCtx->streams[info->videoIdx]->codecpar->height;
-    info->width = avCtx->streams[info->videoIdx]->codecpar->width;
+    quickInfo->height = avCtx->streams[quickInfo->videoIdx]->codecpar->height;
+    quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
 
-    info->colorSpace = enumToString(avCtx->streams[info->videoIdx]->codecpar->color_space);
+    quickInfo->colorSpace = enumToString(avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
 
-    info->videoCodec = enumToString(avCtx->streams[info->videoIdx]->codecpar->codec_id);
+    quickInfo->videoCodec = enumToString(avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
 
 
 
-    info->videoBitRate = avCtx->streams[info->videoIdx]->codecpar->bit_rate;
-    info->frameRate = avCtx->streams[info->videoIdx]->r_frame_rate.num/avCtx->streams[info->videoIdx]->r_frame_rate.den;
+    quickInfo->videoBitRate = avCtx->streams[quickInfo->videoIdx]->codecpar->bit_rate;
+    quickInfo->frameRate = avCtx->streams[quickInfo->videoIdx]->r_frame_rate.num/avCtx->streams[quickInfo->videoIdx]->r_frame_rate.den;
 
     //find the audio stream from container
-    if((info->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0)) < 0){
+    if((quickInfo->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0)) < 0){
         av_log(avCtx, AV_LOG_ERROR, "There is no audio stream!\n");
         goto end;
     }
-    audioCodec = avcodec_find_decoder(avCtx->streams[info->audioIdx]->codecpar->codec_id);
+    audioCodec = avcodec_find_decoder(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
     if (!audioCodec) {
         av_log(NULL, AV_LOG_ERROR, "Codec not found\n");
         goto end;
@@ -118,11 +118,11 @@ void Core::send_info(char *src, QuickInfo *info)
         goto end;
     }
 
-    info->audioCodec = enumToString(avCtx->streams[info->audioIdx]->codecpar->codec_id);
-    info->audioBitRate = avCtx->streams[info->audioIdx]->codecpar->bit_rate;
-    info->channels = avCtx->streams[info->audioIdx]->codecpar->channels;
-    info->sampleFmt = enumToString(audioCtx->sample_fmt);
-    info->sampleRate = avCtx->streams[info->audioIdx]->codecpar->sample_rate;
+    quickInfo->audioCodec = enumToString(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
+    quickInfo->audioBitRate = avCtx->streams[quickInfo->audioIdx]->codecpar->bit_rate;
+    quickInfo->channels = avCtx->streams[quickInfo->audioIdx]->codecpar->channels;
+    quickInfo->sampleFmt = enumToString(audioCtx->sample_fmt);
+    quickInfo->sampleRate = avCtx->streams[quickInfo->audioIdx]->codecpar->sample_rate;
 
 
 
@@ -132,7 +132,7 @@ end:
     avformat_close_input(&avCtx);
 }
 
-Core::~Core()
+Info::~Info()
 {
 
 }

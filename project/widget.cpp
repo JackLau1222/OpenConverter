@@ -14,33 +14,41 @@ Widget::Widget(QWidget *parent)
 
 void Widget::apply_Pushed()
 {
-    qDebug() << ui->lineEdit->text() <<"\n";
 
     QByteArray ba = ui->lineEdit->text().toLocal8Bit();
     char *src = ba.data();
 
-    QuickInfo *info = new QuickInfo;
-    Core *core = new Core;
 
-    core->send_info(src, info);
+    //get info by Decapsulation
+    info->send_info(src, quickInfo);
+
+    //display info on window
+    info_Display(quickInfo);
+
+}
+
+void Widget::line_Text_Get()
+{
+
+}
+
+void Widget::info_Display(QuickInfo *quickInfo)
+{
     //video
-    ui->label_3->setText(QString("Video : Stream %1").arg(info->videoIdx));
-    ui->label_2->setText(QString("width: %1").arg(info->width));
-    ui->label->setText(QString("height: %1").arg(info->height));
-    ui->label_7->setText(QString("color_space: %1").arg(info->colorSpace));
-    ui->label_5->setText(QString("codec: %1").arg(info->videoCodec));
-    ui->label_6->setText(QString("bit_rate: %1").arg(info->videoBitRate));
-    ui->label_8->setText(QString("frame_rate: %1").arg(info->frameRate));
+    ui->label_3->setText(QString("Video : Stream %1").arg(quickInfo->videoIdx));
+    ui->label_2->setText(QString("width: %1").arg(quickInfo->width));
+    ui->label->setText(QString("height: %1").arg(quickInfo->height));
+    ui->label_7->setText(QString("color_space: %1").arg(quickInfo->colorSpace));
+    ui->label_5->setText(QString("codec: %1").arg(quickInfo->videoCodec));
+    ui->label_6->setText(QString("bit_rate: %1").arg(quickInfo->videoBitRate));
+    ui->label_8->setText(QString("frame_rate: %1").arg(quickInfo->frameRate));
     //audio
-    ui->label_9->setText(QString("Audio : Stream %1").arg(info->audioIdx));
-    ui->label_4->setText(QString("codec: %1").arg(info->audioCodec));
-    ui->label_10->setText(QString("bit_rate: %1").arg(info->audioBitRate));
-    ui->label_11->setText(QString("channels: %1").arg(info->channels));
-    ui->label_12->setText(QString("sample_fmt: %1").arg(info->sampleFmt));
-    ui->label_13->setText(QString("sample_rate: %1").arg(info->sampleRate));
-
-
-
+    ui->label_9->setText(QString("Audio : Stream %1").arg(quickInfo->audioIdx));
+    ui->label_4->setText(QString("codec: %1").arg(quickInfo->audioCodec));
+    ui->label_10->setText(QString("bit_rate: %1").arg(quickInfo->audioBitRate));
+    ui->label_11->setText(QString("channels: %1").arg(quickInfo->channels));
+    ui->label_12->setText(QString("sample_fmt: %1").arg(quickInfo->sampleFmt));
+    ui->label_13->setText(QString("sample_rate: %1").arg(quickInfo->sampleRate));
 }
 
 

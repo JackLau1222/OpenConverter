@@ -1,7 +1,7 @@
-#ifndef CORE_H
-#define CORE_H
+#ifndef INFO_H
+#define INFO_H
 
-#endif // CORE_H
+#endif // INFO_H
 extern "C"
 {
 #include <libavformat/avformat.h>
@@ -36,12 +36,12 @@ typedef struct QuickInfo
 
 }QuickInfo;
 
-class Core
+class Info
 {
 
 public:
-    Core();
-    ~Core();
+    Info();
+    ~Info();
 
 private:
     AVFormatContext *avCtx = NULL;

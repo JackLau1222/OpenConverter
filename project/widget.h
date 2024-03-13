@@ -2,7 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
-#include "core.h"
+#include "info.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -20,10 +20,16 @@ public:
 public slots:
     void apply_Pushed();
 
+    void info_Display(QuickInfo *info);
+
+    void line_Text_Get();
 
 
 
 private:
     Ui::Widget *ui;
+    QuickInfo *quickInfo = new QuickInfo;
+    Info *info = new Info;
+
 };
 #endif // WIDGET_H

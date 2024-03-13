@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "info.h"
+#include "converter.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -20,16 +21,18 @@ public:
 public slots:
     void apply_Pushed();
 
+    void convert_Pushed();
+
     void info_Display(QuickInfo *info);
-
-    void line_Text_Get();
-
-
 
 private:
     Ui::Widget *ui;
+
     QuickInfo *quickInfo = new QuickInfo;
+
     Info *info = new Info;
+
+    Converter *converter = new Converter;
 
 };
 #endif // WIDGET_H

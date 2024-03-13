@@ -6,7 +6,7 @@ Info::Info()
 
 }
 
-QString Info::enumToString(AVColorSpace e)
+QString Info::enum_To_String(AVColorSpace e)
 {
     static std::map<AVColorSpace, QString> colorSpaceMap;
 
@@ -27,7 +27,7 @@ QString Info::enumToString(AVColorSpace e)
     }
 }
 
-QString Info::enumToString(AVCodecID e)
+QString Info::enum_To_String(AVCodecID e)
 {
     static std::map<AVCodecID, QString> colorSpaceMap;
 
@@ -45,7 +45,7 @@ QString Info::enumToString(AVCodecID e)
     }
 }
 
-QString Info::enumToString(AVSampleFormat e)
+QString Info::enum_To_String(AVSampleFormat e)
 {
     static std::map<AVSampleFormat, QString> colorSpaceMap;
 
@@ -87,13 +87,8 @@ void Info::send_info(char *src, QuickInfo *quickInfo)
 
     quickInfo->height = avCtx->streams[quickInfo->videoIdx]->codecpar->height;
     quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
-
-    quickInfo->colorSpace = enumToString(avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
-
-    quickInfo->videoCodec = enumToString(avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
-
-
-
+    quickInfo->colorSpace = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
+    quickInfo->videoCodec = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
     quickInfo->videoBitRate = avCtx->streams[quickInfo->videoIdx]->codecpar->bit_rate;
     quickInfo->frameRate = avCtx->streams[quickInfo->videoIdx]->r_frame_rate.num/avCtx->streams[quickInfo->videoIdx]->r_frame_rate.den;
 
@@ -118,10 +113,10 @@ void Info::send_info(char *src, QuickInfo *quickInfo)
         goto end;
     }
 
-    quickInfo->audioCodec = enumToString(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
+    quickInfo->audioCodec = enum_To_String(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
     quickInfo->audioBitRate = avCtx->streams[quickInfo->audioIdx]->codecpar->bit_rate;
     quickInfo->channels = avCtx->streams[quickInfo->audioIdx]->codecpar->channels;
-    quickInfo->sampleFmt = enumToString(audioCtx->sample_fmt);
+    quickInfo->sampleFmt = enum_To_String(audioCtx->sample_fmt);
     quickInfo->sampleRate = avCtx->streams[quickInfo->audioIdx]->codecpar->sample_rate;
 
 
@@ -130,6 +125,10 @@ void Info::send_info(char *src, QuickInfo *quickInfo)
 
 end:
     avformat_close_input(&avCtx);
+
+    avcodec_free_context(&audioCtx);
+
+
 }
 
 Info::~Info()

@@ -10,7 +10,7 @@ extern "C"
 #include <QWidget>
 #include <map>
 
-
+//store some info of video and audio
 typedef struct QuickInfo
 {
     //video
@@ -36,6 +36,8 @@ typedef struct QuickInfo
 
 }QuickInfo;
 
+
+//deal with info of video and audio and stored as QuickInfo type
 class Info
 {
 
@@ -45,21 +47,23 @@ public:
 
 private:
     AVFormatContext *avCtx = NULL;
+
     const AVCodec *audioCodec = NULL;
+
     AVCodecContext *audioCtx = NULL;
 
 public:
     //send the info to front-end
-    void send_info(char *src, QuickInfo *info);
+    void send_info(char *src, QuickInfo *QuickInfo);
 
     //convert video color space into string
-    QString enumToString(AVColorSpace e);
+    QString enum_To_String(AVColorSpace e);
 
     //convert audio and video codec enum into string
-    QString enumToString(AVCodecID e);
+    QString enum_To_String(AVCodecID e);
 
     //convert audio sample format enum into string
-    QString enumToString(AVSampleFormat sample_fmt);
+    QString enum_To_String(AVSampleFormat sample_fmt);
 };
 
 

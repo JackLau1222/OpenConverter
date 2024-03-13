@@ -8,8 +8,9 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    connect(ui->pushButton_2, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 
-    connect(ui->pushButton_2,SIGNAL(clicked(bool)),this,SLOT(apply_Pushed()));
+    connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
 }
 
 void Widget::apply_Pushed()
@@ -17,7 +18,6 @@ void Widget::apply_Pushed()
 
     QByteArray ba = ui->lineEdit->text().toLocal8Bit();
     char *src = ba.data();
-
 
     //get info by Decapsulation
     info->send_info(src, quickInfo);
@@ -27,10 +27,17 @@ void Widget::apply_Pushed()
 
 }
 
-void Widget::line_Text_Get()
+void Widget::convert_Pushed()
 {
+    QByteArray ba = ui->lineEdit->text().toLocal8Bit();
+    char *src = ba.data();
 
+    QByteArray ba1 = ui->lineEdit_2->text().toLocal8Bit();
+    char *dst = ba1.data();
+
+    //converter->convert_Format(src, dst);
 }
+
 
 void Widget::info_Display(QuickInfo *quickInfo)
 {

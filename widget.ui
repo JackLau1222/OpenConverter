@@ -24,10 +24,18 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QLineEdit" name="lineEdit"/>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="lineEdit_2"/>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="pushButton">

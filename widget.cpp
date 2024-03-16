@@ -29,13 +29,30 @@ void Widget::apply_Pushed()
 
 void Widget::convert_Pushed()
 {
+    QMessageBox displayResult;
+    if(ui->lineEdit->text() == ui->lineEdit_2->text())
+    {
+        displayResult.setText("The input file can't same as ouput file!");
+        displayResult.exec();
+        return;
+    }
     QByteArray ba = ui->lineEdit->text().toLocal8Bit();
     char *src = ba.data();
 
     QByteArray ba1 = ui->lineEdit_2->text().toLocal8Bit();
     char *dst = ba1.data();
 
-    //converter->convert_Format(src, dst);
+
+
+    if(converter->convert_Format(src, dst))
+    {
+        displayResult.setText("Convert success!");
+    }else
+    {
+        displayResult.setText("Convert failed! Please ensure the file path is correct");
+    }
+    displayResult.exec();
+
 }
 
 

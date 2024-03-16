@@ -22,7 +22,7 @@ private:
 
     const AVOutputFormat *outFmt = NULL;
 
-    AVPacket pkt;
+    AVPacket *pkt = NULL;
 
     int ret = -1;
     int idx = -1;
@@ -30,6 +30,6 @@ private:
     int *stream_map = NULL;
 
 public:
-    void convert_Format(char *src, char *dst);
+    bool convert_Format(char *src, char *dst);
 
 };

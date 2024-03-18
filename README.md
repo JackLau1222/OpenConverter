@@ -57,4 +57,4 @@ FFmpeg是一套开源的跨平台音视频处理工具，可以用来录制、�
 提交您的更改，创建一个 pull request。
 
 ## 许可证
-FFMPEG GUI 是基于 MIT 许可证开源的。请在使用前阅读 LICENSE 文件。
+FFMPEG GUI 是基于 Apache 2.0 许可证开源的。请在使用前阅读 LICENSE 文件。

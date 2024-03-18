@@ -18,7 +18,6 @@ void Widget::apply_Pushed()
 
     QByteArray ba = ui->lineEdit->text().toLocal8Bit();
     char *src = ba.data();
-
     //get info by Decapsulation
     info->send_info(src, quickInfo);
 

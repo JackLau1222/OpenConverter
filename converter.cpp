@@ -12,13 +12,15 @@ bool Converter::convert_Format(char *src, char *dst)
     av_log_set_level(AV_LOG_ERROR);
 
     pkt = av_packet_alloc();
-    if (!pkt) {
+    if (!pkt)
+    {
         fprintf(stderr, "Could not allocate AVPacket\n");
         goto end;
     }
     //open the multimedia file
-    if( (ret = avformat_open_input(&pFmtCtx, src, NULL, NULL)) < 0 ){
-        av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
+    if( (ret = avformat_open_input(&pFmtCtx, src, NULL, NULL)) < 0 )
+    {
+        //av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
         goto end;
     }
 
@@ -30,7 +32,8 @@ bool Converter::convert_Format(char *src, char *dst)
     }
 
     stream_map = (int *)av_calloc(pFmtCtx->nb_streams, sizeof(int));
-    if(!stream_map){
+    if(!stream_map)
+    {
         av_log(NULL, AV_LOG_ERROR, "No Memory\n");
         goto end;
     }
@@ -42,14 +45,16 @@ bool Converter::convert_Format(char *src, char *dst)
         AVCodecParameters *inCodecPar = inStream->codecpar;
         if(inCodecPar->codec_type != AVMEDIA_TYPE_AUDIO &&
             inCodecPar->codec_type != AVMEDIA_TYPE_VIDEO &&
-            inCodecPar->codec_type != AVMEDIA_TYPE_SUBTITLE){
+            inCodecPar->codec_type != AVMEDIA_TYPE_SUBTITLE)
+        {
             stream_map[i] = -1;
             continue;
         }
         stream_map[i] = stream_index++;
         //create a new stream
         outStream = avformat_new_stream(oFmtCtx, NULL);
-        if(!outStream){
+        if(!outStream)
+        {
             av_log(oFmtCtx, AV_LOG_ERROR, "No Memory!\n");
         }
 
@@ -61,24 +66,28 @@ bool Converter::convert_Format(char *src, char *dst)
 
     //binding
     ret = avio_open2(&oFmtCtx->pb, dst, AVIO_FLAG_WRITE, NULL, NULL);
-    if(ret < 0){
-        av_log(oFmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
+    if(ret < 0)
+    {
+        //av_log(oFmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
         goto end;
     }
 
     //write the head file of multimedia to destination file
     ret = avformat_write_header(oFmtCtx, NULL);
-    if(ret < 0){
-        av_log(oFmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
+    if(ret < 0)
+    {
+        //av_log(oFmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
         goto end;
     }
 
     //read data from multimedia files to write into destination file
-    while(av_read_frame(pFmtCtx, pkt) >= 0){
+    while(av_read_frame(pFmtCtx, pkt) >= 0)
+    {
         AVStream *inStream, *outStream;
 
         inStream = pFmtCtx->streams[pkt->stream_index];
-        if(stream_map[stream_index] < 0){
+        if(stream_map[stream_index] < 0)
+        {
             av_packet_unref(pkt);
             continue;
         }

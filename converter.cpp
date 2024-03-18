@@ -26,7 +26,8 @@ bool Converter::convert_Format(char *src, char *dst)
 
 
     avformat_alloc_output_context2(&oFmtCtx, NULL, NULL, dst);
-    if(!oFmtCtx){
+    if(!oFmtCtx)
+    {
         av_log(NULL, AV_LOG_ERROR, "No Memory\n");
         goto end;
     }

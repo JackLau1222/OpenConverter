@@ -1,5 +1,5 @@
 # FFMPEG GUI
-FFMPEG GUI 是一个基于 ffmpeg 的图形用户界面（GUI），它提供了一些简单易用的工具，可以方便地转换、编辑和处理视频文件。
+FFMPEG GUI 是一个基于 ffmpeg源代码、qt开源框架构建的软件，它提供了一些简单易用的工具，可以方便地转换、编辑和处理音视频文件。
 
 本项目使用[Qt框架](/Qt.md)和[git](/git-command.md)仓库完成开发
 

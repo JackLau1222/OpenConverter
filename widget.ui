@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1100</width>
     <height>600</height>
    </rect>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Widget</string>
@@ -17,28 +23,28 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>0</y>
-     <width>771</width>
-     <height>81</height>
+     <y>20</y>
+     <width>1051</width>
+     <height>91</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QLineEdit" name="lineEdit">
+     <widget class="QLineEdit" name="lineEdit_inputFile">
       <property name="text">
        <string/>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="lineEdit_2">
+     <widget class="QLineEdit" name="lineEdit_outputFile">
       <property name="text">
        <string/>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pushButton_Convert">
       <property name="text">
        <string>convert</string>
       </property>
@@ -51,111 +57,111 @@
     <rect>
      <x>10</x>
      <y>140</y>
-     <width>771</width>
-     <height>241</height>
+     <width>1051</width>
+     <height>231</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="2" column="2">
-     <widget class="QLabel" name="label_10">
+     <widget class="QLabel" name="label_audioBitRate">
       <property name="text">
        <string>bit_rate:</string>
       </property>
      </widget>
     </item>
     <item row="3" column="2">
-     <widget class="QLabel" name="label_13">
+     <widget class="QLabel" name="label_sampleRate">
       <property name="text">
        <string>sample_rate:</string>
       </property>
      </widget>
     </item>
     <item row="4" column="1">
-     <widget class="QLabel" name="label_14">
+     <widget class="QLabel" name="label_subCodec">
       <property name="text">
        <string>codec:</string>
       </property>
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QLabel" name="label_4">
+     <widget class="QLabel" name="label_audioCodec">
       <property name="text">
        <string>codec:</string>
       </property>
      </widget>
     </item>
     <item row="1" column="2">
-     <widget class="QLabel" name="label_6">
+     <widget class="QLabel" name="label_videoBitRate">
       <property name="text">
        <string>bit_rate:</string>
       </property>
      </widget>
     </item>
     <item row="2" column="3">
-     <widget class="QLabel" name="label_11">
+     <widget class="QLabel" name="label_channels">
       <property name="text">
        <string>channels</string>
       </property>
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="label_videoStream">
       <property name="text">
        <string>Video : Stream</string>
       </property>
      </widget>
     </item>
     <item row="3" column="1">
-     <widget class="QLabel" name="label_12">
+     <widget class="QLabel" name="label_sampleFmt">
       <property name="text">
        <string>sample_fmt:</string>
       </property>
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="label_width">
       <property name="text">
        <string>width:</string>
       </property>
      </widget>
     </item>
     <item row="0" column="3">
-     <widget class="QLabel" name="label_7">
+     <widget class="QLabel" name="label_colorSpace">
       <property name="text">
        <string>color_space:</string>
       </property>
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLabel" name="label_5">
+     <widget class="QLabel" name="label_videoCodec">
       <property name="text">
        <string>codec:</string>
       </property>
      </widget>
     </item>
     <item row="0" column="2">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="label_height">
       <property name="text">
        <string>height:</string>
       </property>
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="label_9">
+     <widget class="QLabel" name="label_audioStream">
       <property name="text">
        <string>Audio : Stream</string>
       </property>
      </widget>
     </item>
     <item row="4" column="0">
-     <widget class="QLabel" name="label_15">
+     <widget class="QLabel" name="label_subStream">
       <property name="text">
        <string>Sub : Stream</string>
       </property>
      </widget>
     </item>
     <item row="1" column="3">
-     <widget class="QLabel" name="label_8">
+     <widget class="QLabel" name="label_frameRate">
       <property name="text">
        <string>frame_rate:</string>
       </property>
@@ -166,15 +172,15 @@
   <widget class="QWidget" name="horizontalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>440</y>
-     <width>771</width>
-     <height>80</height>
+     <x>180</x>
+     <y>450</y>
+     <width>701</width>
+     <height>81</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="pushButton_Apply">
       <property name="text">
        <string>Apply</string>
       </property>

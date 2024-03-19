@@ -8,15 +8,15 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->pushButton_2, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
+    connect(ui->pushButton_Apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 
-    connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
+    connect(ui->pushButton_Convert, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
 }
 
 void Widget::apply_Pushed()
 {
 
-    QByteArray ba = ui->lineEdit->text().toLocal8Bit();
+    QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
     char *src = ba.data();
     //get info by Decapsulation
     info->send_info(src, quickInfo);
@@ -29,16 +29,16 @@ void Widget::apply_Pushed()
 void Widget::convert_Pushed()
 {
     QMessageBox displayResult;
-    if(ui->lineEdit->text() == ui->lineEdit_2->text())
+    if(ui->lineEdit_inputFile->text() == ui->lineEdit_outputFile->text())
     {
         displayResult.setText("The input file can't same as ouput file!");
         displayResult.exec();
         return;
     }
-    QByteArray ba = ui->lineEdit->text().toLocal8Bit();
+    QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
     char *src = ba.data();
 
-    QByteArray ba1 = ui->lineEdit_2->text().toLocal8Bit();
+    QByteArray ba1 = ui->lineEdit_outputFile->text().toLocal8Bit();
     char *dst = ba1.data();
 
 
@@ -58,20 +58,20 @@ void Widget::convert_Pushed()
 void Widget::info_Display(QuickInfo *quickInfo)
 {
     //video
-    ui->label_3->setText(QString("Video : Stream %1").arg(quickInfo->videoIdx));
-    ui->label_2->setText(QString("width: %1").arg(quickInfo->width));
-    ui->label->setText(QString("height: %1").arg(quickInfo->height));
-    ui->label_7->setText(QString("color_space: %1").arg(quickInfo->colorSpace));
-    ui->label_5->setText(QString("codec: %1").arg(quickInfo->videoCodec));
-    ui->label_6->setText(QString("bit_rate: %1").arg(quickInfo->videoBitRate));
-    ui->label_8->setText(QString("frame_rate: %1").arg(quickInfo->frameRate));
+    ui->label_videoStream->setText(QString("Video : Stream %1").arg(quickInfo->videoIdx));
+    ui->label_width->setText(QString("width: %1").arg(quickInfo->width));
+    ui->label_height->setText(QString("height: %1").arg(quickInfo->height));
+    ui->label_colorSpace->setText(QString("color_space: %1").arg(quickInfo->colorSpace));
+    ui->label_videoCodec->setText(QString("codec: %1").arg(quickInfo->videoCodec));
+    ui->label_videoBitRate->setText(QString("bit_rate: %1").arg(quickInfo->videoBitRate));
+    ui->label_frameRate->setText(QString("frame_rate: %1").arg(quickInfo->frameRate));
     //audio
-    ui->label_9->setText(QString("Audio : Stream %1").arg(quickInfo->audioIdx));
-    ui->label_4->setText(QString("codec: %1").arg(quickInfo->audioCodec));
-    ui->label_10->setText(QString("bit_rate: %1").arg(quickInfo->audioBitRate));
-    ui->label_11->setText(QString("channels: %1").arg(quickInfo->channels));
-    ui->label_12->setText(QString("sample_fmt: %1").arg(quickInfo->sampleFmt));
-    ui->label_13->setText(QString("sample_rate: %1").arg(quickInfo->sampleRate));
+    ui->label_audioStream->setText(QString("Audio : Stream %1").arg(quickInfo->audioIdx));
+    ui->label_audioCodec->setText(QString("codec: %1").arg(quickInfo->audioCodec));
+    ui->label_audioBitRate->setText(QString("bit_rate: %1").arg(quickInfo->audioBitRate));
+    ui->label_channels->setText(QString("channels: %1").arg(quickInfo->channels));
+    ui->label_sampleFmt->setText(QString("sample_fmt: %1").arg(quickInfo->sampleFmt));
+    ui->label_sampleRate->setText(QString("sample_rate: %1").arg(quickInfo->sampleRate));
 }
 
 

@@ -11,6 +11,21 @@ Widget::Widget(QWidget *parent)
     connect(ui->pushButton_Apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 
     connect(ui->pushButton_Convert, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
+
+    //Init QuickInfo
+    quickInfo->videoIdx = 0;
+    quickInfo->width = 0;
+    quickInfo->height = 0;
+    quickInfo->colorSpace = "";
+    quickInfo->videoCodec= "";
+    quickInfo->videoBitRate = 0;
+    quickInfo->frameRate = 0;
+    quickInfo->audioIdx = 0;
+    quickInfo->audioCodec = "";
+    quickInfo->audioBitRate = 0;
+    quickInfo->channels = 0;
+    quickInfo->sampleFmt = "";
+    quickInfo->sampleRate = 0;
 }
 
 void Widget::apply_Pushed()

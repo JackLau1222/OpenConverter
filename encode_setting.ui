@@ -25,7 +25,7 @@
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="2">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineEdit_"/>
      </item>
      <item row="1" column="2">
       <widget class="QLineEdit" name="lineEdit_2"/>
@@ -145,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>480</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

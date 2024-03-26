@@ -11,17 +11,15 @@ Widget::Widget(QWidget *parent)
     connect(ui->toolButton, &QToolButton::clicked,[&](){
         QString filename=QFileDialog::getOpenFileName();
         ui->lineEdit_inputFile->setText(filename);
-        qDebug() << ui->lineEdit_inputFile->text();
+        //qDebug() << ui->lineEdit_inputFile->text();
     });
 
 
-    connect(ui->pushButton_Apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
-
-    connect(ui->pushButton_Convert, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
-
-    connect(ui->pushButton_EncodeSetting, SIGNAL(clicked(bool)), this, SLOT(encode_Setting_Pushed()));
-
-
+    connect(ui->pushButton_apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
+    
+    connect(ui->pushButton_convert, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
+    
+    connect(ui->pushButton_encodeSetting, SIGNAL(clicked(bool)), this, SLOT(encode_Setting_Pushed()));
 
 }
 
@@ -35,7 +33,7 @@ void Widget::encode_Setting_Pushed()
 
 
     EncodeSetting *encodeSetting = new EncodeSetting;
-    encodeSetting->set_Info(ui->lineEdit_inputFile->text(), ui->lineEdit_inputFile->text());
+
     encodeSetting->show();
 }
 

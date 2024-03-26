@@ -51,7 +51,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_Convert">
+     <widget class="QPushButton" name="pushButton_convert">
       <property name="text">
        <string>convert</string>
       </property>
@@ -187,14 +187,14 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="QPushButton" name="pushButton_Apply">
+     <widget class="QPushButton" name="pushButton_apply">
       <property name="text">
        <string>Apply</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_EncodeSetting">
+     <widget class="QPushButton" name="pushButton_encodeSetting">
       <property name="text">
        <string>encode_setting</string>
       </property>

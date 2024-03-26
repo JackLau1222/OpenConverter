@@ -3,6 +3,17 @@
 
 #include <QMainWindow>
 
+
+typedef struct EncodeInfo
+{
+    QString videoCodec;
+    int64_t videoBitRate;
+
+    QString audioCodec;
+    int64_t audioBitRate;
+
+}EncodeInfo;
+
 namespace Ui {
 class EncodeSetting;
 }
@@ -13,7 +24,6 @@ class EncodeSetting : public QMainWindow
 
 public:
     explicit EncodeSetting(QWidget *parent = nullptr);
-    void set_Info(QString in, QString out);
     ~EncodeSetting();
 
 public slots:
@@ -24,8 +34,7 @@ public slots:
 private:
     Ui::EncodeSetting *ui;
 
-    QString input;
-    QString output;
+    EncodeInfo *encodeInfo;
 };
 
 #endif // ENCODE_SETTING_H

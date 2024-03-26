@@ -8,25 +8,37 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    connect(ui->toolButton, &QToolButton::clicked,[&](){
+        QString filename=QFileDialog::getOpenFileName();
+        ui->lineEdit_inputFile->setText(filename);
+        qDebug() << ui->lineEdit_inputFile->text();
+    });
+
+
     connect(ui->pushButton_Apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 
     connect(ui->pushButton_Convert, SIGNAL(clicked(bool)), this, SLOT(convert_Pushed()));
 
-    //Init QuickInfo
-    quickInfo->videoIdx = 0;
-    quickInfo->width = 0;
-    quickInfo->height = 0;
-    quickInfo->colorSpace = "";
-    quickInfo->videoCodec= "";
-    quickInfo->videoBitRate = 0;
-    quickInfo->frameRate = 0;
-    quickInfo->audioIdx = 0;
-    quickInfo->audioCodec = "";
-    quickInfo->audioBitRate = 0;
-    quickInfo->channels = 0;
-    quickInfo->sampleFmt = "";
-    quickInfo->sampleRate = 0;
+    connect(ui->pushButton_EncodeSetting, SIGNAL(clicked(bool)), this, SLOT(encode_Setting_Pushed()));
+
+
+
 }
+
+void Widget::encode_Setting_Pushed()
+{
+//    QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
+//    char *src = ba.data();
+
+//    QByteArray ba1 = ui->lineEdit_outputFile->text().toLocal8Bit();
+//    char *dst = ba1.data();
+
+
+    EncodeSetting *encodeSetting = new EncodeSetting;
+    encodeSetting->set_Info(ui->lineEdit_inputFile->text(), ui->lineEdit_inputFile->text());
+    encodeSetting->show();
+}
+
 
 void Widget::apply_Pushed()
 {

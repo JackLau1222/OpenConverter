@@ -4,7 +4,9 @@
 #include <QWidget>
 #include "info.h"
 #include "converter.h"
+#include "encode_setting.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -23,6 +25,8 @@ public slots:
     void apply_Pushed();
 
     void convert_Pushed();
+
+    void encode_Setting_Pushed();
 
     void info_Display(QuickInfo *info);
 

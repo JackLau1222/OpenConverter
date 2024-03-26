@@ -10,16 +10,19 @@ CONFIG += c++17
 
 SOURCES += \
     converter.cpp \
+    encode_setting.cpp \
     info.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
     converter.h \
+    encode_setting.h \
     info.h \
     widget.h
 
 FORMS += \
+    encode_setting.ui \
     widget.ui
 
 # LIBS += -L/usr/local/lib -lavformat

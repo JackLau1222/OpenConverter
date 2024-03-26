@@ -24,7 +24,7 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>1051</width>
+     <width>1071</width>
      <height>91</height>
     </rect>
    </property>
@@ -33,6 +33,13 @@
      <widget class="QLineEdit" name="lineEdit_inputFile">
       <property name="text">
        <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QToolButton" name="toolButton">
+      <property name="text">
+       <string>...</string>
       </property>
      </widget>
     </item>
@@ -55,7 +62,7 @@
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>20</x>
      <y>140</y>
      <width>1051</width>
      <height>231</height>
@@ -172,9 +179,9 @@
   <widget class="QWidget" name="horizontalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>10</x>
      <y>450</y>
-     <width>701</width>
+     <width>1071</width>
      <height>81</height>
     </rect>
    </property>
@@ -183,6 +190,13 @@
      <widget class="QPushButton" name="pushButton_Apply">
       <property name="text">
        <string>Apply</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_EncodeSetting">
+      <property name="text">
+       <string>encode_setting</string>
       </property>
      </widget>
     </item>

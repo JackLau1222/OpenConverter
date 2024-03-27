@@ -25,9 +25,8 @@ FORMS += \
     encode_setting.ui \
     widget.ui
 
-# LIBS += -L/usr/local/lib -lavformat
 
-LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lavformat -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lavformat -lavutil -lavcodec -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
 
 INCLUDEPATH += /usr/local/include
 

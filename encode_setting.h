@@ -2,17 +2,7 @@
 #define ENCODE_SETTING_H
 
 #include <QMainWindow>
-
-
-typedef struct EncodeInfo
-{
-    QString videoCodec;
-    int64_t videoBitRate;
-
-    QString audioCodec;
-    int64_t audioBitRate;
-
-}EncodeInfo;
+#include "info.h"
 
 namespace Ui {
 class EncodeSetting;

@@ -11,9 +11,7 @@ Widget::Widget(QWidget *parent)
     connect(ui->toolButton, &QToolButton::clicked,[&](){
         QString filename=QFileDialog::getOpenFileName();
         ui->lineEdit_inputFile->setText(filename);
-        //qDebug() << ui->lineEdit_inputFile->text();
     });
-
 
     connect(ui->pushButton_apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
     
@@ -25,12 +23,6 @@ Widget::Widget(QWidget *parent)
 
 void Widget::encode_Setting_Pushed()
 {
-//    QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
-//    char *src = ba.data();
-
-//    QByteArray ba1 = ui->lineEdit_outputFile->text().toLocal8Bit();
-//    char *dst = ba1.data();
-
 
     EncodeSetting *encodeSetting = new EncodeSetting;
 

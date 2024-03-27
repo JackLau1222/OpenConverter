@@ -24,6 +24,11 @@ void EncodeSetting::cancel_Pushed()
 void EncodeSetting::apply_Pushed()
 {
 
+    encodeInfo->videoCodec = ui->lineEdit_videoCodec->text();
+    encodeInfo->videoBitRate = ui->lineEdit_videoBitRate->text().toLong();
+
+    encodeInfo->audioCodec = ui->lineEdit_audioCodec->text();
+    encodeInfo->audioBitRate = ui->lineEdit_audioBitRate->text().toLong();
 
 }
 

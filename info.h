@@ -1,7 +1,7 @@
 #ifndef INFO_H
 #define INFO_H
 
-#endif // INFO_H
+
 extern "C"
 {
 #include <libavformat/avformat.h>
@@ -9,6 +9,16 @@ extern "C"
 };
 #include <QWidget>
 #include <map>
+
+typedef struct EncodeInfo
+{
+    QString videoCodec;
+    int64_t videoBitRate;
+
+    QString audioCodec;
+    int64_t audioBitRate;
+
+}EncodeInfo;
 
 //store some info of video and audio
 typedef struct QuickInfo
@@ -66,5 +76,6 @@ public:
     QString enum_To_String(AVSampleFormat sample_fmt);
 };
 
+#endif // INFO_H
 
 

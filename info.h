@@ -41,9 +41,14 @@ typedef struct QuickInfo
     QString sampleFmt;
     int sampleRate;
 
-    //sub
-    QString codec;
-
+    //subtitle
+    int subIdx;
+    QString subCodec;
+    QString subFmt;
+    QString displayTime;
+    int position;
+    QSize subSize;
+    QString subColor;
 }QuickInfo;
 
 

@@ -17,8 +17,8 @@ if(true){
 ```
 > if语句不可省略大括号
 
-空格使用
-> 等号左右需空格、逗号右侧需空格
+## 空格使用
+`等号左右需空格、逗号右侧需空格`
 - 正确示范
 ```
 ret = prepare_Encoder_Video(decoder, encoder);
@@ -26,6 +26,17 @@ ret = prepare_Encoder_Video(decoder, encoder);
 - 错误示范
 ```
 ret=prepare_Encoder_Video(decoder,encoder);
+```
+
+## 指针的使用
+`*需要在变量名的前面`
+- 正确示范
+```
+AVStream *audioStream;
+```
+- 错误示范
+```
+AVStream* audioStream;
 ```
 
 ##  函数/方法

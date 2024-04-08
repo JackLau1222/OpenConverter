@@ -1,4 +1,4 @@
-# 项目开发规范
+# 项目开发编码规范
 
 ## 括号
 
@@ -14,6 +14,29 @@ if(true)
 if(true){
     printf("true\n");
 }
+```
+> if语句不可省略大括号
+
+## 空格使用
+`等号左右需空格、逗号右侧需空格`
+- 正确示范
+```
+ret = prepare_Encoder_Video(decoder, encoder);
+```
+- 错误示范
+```
+ret=prepare_Encoder_Video(decoder,encoder);
+```
+
+## 指针的使用
+`*需要在变量名的前面`
+- 正确示范
+```
+AVStream *audioStream;
+```
+- 错误示范
+```
+AVStream* audioStream;
 ```
 
 ##  函数/方法
@@ -52,7 +75,11 @@ public:
     core_audio.h
 ```
 
+
+
 ## 开发环境版本
 
 - Qt：5.14.2
 - FFmpeg：5.1.4
+- x264 0.164.3108 31e19f9
+- x265 3.4+31-6722fce1f

@@ -3,12 +3,8 @@
 
 #endif // CONVERTER_H
 
-extern "C"
-{
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-#include <libavutil/avutil.h>
-};
+#include "transcoder.h"
+#include "encode_parameter.h"
 
 class Converter
 {
@@ -17,6 +13,7 @@ public:
     ~Converter();
 
 private:
+    //old code (remux only)
     AVFormatContext *pFmtCtx = NULL;
 
     AVFormatContext *oFmtCtx = NULL;
@@ -35,13 +32,18 @@ private:
 
     AVStream *inStream = NULL, *outStream = NULL;
 
+    //encoder's parameters
+    bool copyVideo;
+    bool copyAudio;
+
+
+
 public:
+    //void set_Encode_Param(EncodeParameter *ep);
+    EncodeParameter *encodeParameter = new EncodeParameter;
+
     bool convert_Format(char *src, char *dst);
 
-    bool remux();
-
-    bool transcode();
-
-    bool extract();
+    bool transcode(char *src, char *dst);
 
 };

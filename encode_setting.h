@@ -2,7 +2,7 @@
 #define ENCODE_SETTING_H
 
 #include <QMainWindow>
-#include "info.h"
+#include "encode_parameter.h"
 
 namespace Ui {
 class EncodeSetting;
@@ -14,7 +14,12 @@ class EncodeSetting : public QMainWindow
 
 public:
     explicit EncodeSetting(QWidget *parent = nullptr);
+
     ~EncodeSetting();
+
+    bool get_Encode_Parameter(EncodeParameter *ep);
+
+    bool get_Available();
 
 public slots:
     void cancel_Pushed();
@@ -22,9 +27,11 @@ public slots:
     void apply_Pushed();
 
 private:
+
+    EncodeParameter *encodeParameter = new EncodeParameter;
+
     Ui::EncodeSetting *ui;
 
-    EncodeInfo *encodeInfo;
 };
 
 #endif // ENCODE_SETTING_H

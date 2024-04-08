@@ -23,9 +23,6 @@ Widget::Widget(QWidget *parent)
 
 void Widget::encode_Setting_Pushed()
 {
-
-    EncodeSetting *encodeSetting = new EncodeSetting;
-
     encodeSetting->show();
 }
 
@@ -45,6 +42,11 @@ void Widget::apply_Pushed()
 
 void Widget::convert_Pushed()
 {
+    if(encodeSetting->get_Available())
+    {
+        encodeSetting->get_Encode_Parameter(converter->encodeParameter);
+    }
+
     QMessageBox displayResult;
     if(ui->lineEdit_inputFile->text() == ui->lineEdit_outputFile->text())
     {

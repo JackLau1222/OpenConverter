@@ -10,15 +10,19 @@ CONFIG += c++17
 
 SOURCES += \
     converter.cpp \
+    encode_parameter.cpp \
     encode_setting.cpp \
     info.cpp \
     main.cpp \
+    transcoder.cpp \
     widget.cpp
 
 HEADERS += \
     converter.h \
+    encode_parameter.h \
     encode_setting.h \
     info.h \
+    transcoder.h \
     widget.h
 
 FORMS += \
@@ -26,9 +30,13 @@ FORMS += \
     widget.ui
 
 
-LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lavformat -lavutil -lavcodec -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/3.5/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
 
 INCLUDEPATH += /usr/local/include
+
+INCLUDEPATH +=/opt/homebrew/Cellar/x264/r3108/include
+
+INCLUDEPATH +=/opt/homebrew/Cellar/x265/3.5/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

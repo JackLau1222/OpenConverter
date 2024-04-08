@@ -39,5 +39,7 @@ private:
 
     Converter *converter = new Converter;
 
+    EncodeSetting *encodeSetting = new EncodeSetting;
+
 };
 #endif // WIDGET_H

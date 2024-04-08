@@ -7,14 +7,27 @@ EncodeSetting::EncodeSetting(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    encodeInfo = new EncodeInfo;
-
     connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel_Pushed()));
 
     connect(ui->pushButton_apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 }
 
+bool EncodeSetting::get_Available()
+{
+    return encodeParameter->get_Available();
+}
 
+bool EncodeSetting::get_Encode_Parameter(EncodeParameter *ep)
+{
+    ep = encodeParameter;
+    if(ep != NULL)
+    {
+        return true;
+    }
+
+    return false;
+
+}
 
 void EncodeSetting::cancel_Pushed()
 {
@@ -24,11 +37,11 @@ void EncodeSetting::cancel_Pushed()
 void EncodeSetting::apply_Pushed()
 {
 
-    encodeInfo->videoCodec = ui->lineEdit_videoCodec->text();
-    encodeInfo->videoBitRate = ui->lineEdit_videoBitRate->text().toLong();
+    encodeParameter->set_Video_Codec_Name(ui->lineEdit_videoCodec->text());
+    encodeParameter->set_Video_Bit_Rate(ui->lineEdit_videoBitRate->text().toLong());
 
-    encodeInfo->audioCodec = ui->lineEdit_audioCodec->text();
-    encodeInfo->audioBitRate = ui->lineEdit_audioBitRate->text().toLong();
+    encodeParameter->set_Audio_Codec_Name(ui->lineEdit_audioCodec->text());
+    encodeParameter->set_Audio_Bit_Rate(ui->lineEdit_audioBitRate->text().toLong());
 
 }
 

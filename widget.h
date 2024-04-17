@@ -7,6 +7,7 @@
 #include "encode_setting.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QThread>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -21,6 +22,10 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+    //void set_Process_Bar();
+
+
+
 public slots:
     void apply_Pushed();
 
@@ -30,6 +35,8 @@ public slots:
 
     void info_Display(QuickInfo *info);
 
+    void update_Process_Bar();
+
 private:
     Ui::Widget *ui;
 
@@ -37,9 +44,15 @@ private:
 
     Info *info = new Info;
 
-    Converter *converter = new Converter;
+    EncodeParameter *encodeParamter = new EncodeParameter;
 
-    EncodeSetting *encodeSetting = new EncodeSetting;
+    EncodeSetting *encodeSetting = new EncodeSetting(nullptr, encodeParamter);
+
+    ProcessParameter *processParameter = new ProcessParameter;
+
+    Converter *converter = new Converter(processParameter, encodeParamter);
+
+    double processNumber = 0;
 
 };
 #endif // WIDGET_H

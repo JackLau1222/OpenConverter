@@ -8,6 +8,10 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->progressBar->setValue(0);
+    /* update the progress bar along with encoding  */
+    connect(processParameter, &ProcessParameter::update_Process_Number, this, &Widget::update_Process_Bar);
+
     connect(ui->toolButton, &QToolButton::clicked,[&](){
         QString filename=QFileDialog::getOpenFileName();
         ui->lineEdit_inputFile->setText(filename);
@@ -37,6 +41,13 @@ Widget::Widget(QWidget *parent)
 
     quickInfo->subIdx = 0;
 
+}
+
+void Widget::update_Process_Bar()
+{
+    static int x = 100;
+    ui->progressBar->setValue(x);
+    ui->label_process->setText(QString("Process: %1%").arg(x));
 }
 
 void Widget::encode_Setting_Pushed()
@@ -72,15 +83,10 @@ void Widget::convert_Pushed()
         displayResult.exec();
         return;
     }
-    QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
-    char *src = ba.data();
-
-    QByteArray ba1 = ui->lineEdit_outputFile->text().toLocal8Bit();
-    char *dst = ba1.data();
 
 
 
-    if(converter->convert_Format(src, dst))
+    if(converter->convert_Format(ui->lineEdit_inputFile->text(), ui->lineEdit_outputFile->text()))
     {
         displayResult.setText("Convert success!");
     }else

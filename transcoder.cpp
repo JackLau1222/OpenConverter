@@ -2,7 +2,24 @@
 
 Transcoder::Transcoder()
 {
+    processParameter = new ProcessParameter;
 
+    frameNumber = 0;
+
+    frameTotalNumber = 0;
+}
+/* Receive pointers from converter */
+Transcoder::Transcoder(ProcessParameter *processParameter)
+    :processParameter(processParameter)
+{
+    frameNumber = 0;
+
+    frameTotalNumber = 0;
+}
+
+ProcessParameter *Transcoder::get_Process_Parameter()
+{
+    //return processParameter;
 }
 
 bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
@@ -68,6 +85,7 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
         goto end;
     }
 
+
     while (ret >= 0)
     {
         ret = avcodec_receive_packet(encoder->videoCodecCtx, encoder->pkt);
@@ -77,6 +95,12 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
 
             return false;
         }
+        /* set the frameNumber of processParameter */
+//        frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
+        static int frameNumber = 0;
+        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n",frameNumber);
+        processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+
         encoder->pkt->stream_index = encoder->videoStream->index;
         encoder->pkt->duration = encoder->videoStream->time_base.den / encoder->videoStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
 
@@ -231,6 +255,8 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
 {
     int ret = -1;
 
+    /* set the total numbers of frame */
+    frameTotalNumber = decoder->videoStream->nb_frames;
     /**
      * set the output file parameters
      */

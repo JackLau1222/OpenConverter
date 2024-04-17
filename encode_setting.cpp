@@ -1,9 +1,11 @@
 #include "encode_setting.h"
 #include "ui_encode_setting.h"
 
-EncodeSetting::EncodeSetting(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::EncodeSetting)
+/* Receive pointers from widget */
+EncodeSetting::EncodeSetting(QWidget *parent, EncodeParameter *encodeParamter)
+    : QMainWindow(parent)
+    , encodeParameter(encodeParamter)
+    , ui(new Ui::EncodeSetting)
 {
     ui->setupUi(this);
 

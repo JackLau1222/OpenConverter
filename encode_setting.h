@@ -13,7 +13,7 @@ class EncodeSetting : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit EncodeSetting(QWidget *parent = nullptr);
+    explicit EncodeSetting(QWidget *parent = nullptr, EncodeParameter *encodeParamter = NULL);
 
     ~EncodeSetting();
 
@@ -28,7 +28,7 @@ public slots:
 
 private:
 
-    EncodeParameter *encodeParameter = new EncodeParameter;
+    EncodeParameter *encodeParameter = NULL;
 
     Ui::EncodeSetting *ui;
 

@@ -8,6 +8,8 @@ extern "C"
 #include <libavutil/avutil.h>
 };
 
+#include "process_parameter.h"
+
 #define ENCODE_BIT_RATE 5000000
 
 typedef struct StreamContext
@@ -33,6 +35,7 @@ class Transcoder
 {
 public:
     Transcoder();
+    Transcoder(ProcessParameter *processParameter);
     ~Transcoder();
 
     bool open_Media(StreamContext *decoder, StreamContext *encoder);
@@ -53,6 +56,14 @@ public:
 
     bool remux(AVPacket *pkt, AVFormatContext *avCtx, AVStream *inStream, AVStream *outStream);
 
+    ProcessParameter *get_Process_Parameter();
+
+private:
+    ProcessParameter *processParameter = NULL;
+
+    int64_t frameNumber;
+
+    int64_t frameTotalNumber;
 };
 
 #endif // TRANSCODER_H

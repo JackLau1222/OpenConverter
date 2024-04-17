@@ -14,6 +14,7 @@ SOURCES += \
     encode_setting.cpp \
     info.cpp \
     main.cpp \
+    process_parameter.cpp \
     transcoder.cpp \
     widget.cpp
 
@@ -22,6 +23,7 @@ HEADERS += \
     encode_parameter.h \
     encode_setting.h \
     info.h \
+    process_parameter.h \
     transcoder.h \
     widget.h
 

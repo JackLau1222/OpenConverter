@@ -9,11 +9,21 @@ if(true)
     printf("true\n");
 }
 ```
+or
+```
+if(true)    printf("true\n");
+
+```
 - 错误示范：
 ```
 if(true){
     printf("true\n");
 }
+```
+or
+```
+if(true)
+    printf("true\n");
 ```
 > if语句不可省略大括号
 

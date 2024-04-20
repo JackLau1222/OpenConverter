@@ -11,7 +11,7 @@ if(true)
 ```
 or
 ```
-if(true)    printf("true\n");
+if(true) printf("true\n");
 
 ```
 - 错误示范：

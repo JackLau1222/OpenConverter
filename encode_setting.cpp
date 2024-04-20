@@ -33,18 +33,20 @@ bool EncodeSetting::get_Encode_Parameter(EncodeParameter *ep)
 
 void EncodeSetting::cancel_Pushed()
 {
+    //close the sub window
     close();
 }
 
 void EncodeSetting::apply_Pushed()
 {
-
+    /* get the encoder's parameter of video */
     encodeParameter->set_Video_Codec_Name(ui->lineEdit_videoCodec->text());
     encodeParameter->set_Video_Bit_Rate(ui->lineEdit_videoBitRate->text().toLong());
 
     encodeParameter->set_Audio_Codec_Name(ui->lineEdit_audioCodec->text());
     encodeParameter->set_Audio_Bit_Rate(ui->lineEdit_audioBitRate->text().toLong());
-
+    //close the sub window
+    close();
 }
 
 EncodeSetting::~EncodeSetting()

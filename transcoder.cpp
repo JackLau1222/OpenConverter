@@ -2,18 +2,15 @@
 
 Transcoder::Transcoder()
 {
-    processParameter = new ProcessParameter;
-
-    frameNumber = 0;
-
-    frameTotalNumber = 0;
 }
-/* Receive pointers from converter */
-Transcoder::Transcoder(ProcessParameter *processParameter)
-    :processParameter(processParameter)
-{
-    frameNumber = 0;
 
+int Transcoder::frameNumber = 0;
+
+/* Receive pointers from converter */
+Transcoder::Transcoder(ProcessParameter *processParameter, EncodeParameter *encodeParamter)
+    : processParameter(processParameter)
+    , encodeParamter(encodeParamter)
+{
     frameTotalNumber = 0;
 }
 
@@ -21,6 +18,8 @@ Transcoder::Transcoder(ProcessParameter *processParameter)
 bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
 {
     int ret = -1;
+    /* set the frameNumber to zero to avoid some bugs */
+    frameNumber = 0;
     //open the multimedia file
     if( (ret = avformat_open_input(&decoder->fmtCtx, decoder->filename, NULL, NULL)) < 0 )
     {
@@ -93,8 +92,8 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
         }
         /* set the frameNumber of processParameter */
         //frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
-        static int frameNumber = 0;
-        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n",frameNumber);
+
+        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
         processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
 
         encoder->pkt->stream_index = encoder->videoStream->index;
@@ -177,9 +176,8 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
     }
 
     //find the decoder
-    //codec = avcodec_find_encoder_by_name(codecID);
+    //decoder->videoCodec = avcodec_find_encoder_by_name(codec);
     //find the decoder by ID
-
     decoder->videoCodec = avcodec_find_decoder(decoder->videoStream->codecpar->codec_id);
     if(!decoder->videoCodec)
     {
@@ -253,10 +251,13 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     /**
      * set the output file parameters
      */
-
+    //find the encodec by Name
+    QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
+    char *codec = ba.data();
+    encoder->videoCodec = avcodec_find_encoder_by_name(codec);
 
     //find the encodec by ID
-    encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
+    //encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
     if(!encoder->videoCodec)
     {
         av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: \n");

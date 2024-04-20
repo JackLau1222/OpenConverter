@@ -30,11 +30,10 @@ signals:
     void return_Value_Converter(bool flag);
 
 public:
+    ProcessParameter *processParameter = NULL;
 
     EncodeParameter *encodeParameter = NULL;
 
     bool transcode(char *src, char *dst);
-
-    ProcessParameter *processParameter = NULL;
 
 };

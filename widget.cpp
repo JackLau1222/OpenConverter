@@ -31,6 +31,7 @@ Widget::Widget(QWidget *parent)
     
     connect(ui->pushButton_encodeSetting, SIGNAL(clicked(bool)), this, SLOT(encode_Setting_Pushed()));
 
+
     //Init QuickInfo
     quickInfo->videoIdx = 0;
     quickInfo->width = 0;
@@ -61,6 +62,7 @@ void Widget::handle_Converter_Result(bool flag)
         displayResult->setText("Convert failed! Please ensure the file path is correct");
     }
     displayResult->exec();
+
 }
 
 void Widget::update_Process_Bar(double result)
@@ -134,5 +136,6 @@ Widget::~Widget()
     /* Destory converter thread */
     converterThread.quit();
     converterThread.wait();
+    //encodeSetting->close();
     delete ui;
 }

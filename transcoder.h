@@ -9,6 +9,7 @@ extern "C"
 };
 
 #include "process_parameter.h"
+#include "encode_parameter.h"
 
 #define ENCODE_BIT_RATE 5000000
 
@@ -35,7 +36,7 @@ class Transcoder
 {
 public:
     Transcoder();
-    Transcoder(ProcessParameter *processParameter);
+    Transcoder(ProcessParameter *processParameter, EncodeParameter *encodeParamter);
     ~Transcoder();
 
     bool open_Media(StreamContext *decoder, StreamContext *encoder);
@@ -59,9 +60,12 @@ public:
 private:
     ProcessParameter *processParameter = NULL;
 
-    int64_t frameNumber;
+    EncodeParameter *encodeParamter = NULL;
+
+    static int frameNumber;
 
     int64_t frameTotalNumber;
+
 };
 
 #endif // TRANSCODER_H

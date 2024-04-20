@@ -2,13 +2,13 @@
 
 Converter::Converter()
 {
-    transcoder = new Transcoder;
 }
 /* Receive pointers from widget */
 Converter::Converter(ProcessParameter *processParamter, EncodeParameter *encodeParamter)
+    : processParameter(processParamter)
+    , encodeParameter(encodeParamter)
 {
-    this->processParameter = processParamter;
-    transcoder = new Transcoder(this->processParameter);
+    transcoder = new Transcoder(this->processParameter, this->encodeParameter);
     this->encodeParameter = encodeParamter;
 }
 

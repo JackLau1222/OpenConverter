@@ -17,12 +17,16 @@ class Widget : public QWidget
 {
     Q_OBJECT
 
-
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
-    //void set_Process_Bar();
+    //close the sub window (EncodeSetting) when the main window (Widget) closed
+    virtual void closeEvent(QCloseEvent *e)
+    {
+        QWidget::closeEvent(e);
+        if (encodeSetting) encodeSetting->close();
+    }
 
 signals:
     void activateConverterThread(QString src, QString dst);

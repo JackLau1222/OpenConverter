@@ -7,33 +7,12 @@ Converter::Converter()
 /* Receive pointers from widget */
 Converter::Converter(ProcessParameter *processParamter, EncodeParameter *encodeParamter)
 {
-    transcoder = new Transcoder(processParamter);
+    this->processParameter = processParamter;
+    transcoder = new Transcoder(this->processParameter);
     this->encodeParameter = encodeParamter;
 }
 
-/* TODO: fix the problem that i can't return point in a function */
-
-//void Converter::set_Encode_Param(EncodeParameter *ep)
-//{
-//    encodeParameter = ep;
-
-//    if(encodeParameter->get_Video_Codec_Name() != "")
-//    {
-//        copyVideo = true;
-//    }
-
-//    if(encodeParameter->get_Audio_Codec_Name() != "")
-//    {
-//        copyAudio = true;
-//    }
-//}
-
-ProcessParameter *Converter::get_Process_Parameter()
-{
-    //return transcoder->get_Process_Parameter();
-}
-
-bool Converter::convert_Format(QString src, QString dst)
+void Converter::convert_Format(QString src, QString dst)
 {
     if(encodeParameter->get_Video_Codec_Name() == "")
     {
@@ -55,8 +34,7 @@ bool Converter::convert_Format(QString src, QString dst)
 
     QByteArray bb = dst.toLocal8Bit();
     char *destinationFileName = bb.data();
-
-    return transcode(sourceFileName, destinationFileName);
+    emit return_Value_Converter(transcode(sourceFileName, destinationFileName));
 }
 
 bool Converter::transcode(char *src, char *dst)
@@ -157,8 +135,9 @@ bool Converter::transcode(char *src, char *dst)
         encoder->frame = NULL;
         //write the buffered frame
         transcoder->encode_Video(decoder->videoStream, encoder);
-
     }
+
+    processParameter->set_Process_Number(1, 1);
 
     av_write_trailer(encoder->fmtCtx);
 

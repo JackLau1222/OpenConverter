@@ -56,8 +56,6 @@ public:
 
     bool remux(AVPacket *pkt, AVFormatContext *avCtx, AVStream *inStream, AVStream *outStream);
 
-    ProcessParameter *get_Process_Parameter();
-
 private:
     ProcessParameter *processParameter = NULL;
 

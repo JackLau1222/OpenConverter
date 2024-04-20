@@ -6,9 +6,11 @@
 #include "transcoder.h"
 #include "encode_parameter.h"
 #include <QString>
+#include <QObject>
 
-class Converter
+class Converter : public QObject
 {
+    Q_OBJECT;
 public:
     Converter();
     Converter(ProcessParameter *processParamter, EncodeParameter *encodeParamter);
@@ -21,17 +23,18 @@ private:
     bool copyVideo;
     bool copyAudio;
 
+public slots:
+    void convert_Format(QString src, QString dst);
 
+signals:
+    void return_Value_Converter(bool flag);
 
 public:
-    //void set_Encode_Param(EncodeParameter *ep);
 
     EncodeParameter *encodeParameter = NULL;
 
-    bool convert_Format(QString src, QString dst);
-
     bool transcode(char *src, char *dst);
 
-    ProcessParameter *get_Process_Parameter();
+    ProcessParameter *processParameter = NULL;
 
 };

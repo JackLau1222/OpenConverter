@@ -7,6 +7,14 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    /* set the converter thread */
+    converter->moveToThread(&converterThread);
+
+    connect(&converterThread, &QThread::finished, converter, &QObject::deleteLater);
+    connect(this, &Widget::activateConverterThread, converter, &Converter::convert_Format);
+    connect(converter, &Converter::return_Value_Converter, this, &Widget::handle_Converter_Result);
+
+    converterThread.start();
 
     ui->progressBar->setValue(0);
     /* update the progress bar along with encoding  */
@@ -43,11 +51,24 @@ Widget::Widget(QWidget *parent)
 
 }
 
-void Widget::update_Process_Bar()
+void Widget::handle_Converter_Result(bool flag)
 {
-    static int x = 100;
-    ui->progressBar->setValue(x);
-    ui->label_process->setText(QString("Process: %1%").arg(x));
+    if(flag)
+    {
+        displayResult->setText("Convert success!");
+    }else
+    {
+        displayResult->setText("Convert failed! Please ensure the file path is correct");
+    }
+    displayResult->exec();
+}
+
+void Widget::update_Process_Bar(double result)
+{
+    //static int x = 0;
+    int process = result * 100;
+    ui->progressBar->setValue(process);
+    ui->label_process->setText(QString("Process: %1%").arg(process));
 }
 
 void Widget::encode_Setting_Pushed()
@@ -76,25 +97,15 @@ void Widget::convert_Pushed()
         encodeSetting->get_Encode_Parameter(converter->encodeParameter);
     }
 
-    QMessageBox displayResult;
+
     if(ui->lineEdit_inputFile->text() == ui->lineEdit_outputFile->text())
     {
-        displayResult.setText("The input file can't same as ouput file!");
-        displayResult.exec();
+        displayResult->setText("The input file can't same as ouput file!");
+        displayResult->exec();
         return;
     }
 
-
-
-    if(converter->convert_Format(ui->lineEdit_inputFile->text(), ui->lineEdit_outputFile->text()))
-    {
-        displayResult.setText("Convert success!");
-    }else
-    {
-        displayResult.setText("Convert failed! Please ensure the file path is correct");
-    }
-    displayResult.exec();
-
+    emit activateConverterThread(ui->lineEdit_inputFile->text(), ui->lineEdit_outputFile->text());
 }
 
 
@@ -120,5 +131,8 @@ void Widget::info_Display(QuickInfo *quickInfo)
 
 Widget::~Widget()
 {
+    /* Destory converter thread */
+    converterThread.quit();
+    converterThread.wait();
     delete ui;
 }

@@ -24,7 +24,8 @@ public:
 
     //void set_Process_Bar();
 
-
+signals:
+    void activateConverterThread(QString src, QString dst);
 
 public slots:
     void apply_Pushed();
@@ -35,7 +36,9 @@ public slots:
 
     void info_Display(QuickInfo *info);
 
-    void update_Process_Bar();
+    void update_Process_Bar(double result);
+
+    void handle_Converter_Result(bool flag);
 
 private:
     Ui::Widget *ui;
@@ -53,6 +56,10 @@ private:
     Converter *converter = new Converter(processParameter, encodeParamter);
 
     double processNumber = 0;
+
+    QMessageBox *displayResult =new QMessageBox;
+
+    QThread converterThread;
 
 };
 #endif // WIDGET_H

@@ -17,10 +17,6 @@ Transcoder::Transcoder(ProcessParameter *processParameter)
     frameTotalNumber = 0;
 }
 
-ProcessParameter *Transcoder::get_Process_Parameter()
-{
-    //return processParameter;
-}
 
 bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
 {
@@ -96,7 +92,7 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
             return false;
         }
         /* set the frameNumber of processParameter */
-//        frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
+        //frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
         static int frameNumber = 0;
         av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n",frameNumber);
         processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
@@ -125,7 +121,6 @@ bool Transcoder::transcode_Video(StreamContext *decoder, StreamContext *encoder)
 {
     int ret = -1;
 
-    char buffer[1024];
     //send packet to decoder
     ret = avcodec_send_packet(decoder->videoCodecCtx, decoder->pkt);
     if(ret < 0)
@@ -167,7 +162,6 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
 {
     int ret = -1;
 
-
     for (int i = 0; i < decoder->fmtCtx->nb_streams; i++)
     {
         if (decoder->fmtCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -181,7 +175,6 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
         }
 
     }
-
 
     //find the decoder
     //codec = avcodec_find_encoder_by_name(codecID);
@@ -379,6 +372,7 @@ bool Transcoder::remux(AVPacket *pkt, AVFormatContext *avCtx, AVStream *inStream
     if(av_interleaved_write_frame(avCtx, pkt) < 0)
     {
         av_log(NULL, AV_LOG_ERROR, "write frame error!\n");
+        return false;
     }
     return true;
 }

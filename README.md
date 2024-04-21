@@ -12,7 +12,7 @@ OpenConverter 是一个基于 **FFmpeg**源代码、**Qt**开源框架构建的�
 4. 支持在转换文件时显示进度。
 5. 支持从文件管理器中打开文件。
 
-本项目使用[Qt框架](./doc/Qt.md)、[git](./doc/git-command.md)仓库和Libav库完成开发。
+本项目使用[Qt框架](./doc/Qt.md)和FFmpeg libav库完成开发。
 
 ## 💾 项目准备
 
@@ -50,7 +50,9 @@ FFmpeg提供了一些核心库和工具，使得开发者能够方便地处理�
 
 ## 🌟  功能详解
 
-运行 OpenConverter 后，您可以使用以下功能：
+运行 OpenConverter 后，您可以看到并使用以下功能：
+
+![image-20240421150149923](./img/4e01d8f6508c13ed0e77f62335ce0f5.png)
 
 ### 1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
 

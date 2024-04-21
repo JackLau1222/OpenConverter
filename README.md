@@ -52,7 +52,7 @@ FFmpeg提供了一些核心库和工具，使得开发者能够方便地处理�
 
 运行 OpenConverter 后，您可以看到并使用以下功能：
 
-![image-20240421150149923](./img/4e01d8f6508c13ed0e77f62335ce0f5.png)
+![image-20240421150149923](./img/demo.png)
 
 ### 1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
 
@@ -80,4 +80,4 @@ FFmpeg提供了一些核心库和工具，使得开发者能够方便地处理�
 
 ## ☘️ 许可证
 
-OpenConverter 是基于 Apache 2.0 许可证开源的。请在使用前阅读 LICENSE 文件。
+OpenConverter 是基于 Apache 2.0 许可证开源的。请在使用前阅读 [LICENSE](./LICENSE) 文件。

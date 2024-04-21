@@ -8,7 +8,7 @@
 
 1. **报告问题**：发现了文档中的错误或有改进的地方？请创建一个 Issue 来报告问题。
 
-2. **提出改进建议**：如果您有关于文档结构、内容或样式的建议，请通过 Issue 提出您的想法。
+2. **提出改进**：如果您有本项目的建议，请通过 Issue 提出您的想法。
 
 3. **提交项目**：如果您有自己的项目并希望分享，欢迎提交 Pull Request。
 
@@ -52,4 +52,4 @@
 
 ## 注意事项
 
-- 请确保您的修改符合项目所规定的开发编码规范，具体可查看[项目开发编码规范](.https://github.com/JackLau1222/OpenConverter/blob/develop/README.md)
+- 请确保您的修改符合本项目所规定的开发编码规范，具体可查看[项目开发编码规范](https://github.com/JackLau1222/OpenConverter/blob/develop/README.md)

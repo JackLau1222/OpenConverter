@@ -27,25 +27,22 @@
     ```bash
    git clone -b develop https://github.com/your-username/your-repo-name.git
    ```
-2. 在此目录下新建目录，以内容命名
-    ```bash
-    mkdir your_directory
-    ```
-3. 进入您刚刚创建的目录，将您的新项目放入到目录下并创建编辑您的markdown文档
-    ```bash
-    cd ./your_directory
-    touch README.md
-    vim README.md
-    ```
+   
+2. 在此目录下进行修改
+    
+    
+    
 4. 提交您的修改
     ```bash
     git add .
     git commit -m "Add/modify your-documentation"
     ```
+    
 5. 推送到您的Fork
     ```bash
     git push origin feature/your-feature
     ```
+    
 6. 创建一个 Pull Request（PR）：
 
 - 到您的 Fork 页面，点击 "New Pull Request"。
@@ -54,13 +51,5 @@
 7. 我们将审查您的 PR，并在需要时提出建议或请求修改。
 
 ## 注意事项
-- 请确保您的文档使用正确的 Markdown 语法，并注意格式的一致性。
-- 如果您贡献的是新的主题，请在目录中添加相应的链接。
-- 我们鼓励包含适当的图片、图表等以提高文档的可读性。如有图片请将图片放入image目录下。
-- 不要提交二进制可执行文件或者目标文件等
-- 命名规范：不能有中文、空格、特殊字符
 
-- > 项目上传需要：
-  >  1.代码文件
-  >  2.项目信息文件（sln等）
-  >  3.说明文档（md）
+- 请确保您的修改符合项目所规定的开发编码规范，具体可查看[项目开发编码规范](.https://github.com/JackLau1222/OpenConverter/blob/develop/README.md)

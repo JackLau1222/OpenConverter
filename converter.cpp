@@ -91,7 +91,7 @@ bool Converter::transcode(char *src, char *dst)
     ret = avio_open2(&encoder->fmtCtx->pb, encoder->filename, AVIO_FLAG_WRITE, NULL, NULL);
     if(ret < 0)
     {
-        av_log(encoder->fmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
+        //av_log(encoder->fmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
         flag = false;
         goto end;
     }
@@ -99,8 +99,7 @@ bool Converter::transcode(char *src, char *dst)
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0)
     {
-        fprintf(stderr, "Error occurred when opening output file: %s\n",
-                av_err2str(ret));
+        //fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
         flag = false;
         goto end;
     }

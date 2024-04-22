@@ -15,6 +15,7 @@ SOURCES += \
     info.cpp \
     main.cpp \
     process_parameter.cpp \
+    stream_context.cpp \
     transcoder.cpp \
     widget.cpp
 
@@ -24,6 +25,7 @@ HEADERS += \
     encode_setting.h \
     info.h \
     process_parameter.h \
+    stream_context.h \
     transcoder.h \
     widget.h
 

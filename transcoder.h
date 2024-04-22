@@ -10,27 +10,28 @@ extern "C"
 
 #include "process_parameter.h"
 #include "encode_parameter.h"
+#include "stream_context.h"
 
 #define ENCODE_BIT_RATE 5000000
 
-typedef struct StreamContext
-{
-    AVFormatContext *fmtCtx;
-    char *filename;
+//typedef struct StreamContext
+//{
+//    AVFormatContext *fmtCtx;
+//    char *filename;
 
-    int videoIdx;
-    AVStream *videoStream;
-    const AVCodec *videoCodec;
-    AVCodecContext *videoCodecCtx;
+//    int videoIdx;
+//    AVStream *videoStream;
+//    const AVCodec *videoCodec;
+//    AVCodecContext *videoCodecCtx;
 
-    int audioIdx;
-    AVStream *audioStream;
-    const AVCodec *audioCodec;
-    AVCodecContext *audioCodecCtx;
+//    int audioIdx;
+//    AVStream *audioStream;
+//    const AVCodec *audioCodec;
+//    AVCodecContext *audioCodecCtx;
 
-    AVPacket *pkt;
-    AVFrame *frame;
-}StreamContext;
+//    AVPacket *pkt;
+//    AVFrame *frame;
+//}StreamContext;
 
 class Transcoder
 {

@@ -23,7 +23,7 @@ bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
     //open the multimedia file
     if( (ret = avformat_open_input(&decoder->fmtCtx, decoder->filename, NULL, NULL)) < 0 )
     {
-        av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
         return -1;
     }
 
@@ -210,13 +210,13 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
     //bind decoder and decoder context
     ret = avcodec_open2(decoder->videoCodecCtx, decoder->videoCodec, NULL);
     if(ret < 0){
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         //return -1;
     }
 
     ret = avcodec_open2(decoder->audioCodecCtx, decoder->audioCodec, NULL);
     if(ret < 0){
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         //return -1;
     }
 
@@ -293,7 +293,7 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     ret = avcodec_open2(encoder->videoCodecCtx, encoder->videoCodec, NULL);
     if(ret < 0)
     {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         return false;
     }
 

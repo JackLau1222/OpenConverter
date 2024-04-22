@@ -105,7 +105,7 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
         ret = av_interleaved_write_frame(encoder->fmtCtx, encoder->pkt);
         if(ret < 0)
         {
-            fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
+            //fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
         }
 
         av_packet_unref(encoder->pkt);

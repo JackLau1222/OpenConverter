@@ -14,7 +14,7 @@ OpenConverter 是一个基于 **FFmpeg**源代码、**Qt**开源框架构建的�
 
 本项目使用[Qt框架](./doc/Qt.md)和FFmpeg libav库完成开发。
 
-FFmpeg libav 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU-OSC/Learn_FFmpeg_the_Hard_Way)
+FFmpeg 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU-OSC/Learn_FFmpeg_the_Hard_Way)
 
 ## 🌟  功能详解
 

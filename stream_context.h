@@ -15,21 +15,21 @@ public:
     StreamContext();
     ~StreamContext();
 
-    AVFormatContext *fmtCtx;
-    char *filename;
+    AVFormatContext *fmtCtx = NULL;
+    char *filename = NULL;
 
     int videoIdx;
-    AVStream *videoStream;
-    const AVCodec *videoCodec;
-    AVCodecContext *videoCodecCtx;
+    AVStream *videoStream = NULL;
+    const AVCodec *videoCodec = NULL;
+    AVCodecContext *videoCodecCtx = NULL;
 
     int audioIdx;
-    AVStream *audioStream;
-    const AVCodec *audioCodec;
-    AVCodecContext *audioCodecCtx;
+    AVStream *audioStream = NULL;
+    const AVCodec *audioCodec = NULL;
+    AVCodecContext *audioCodecCtx = NULL;
 
-    AVPacket *pkt;
-    AVFrame *frame;
+    AVPacket *pkt = NULL;
+    AVFrame *frame = NULL;
 };
 
 #endif // STREAMCONTEXT_H

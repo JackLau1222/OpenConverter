@@ -6,7 +6,17 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
+    /* init objects */
+    quickInfo = new QuickInfo;
+    info = new Info;
+    encodeParameter = new EncodeParameter;
+    encodeSetting = new EncodeSetting(nullptr, encodeParameter);
+    processParameter = new ProcessParameter;
+    converter = new Converter(processParameter, encodeParameter);
+    displayResult = new QMessageBox;
+
     ui->setupUi(this);
+
     /* set the converter thread */
     converter->moveToThread(&converterThread);
 
@@ -130,6 +140,11 @@ void Widget::info_Display(QuickInfo *quickInfo)
     ui->label_sampleRate->setText(QString("sample_rate: %1").arg(quickInfo->sampleRate));
 }
 
+void Widget::closeEvent(QCloseEvent *e)
+{
+    QWidget::closeEvent(e);
+    if (encodeSetting) encodeSetting->close();
+}
 
 Widget::~Widget()
 {

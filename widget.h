@@ -22,11 +22,7 @@ public:
     ~Widget();
 
     //close the sub window (EncodeSetting) when the main window (Widget) closed
-    virtual void closeEvent(QCloseEvent *e)
-    {
-        QWidget::closeEvent(e);
-        if (encodeSetting) encodeSetting->close();
-    }
+    virtual void closeEvent(QCloseEvent *e);
 
 signals:
     void activateConverterThread(QString src, QString dst);
@@ -47,21 +43,21 @@ public slots:
 private:
     Ui::Widget *ui;
 
-    QuickInfo *quickInfo = new QuickInfo;
+    QuickInfo *quickInfo = NULL;
 
-    Info *info = new Info;
+    Info *info = NULL;
 
-    EncodeParameter *encodeParamter = new EncodeParameter;
+    EncodeParameter *encodeParameter = NULL;
 
-    EncodeSetting *encodeSetting = new EncodeSetting(nullptr, encodeParamter);
+    EncodeSetting *encodeSetting = NULL;
 
-    ProcessParameter *processParameter = new ProcessParameter;
+    ProcessParameter *processParameter = NULL;
 
-    Converter *converter = new Converter(processParameter, encodeParamter);
+    Converter *converter = NULL;
 
     double processNumber = 0;
 
-    QMessageBox *displayResult =new QMessageBox;
+    QMessageBox *displayResult = NULL;
 
     QThread converterThread;
 

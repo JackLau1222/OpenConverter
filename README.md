@@ -20,8 +20,13 @@ FFmpeg 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU
 
 运行 OpenConverter 后，您可以看到并使用以下功能：
 
-![main window](./img/main_window.png)
-![encode setting](./img/encode_setting.png)
+<div align="center">
+
+<img src="./img/open_converter.png" style="width:100%">
+
+<img src="./img/encode_setting.png" style="width:50%">
+
+</div>
 
 ### 1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
 

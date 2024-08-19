@@ -11,6 +11,7 @@ Widget::Widget(QWidget *parent)
     info = new Info;
     encodeParameter = new EncodeParameter;
     encodeSetting = new EncodeSetting(nullptr, encodeParameter);
+    encodeSetting->setWindowTitle("Encode Setting");
     processParameter = new ProcessParameter;
     converter = new Converter(processParameter, encodeParameter);
     displayResult = new QMessageBox;

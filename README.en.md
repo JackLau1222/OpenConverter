@@ -20,8 +20,13 @@ FFmpeg development tutorial can be reference at [Learn FFmpeg the Hard Way](http
 
 After running OpenConverter, you can see and use the following functions:
 
-![main window](./img/main_window.png)
-![encode setting](./img/encode_setting.png)
+<div align="center">
+
+<img src="./img/open_converter.png" style="width:100%">
+
+<img src="./img/encode_setting.png" style="width:50%">
+
+</div>
 
 ### 1. Support for changing video codecs for encoding（e.g.,libx264，libx265）
 

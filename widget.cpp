@@ -7,7 +7,7 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     /* init objects */
-    quickInfo = new QuickInfo;
+//    quickInfo = new QuickInfo;
     info = new Info;
     encodeParameter = new EncodeParameter;
     encodeSetting = new EncodeSetting(nullptr, encodeParameter);
@@ -44,22 +44,22 @@ Widget::Widget(QWidget *parent)
 
 
     //Init QuickInfo
-    quickInfo->videoIdx = 0;
-    quickInfo->width = 0;
-    quickInfo->height = 0;
-    quickInfo->colorSpace = "";
-    quickInfo->videoCodec = "";
-    quickInfo->videoBitRate = 0;
-    quickInfo->frameRate = 0;
+//    quickInfo->videoIdx = 0;
+//    quickInfo->width = 0;
+//    quickInfo->height = 0;
+//    quickInfo->colorSpace = "";
+//    quickInfo->videoCodec = "";
+//    quickInfo->videoBitRate = 0;
+//    quickInfo->frameRate = 0;
 
-    quickInfo->audioIdx = 0;
-    quickInfo->audioCodec = "";
-    quickInfo->audioBitRate = 0;
-    quickInfo->channels = 0;
-    quickInfo->sampleFmt = "";
-    quickInfo->sampleRate = 0;
+//    quickInfo->audioIdx = 0;
+//    quickInfo->audioCodec = "";
+//    quickInfo->audioBitRate = 0;
+//    quickInfo->channels = 0;
+//    quickInfo->sampleFmt = "";
+//    quickInfo->sampleRate = 0;
 
-    quickInfo->subIdx = 0;
+//    quickInfo->subIdx = 0;
 
 }
 
@@ -96,10 +96,10 @@ void Widget::apply_Pushed()
     QByteArray ba = ui->lineEdit_inputFile->text().toLocal8Bit();
     char *src = ba.data();
     //get info by Decapsulation
-    info->send_info(src, quickInfo);
+    info->send_Info(src);
 
     //display info on window
-    info_Display(quickInfo);
+    info_Display(info->get_Quick_Info());
 
 }
 

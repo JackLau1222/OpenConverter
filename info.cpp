@@ -3,7 +3,34 @@
 
 Info::Info()
 {
+    quickInfo = new QuickInfo();
+    init();
+}
 
+void Info::init()
+{
+    //Init QuickInfo
+    quickInfo->videoIdx = 0;
+    quickInfo->width = 0;
+    quickInfo->height = 0;
+    quickInfo->colorSpace = "";
+    quickInfo->videoCodec = "";
+    quickInfo->videoBitRate = 0;
+    quickInfo->frameRate = 0;
+
+    quickInfo->audioIdx = 0;
+    quickInfo->audioCodec = "";
+    quickInfo->audioBitRate = 0;
+    quickInfo->channels = 0;
+    quickInfo->sampleFmt = "";
+    quickInfo->sampleRate = 0;
+
+    quickInfo->subIdx = 0;
+}
+
+QuickInfo* Info::get_Quick_Info()
+{
+    return quickInfo;
 }
 
 QString Info::enum_To_String(AVColorSpace e)
@@ -69,9 +96,9 @@ QString Info::enum_To_String(AVSampleFormat e)
     }
 }
 
-void Info::send_info(char *src, QuickInfo *quickInfo)
+void Info::send_Info(char *src)
 {
-
+    init();
     int ret = 0;
     av_log_set_level(AV_LOG_DEBUG);
     ret = avformat_open_input(&avCtx, src, NULL, NULL);
@@ -82,18 +109,21 @@ void Info::send_info(char *src, QuickInfo *quickInfo)
     }
 
     //find the video stream from container
-    if((quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0)) < 0)
+    if((quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0)) >= 0)
+    {
+        quickInfo->height = avCtx->streams[quickInfo->videoIdx]->codecpar->height;
+        quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
+        quickInfo->colorSpace = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
+        quickInfo->videoCodec = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
+        quickInfo->videoBitRate = avCtx->streams[quickInfo->videoIdx]->codecpar->bit_rate;
+        quickInfo->frameRate = avCtx->streams[quickInfo->videoIdx]->r_frame_rate.num/avCtx->streams[quickInfo->videoIdx]->r_frame_rate.den;
+
+    } else
     {
         av_log(avCtx, AV_LOG_ERROR, "There is no video stream!\n");
-        goto end;
+        // goto end;
     }
 
-    quickInfo->height = avCtx->streams[quickInfo->videoIdx]->codecpar->height;
-    quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
-    quickInfo->colorSpace = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
-    quickInfo->videoCodec = enum_To_String(avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
-    quickInfo->videoBitRate = avCtx->streams[quickInfo->videoIdx]->codecpar->bit_rate;
-    quickInfo->frameRate = avCtx->streams[quickInfo->videoIdx]->r_frame_rate.num/avCtx->streams[quickInfo->videoIdx]->r_frame_rate.den;
 
     //find the audio stream from container
     if((quickInfo->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0)) < 0)
@@ -125,10 +155,6 @@ void Info::send_info(char *src, QuickInfo *quickInfo)
     quickInfo->channels = avCtx->streams[quickInfo->audioIdx]->codecpar->channels;
     quickInfo->sampleFmt = enum_To_String(audioCtx->sample_fmt);
     quickInfo->sampleRate = avCtx->streams[quickInfo->audioIdx]->codecpar->sample_rate;
-
-
-
-
 
 end:
     avformat_close_input(&avCtx);

@@ -58,9 +58,15 @@ private:
 
     AVCodecContext *audioCtx = NULL;
 
+    QuickInfo *quickInfo = NULL;
+
 public:
+    // init quick info
+    void init();
+    // get qucik info reference
+    QuickInfo* get_Quick_Info();
     //send the info to front-end
-    void send_info(char *src, QuickInfo *QuickInfo);
+    void send_Info(char *src);
 
     //convert video color space into string
     QString enum_To_String(AVColorSpace e);

@@ -252,8 +252,8 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
      * set the output file parameters
      */
     //find the encodec by Name
-    QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
-    char *codec = ba.data();
+    // QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
+    const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
     encoder->videoCodec = avcodec_find_encoder_by_name(codec);
 
     //find the encodec by ID

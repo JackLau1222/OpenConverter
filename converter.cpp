@@ -54,8 +54,7 @@ bool Converter::transcode(char *src, char *dst)
 
     transcoder->open_Media(decoder, encoder);
 
-    ret = transcoder->prepare_Decoder(decoder);
-    if(ret < 0)
+    if(!transcoder->prepare_Decoder(decoder))
     {
         flag = false;
         goto end;
@@ -63,8 +62,7 @@ bool Converter::transcode(char *src, char *dst)
 
     if(!copyVideo)
     {
-        ret = transcoder->prepare_Encoder_Video(decoder, encoder);
-        if(ret < 0)
+        if(!transcoder->prepare_Encoder_Video(decoder, encoder))
         {
             flag = false;
             goto end;
@@ -76,8 +74,7 @@ bool Converter::transcode(char *src, char *dst)
 
     if(!copyAudio)
     {
-        ret = transcoder->prepare_Encoder_Audio(decoder, encoder);
-        if(ret < 0)
+        if(!transcoder->prepare_Encoder_Audio(decoder, encoder))
         {
             flag = false;
             goto end;

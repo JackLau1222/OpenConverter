@@ -40,10 +40,16 @@ void EncodeSetting::cancel_Pushed()
 void EncodeSetting::apply_Pushed()
 {
     /* get the encoder's parameter of video */
-    encodeParameter->set_Video_Codec_Name(ui->lineEdit_videoCodec->text());
+    if(!ui->lineEdit_videoCodec->text().toStdString().empty())
+        encodeParameter->set_Video_Codec_Name(ui->lineEdit_videoCodec->text().toStdString());
+    else
+        encodeParameter->set_Video_Codec_Name("");
     encodeParameter->set_Video_Bit_Rate(ui->lineEdit_videoBitRate->text().toLong());
 
-    encodeParameter->set_Audio_Codec_Name(ui->lineEdit_audioCodec->text());
+    if(!ui->lineEdit_audioCodec->text().toStdString().empty())
+        encodeParameter->set_Audio_Codec_Name(ui->lineEdit_audioCodec->text().toStdString());
+    else
+        encodeParameter->set_Audio_Codec_Name("");
     encodeParameter->set_Audio_Bit_Rate(ui->lineEdit_audioBitRate->text().toLong());
     //close the sub window
     close();

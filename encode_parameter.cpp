@@ -16,7 +16,7 @@ bool EncodeParameter::get_Available()
     return available;
 }
 
-void EncodeParameter::set_Video_Codec_Name(QString vc)
+void EncodeParameter::set_Video_Codec_Name(std::string vc)
 {
     if(vc == "")
     {
@@ -26,7 +26,7 @@ void EncodeParameter::set_Video_Codec_Name(QString vc)
     available = true;
 }
 
-void EncodeParameter::set_Audio_Codec_Name(QString ac)
+void EncodeParameter::set_Audio_Codec_Name(std::string ac)
 {
     if(ac == "")
     {
@@ -56,12 +56,12 @@ void EncodeParameter::set_Audio_Bit_Rate(int64_t abr)
     available = true;
 }
 
-QString EncodeParameter::get_Video_Codec_Name()
+std::string EncodeParameter::get_Video_Codec_Name()
 {
     return videoCodec;
 }
 
-QString EncodeParameter::get_Audio_Codec_Name()
+std::string EncodeParameter::get_Audio_Codec_Name()
 {
     return audioCodec;
 }

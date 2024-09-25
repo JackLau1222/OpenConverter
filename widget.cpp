@@ -70,7 +70,7 @@ void Widget::handle_Converter_Result(bool flag)
         displayResult->setText("Convert success!");
     }else
     {
-        displayResult->setText("Convert failed! Please ensure the file path is correct");
+        displayResult->setText("Convert failed! Please ensure the file path and encode setting is correct");
     }
     displayResult->exec();
 

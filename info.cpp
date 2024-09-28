@@ -33,9 +33,9 @@ QuickInfo* Info::get_Quick_Info()
     return quickInfo;
 }
 
-QString Info::enum_To_String(AVColorSpace e)
+std::string Info::enum_To_String(AVColorSpace e)
 {
-    static std::map<AVColorSpace, QString> colorSpaceMap;
+    static std::map<AVColorSpace, std::string> colorSpaceMap;
 
     // Initialize the map on first call
     if (colorSpaceMap.empty())
@@ -54,9 +54,9 @@ QString Info::enum_To_String(AVColorSpace e)
     }
 }
 
-QString Info::enum_To_String(AVCodecID e)
+std::string Info::enum_To_String(AVCodecID e)
 {
-    static std::map<AVCodecID, QString> colorSpaceMap;
+    static std::map<AVCodecID, std::string> colorSpaceMap;
 
     if(colorSpaceMap.empty())
     {
@@ -73,9 +73,9 @@ QString Info::enum_To_String(AVCodecID e)
     }
 }
 
-QString Info::enum_To_String(AVSampleFormat e)
+std::string Info::enum_To_String(AVSampleFormat e)
 {
-    static std::map<AVSampleFormat, QString> colorSpaceMap;
+    static std::map<AVSampleFormat, std::string> colorSpaceMap;
 
     if(colorSpaceMap.empty())
     {

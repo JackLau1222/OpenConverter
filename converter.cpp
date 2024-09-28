@@ -96,7 +96,7 @@ bool Converter::transcode(char *src, char *dst)
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0)
     {
-        //fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
+        fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
         flag = false;
         goto end;
     }

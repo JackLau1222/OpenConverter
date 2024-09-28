@@ -128,16 +128,16 @@ void Widget::info_Display(QuickInfo *quickInfo)
     ui->label_videoStream->setText(QString("Video : Stream %1").arg(quickInfo->videoIdx));
     ui->label_width->setText(QString("width: %1").arg(quickInfo->width));
     ui->label_height->setText(QString("height: %1").arg(quickInfo->height));
-    ui->label_colorSpace->setText(QString("color_space: %1").arg(quickInfo->colorSpace));
-    ui->label_videoCodec->setText(QString("codec: %1").arg(quickInfo->videoCodec));
+    ui->label_colorSpace->setText(QString("color_space: %1").arg(QString::fromStdString(quickInfo->colorSpace)));
+    ui->label_videoCodec->setText(QString("codec: %1").arg(QString::fromStdString(quickInfo->videoCodec)));
     ui->label_videoBitRate->setText(QString("bit_rate: %1").arg(quickInfo->videoBitRate));
     ui->label_frameRate->setText(QString("frame_rate: %1").arg(quickInfo->frameRate));
     //audio
     ui->label_audioStream->setText(QString("Audio : Stream %1").arg(quickInfo->audioIdx));
-    ui->label_audioCodec->setText(QString("codec: %1").arg(quickInfo->audioCodec));
+    ui->label_audioCodec->setText(QString("codec: %1").arg(QString::fromStdString(quickInfo->audioCodec)));
     ui->label_audioBitRate->setText(QString("bit_rate: %1").arg(quickInfo->audioBitRate));
     ui->label_channels->setText(QString("channels: %1").arg(quickInfo->channels));
-    ui->label_sampleFmt->setText(QString("sample_fmt: %1").arg(quickInfo->sampleFmt));
+    ui->label_sampleFmt->setText(QString("sample_fmt: %1").arg(QString::fromStdString(quickInfo->sampleFmt)));
     ui->label_sampleRate->setText(QString("sample_rate: %1").arg(quickInfo->sampleRate));
 }
 

@@ -348,9 +348,6 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     //     av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
     // }
 
-
-
-
     return true;
 }
 

@@ -14,26 +14,6 @@ extern "C"
 
 #define ENCODE_BIT_RATE 5000000
 
-/* transform this data structure into stream_context.h/cpp */
-//typedef struct StreamContext
-//{
-//    AVFormatContext *fmtCtx;
-//    char *filename;
-
-//    int videoIdx;
-//    AVStream *videoStream;
-//    const AVCodec *videoCodec;
-//    AVCodecContext *videoCodecCtx;
-
-//    int audioIdx;
-//    AVStream *audioStream;
-//    const AVCodec *audioCodec;
-//    AVCodecContext *audioCodecCtx;
-
-//    AVPacket *pkt;
-//    AVFrame *frame;
-//}StreamContext;
-
 class Transcoder
 {
 public:

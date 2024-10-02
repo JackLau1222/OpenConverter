@@ -42,25 +42,6 @@ Widget::Widget(QWidget *parent)
     
     connect(ui->pushButton_encodeSetting, SIGNAL(clicked(bool)), this, SLOT(encode_Setting_Pushed()));
 
-
-    //Init QuickInfo
-//    quickInfo->videoIdx = 0;
-//    quickInfo->width = 0;
-//    quickInfo->height = 0;
-//    quickInfo->colorSpace = "";
-//    quickInfo->videoCodec = "";
-//    quickInfo->videoBitRate = 0;
-//    quickInfo->frameRate = 0;
-
-//    quickInfo->audioIdx = 0;
-//    quickInfo->audioCodec = "";
-//    quickInfo->audioBitRate = 0;
-//    quickInfo->channels = 0;
-//    quickInfo->sampleFmt = "";
-//    quickInfo->sampleRate = 0;
-
-//    quickInfo->subIdx = 0;
-
 }
 
 void Widget::handle_Converter_Result(bool flag)
@@ -73,7 +54,6 @@ void Widget::handle_Converter_Result(bool flag)
         displayResult->setText("Convert failed! Please ensure the file path and encode setting is correct");
     }
     displayResult->exec();
-
 }
 
 void Widget::update_Process_Bar(double result)

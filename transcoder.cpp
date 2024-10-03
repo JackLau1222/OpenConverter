@@ -41,13 +41,13 @@ bool Transcoder::copyFrame(AVFrame* oldFrame, AVFrame* newFrame)
 {
     int response;
     newFrame->pts = oldFrame->pts;
-    newFrame->format = oldFrame->format;
+    // newFrame->format = oldFrame->format;
     newFrame->width = oldFrame->width;
     newFrame->height = oldFrame->height;
     //newFrame->channels = oldFrame->channels;
     //newFrame->channel_layout = oldFrame->channel_layout;
-    newFrame->ch_layout = oldFrame->ch_layout;
-    newFrame->nb_samples = oldFrame->nb_samples;
+    // newFrame->ch_layout = oldFrame->ch_layout;
+    // newFrame->nb_samples = oldFrame->nb_samples;
     response = av_frame_get_buffer(newFrame, 32);
     if (response != 0)
     {
@@ -116,6 +116,52 @@ end:
     return true;
 }
 
+bool Transcoder::encode_Audio(AVStream *inStream, StreamContext *encoder)
+{
+    int ret = -1;
+
+    ret = avcodec_send_frame(encoder->audioCodecCtx, encoder->frame);
+    if(ret < 0)
+    {
+        char errbuf[AV_ERROR_MAX_STRING_SIZE];
+        ret = av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
+        av_log(NULL, AV_LOG_ERROR, "Failed to send frame to encoder! %s\n", errbuf);
+        goto end;
+    }
+
+    while (ret >= 0)
+    {
+        ret = avcodec_receive_packet(encoder->audioCodecCtx, encoder->pkt);
+        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+            return true;
+        }else if(ret < 0){
+
+            return false;
+        }
+        /* set the frameNumber of processParameter */
+        //frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
+
+        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
+        processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+
+        encoder->pkt->stream_index = encoder->audioStream->index;
+        encoder->pkt->duration = encoder->audioStream->time_base.den / encoder->audioStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
+
+        av_packet_rescale_ts(encoder->pkt, inStream->time_base, encoder->audioStream->time_base);
+
+        ret = av_interleaved_write_frame(encoder->fmtCtx, encoder->pkt);
+        if(ret < 0)
+        {
+            //fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
+        }
+
+        av_packet_unref(encoder->pkt);
+    }
+
+end:
+    return true;
+}
+
 bool Transcoder::transcode_Video(StreamContext *decoder, StreamContext *encoder)
 {
     int ret = -1;
@@ -152,6 +198,46 @@ bool Transcoder::transcode_Video(StreamContext *decoder, StreamContext *encoder)
         av_frame_unref(decoder->frame);
     }
 
+
+end:
+    return 0;
+}
+
+bool Transcoder::transcode_Audio(StreamContext *decoder, StreamContext *encoder)
+{
+    int ret = -1;
+
+    // send packet to decoder
+    ret = avcodec_send_packet(decoder->audioCodecCtx, decoder->pkt);
+    if(ret < 0)
+    {
+        av_log(NULL, AV_LOG_ERROR, "Failed to send frame to decoder!\n");
+        goto end;
+    }
+
+    while(ret >= 0)
+    {
+        ret = avcodec_receive_frame(decoder->audioCodecCtx, decoder->frame);
+        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        {
+            return 0;
+        }else if(ret < 0)
+        {
+
+            return -1;
+        }
+
+        //copyFrame(decoder->frame, encoder->frame);
+
+        encode_Audio(decoder->audioStream, encoder);
+
+        if(decoder->pkt)
+        {
+            av_packet_unref(decoder->pkt);
+        }
+
+        av_frame_unref(decoder->frame);
+    }
 
 end:
     return 0;
@@ -356,7 +442,83 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
 
 bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *encoder)
 {
-    //TODO
+    int ret = -1;
+
+    frameTotalNumber = decoder->audioStream->nb_frames;
+
+    // find the encodec by Name
+    const char *codec = encodeParamter->get_Audio_Codec_Name().c_str();
+    encoder->audioCodec = avcodec_find_encoder_by_name(codec);
+    if(!encoder->audioCodec)
+    {
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s\n", codec);
+        return false;
+    }
+
+    encoder->audioCodecCtx = avcodec_alloc_context3(encoder->audioCodec);
+    if(!encoder->audioCodecCtx)
+    {
+        av_log(NULL, AV_LOG_ERROR, "No memory!\n");
+        return false;
+    }
+
+
+    if(decoder->audioCodecCtx->codec_type == AVMEDIA_TYPE_AUDIO)
+    {
+        encoder->audioCodecCtx->sample_rate = decoder->audioCodecCtx->sample_rate;
+        encoder->audioCodecCtx->sample_fmt = decoder->audioCodecCtx->codec->sample_fmts[0];
+        encoder->audioCodecCtx->ch_layout = decoder->audioCodecCtx->ch_layout;
+        encoder->audioCodecCtx->time_base = decoder->audioCodecCtx->time_base;
+    }
+
+    ret = avcodec_open2(encoder->audioCodecCtx, encoder->audioCodec, NULL);
+    if(ret < 0)
+    {
+        // av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        return false;
+    }
+
+    encoder->frame = av_frame_alloc();
+    if(!encoder->frame)
+    {
+        av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
+        return false;
+    }
+
+    encoder->frame->nb_samples = encoder->audioCodecCtx->frame_size;
+    encoder->frame->format = encoder->audioCodecCtx->sample_fmt;
+    // encoder->frame->channel_layout = encoder->audioCodecCtx->ch_layout;
+    
+    ret = av_frame_get_buffer(encoder->frame, 0);
+    if(ret < 0)
+    {
+        av_log(NULL, AV_LOG_ERROR, "Couldn't allocate the audio frame\n");
+        return false;
+    }
+
+    encoder->pkt = av_packet_alloc();
+    if(!encoder->pkt)
+    {
+        av_log(NULL, AV_LOG_ERROR, "NO Memory!\n");
+        return false;
+    }
+
+    encoder->audioStream = avformat_new_stream(encoder->fmtCtx, NULL);
+    if (!encoder->audioStream)
+    {
+        av_log(NULL, AV_LOG_ERROR, "Failed allocating output stream\n");
+        return false;
+    }
+
+    ret = avcodec_parameters_from_context(encoder->audioStream->codecpar, encoder->audioCodecCtx);
+    if (ret < 0)
+    {
+        av_log(NULL, AV_LOG_ERROR, "Failed to copy encoder parameters to output stream #\n");
+        return false;
+    }
+
+
+
     return true;
 }
 

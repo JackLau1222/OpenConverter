@@ -96,7 +96,7 @@ bool Converter::transcode(char *src, char *dst)
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0)
     {
-        fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
+//        fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
         flag = false;
         goto end;
     }
@@ -104,6 +104,9 @@ bool Converter::transcode(char *src, char *dst)
     //read video data from multimedia files to write into destination file
     while(av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0)
     {
+        // set packet pts
+        av_packet_rescale_ts(decoder->pkt, decoder->videoStream->time_base, encoder->videoStream->time_base);
+
         if(decoder->pkt->stream_index == decoder->videoIdx )
         {
             if(!copyVideo)
@@ -119,7 +122,7 @@ bool Converter::transcode(char *src, char *dst)
         {
             if(!copyAudio)
             {
-
+                transcoder->transcode_Audio(decoder, encoder);
             }else
             {
                 transcoder->remux(decoder->pkt, encoder->fmtCtx, decoder->audioStream, encoder->audioStream);

@@ -6,6 +6,7 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
+#include <libavutil/channel_layout.h>
 };
 
 #include "process_parameter.h"
@@ -47,7 +48,11 @@ public:
 
     bool encode_Video(AVStream *inStream, StreamContext *encoder);
 
+    bool encode_Audio(AVStream *inStream, StreamContext *encoder);
+
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
+
+    bool transcode_Audio(StreamContext *decoder, StreamContext *encoder);
 
     bool prepare_Decoder(StreamContext *decoder);
 

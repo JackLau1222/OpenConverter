@@ -14,6 +14,15 @@ EncodeSetting::EncodeSetting(QWidget *parent, EncodeParameter *encodeParamter)
     connect(ui->pushButton_apply, SIGNAL(clicked(bool)), this, SLOT(apply_Pushed()));
 }
 
+void EncodeSetting::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::LanguageChange)
+    {
+        ui->retranslateUi(this);
+    }
+    QMainWindow::changeEvent(event);
+}
+
 bool EncodeSetting::get_Available()
 {
     return encodeParameter->get_Available();

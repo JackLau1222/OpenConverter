@@ -1,95 +1,57 @@
-# 项目开发编码规范
+# OpenConverter
 
-## 括号
+## 📢  项目介绍
 
-- 正确示范：
-```
-if(true)
-{
-    printf("true\n");
-}
-```
-or
-```
-if(true) printf("true\n");
+OpenConverter 是一个基于 **FFmpeg**源代码、**Qt**开源框架构建的软件，它提供了一些简单易用的工具，可以方便地转换、编辑和处理音视频文件。
 
-```
-- 错误示范：
-```
-if(true){
-    printf("true\n");
-}
-```
-or
-```
-if(true)
-    printf("true\n");
-```
-> if语句不可省略大括号
+这款转换器具有以下主要功能：
 
-## 空格使用
-`等号左右需空格、逗号右侧需空格`
-- 正确示范
-```
-ret = prepare_Encoder_Video(decoder, encoder);
-```
-- 错误示范
-```
-ret=prepare_Encoder_Video(decoder,encoder);
-```
+1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
+2. 支持无编码转换多媒体。
+3. 支持显示多媒体文件中视频和音频流的信息。
+4. 支持在转换文件时显示进度。
+5. 支持从文件管理器中打开文件。
 
-## 指针的使用
-`*需要在变量名的前面`
-- 正确示范
-```
-AVStream *audioStream;
-```
-- 错误示范
-```
-AVStream* audioStream;
-```
+本项目使用[Qt框架](./doc/Qt.md)和FFmpeg libav库完成开发。
 
-##  函数/方法
+FFmpeg 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU-OSC/Learn_FFmpeg_the_Hard_Way)
 
-- 使用驼峰命名法，单词与单词之间用下划线"_"分隔，且第二个单词首字母需要大写，比如：
-```
-int apply_Pushed(int x)
-{
-    return x;
-}
-```
+## 🌟  功能详解
 
-## 变量
+运行 OpenConverter 后，您可以看到并使用以下功能：
 
-- 使用驼峰命名法,比如：
-```
-    int numberCount;
-```
+<div align="center">
 
-## 类
+<img src="./img/open_converter.png" style="width:100%">
 
-- 每个单词的首字母需要大写，比如：
-```
-class CoreAudio
-{
-public:
-    int number;
-};
-```
+<img src="./img/encode_setting.png" style="width:50%">
 
-## 文件命名
+</div>
 
-- 文件名称中，单词与单词之间使用下划线"_"进行分隔，比如：
-```
-    core_audio.c
-    core_audio.h
-```
+### 1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
 
+这款转换器允许用户轻松地更改视频编解码器，以便在转换过程中使用不同的编码器。例如，您可以选择使用libx264或libx265编码器，以获得更高的压缩率和更好的视频质量。
 
+### 2. 支持无编码转换多媒体。
 
-## 开发环境版本
+该转换器还支持无需编码即可转换多媒体文件。这意味着您可以在不改变原始视频和音频流的情况下，直接将文件从一种格式转换为另一种格式。这对于快速转换文件非常有用。
 
-- Qt：5.14.2
-- FFmpeg：5.1.4
-- x264 0.164.3108 31e19f9
-- x265 3.4+31-6722fce1f
+### 3. 支持显示多媒体文件中视频和音频流的信息
+
+这款转换器可以显示有关视频和音频流的详细信息，包括分辨率、帧率、比特率等。这有助于您了解多媒体文件的属性，以便在转换过程中进行相应的调整。
+
+### 4. 支持在转换文件时显示进度
+
+在转换文件时，该播放器会实时显示转换进度，以便您了解转换过程所需的时间。这有助于您更好地安排时间，避免不必要的等待。
+
+### 5. 支持从文件管理器中打开文件
+
+该转换器支持从Finder或其他文件管理器中直接打开多媒体文件。这使得文件管理变得更加简单，方便您快速找到并打开需要转换的文件。
+
+## 📖 贡献指南
+
+如果你有兴趣贡献项目或发现了错误，请参考我们的 [贡献指南](./CONTRIBUTING.md)
+
+## ☘️ 许可证
+
+OpenConverter 是基于 Apache 2.0 许可证开源的。请在使用前阅读 [LICENSE](./LICENSE) 文件。

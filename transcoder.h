@@ -46,9 +46,9 @@ public:
 
     bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
 
-    bool encode_Video(AVStream *inStream, StreamContext *encoder);
+    bool encode_Video(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
 
-    bool encode_Audio(AVStream *inStream, StreamContext *encoder);
+    bool encode_Audio(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
 
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
 

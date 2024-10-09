@@ -7,9 +7,8 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 };
-#include <QWidget>
+#include <string>
 #include <map>
-
 
 //store some info of video and audio
 typedef struct QuickInfo
@@ -19,27 +18,27 @@ typedef struct QuickInfo
     int width;
     int height;
 
-    QString colorSpace;
-    QString videoCodec;
+    std::string colorSpace;
+    std::string videoCodec;
 
     int64_t videoBitRate;
     double frameRate;
     //audio
     int audioIdx;
-    QString audioCodec;
+    std::string audioCodec;
     int64_t audioBitRate;
     int channels;
-    QString sampleFmt;
+    std::string sampleFmt;
     int sampleRate;
 
     //subtitle
     int subIdx;
-    QString subCodec;
-    QString subFmt;
-    QString displayTime;
+    std::string subCodec;
+    std::string subFmt;
+    std::string displayTime;
     int position;
-    QSize subSize;
-    QString subColor;
+    //QSize subSize;
+    std::string subColor;
 }QuickInfo;
 
 
@@ -58,20 +57,25 @@ private:
 
     AVCodecContext *audioCtx = NULL;
 
+    QuickInfo *quickInfo = NULL;
+
 public:
+    // init quick info
+    void init();
+    // get qucik info reference
+    QuickInfo* get_Quick_Info();
     //send the info to front-end
-    void send_info(char *src, QuickInfo *QuickInfo);
+    void send_Info(char *src);
 
     //convert video color space into string
-    QString enum_To_String(AVColorSpace e);
+    std::string enum_To_String(AVColorSpace e);
 
     //convert audio and video codec enum into string
-    QString enum_To_String(AVCodecID e);
+    std::string enum_To_String(AVCodecID e);
 
     //convert audio sample format enum into string
-    QString enum_To_String(AVSampleFormat sample_fmt);
+    std::string enum_To_String(AVSampleFormat sample_fmt);
 };
 
 #endif // INFO_H
-
 

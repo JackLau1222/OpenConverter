@@ -23,7 +23,7 @@ bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
     //open the multimedia file
     if( (ret = avformat_open_input(&decoder->fmtCtx, decoder->filename, NULL, NULL)) < 0 )
     {
-        av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, " %s \n", av_err2str(ret));
         return -1;
     }
 
@@ -105,7 +105,7 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
         ret = av_interleaved_write_frame(encoder->fmtCtx, encoder->pkt);
         if(ret < 0)
         {
-            fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
+            //fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
         }
 
         av_packet_unref(encoder->pkt);
@@ -210,13 +210,13 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
     //bind decoder and decoder context
     ret = avcodec_open2(decoder->videoCodecCtx, decoder->videoCodec, NULL);
     if(ret < 0){
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         //return -1;
     }
 
     ret = avcodec_open2(decoder->audioCodecCtx, decoder->audioCodec, NULL);
     if(ret < 0){
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         //return -1;
     }
 
@@ -252,8 +252,8 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
      * set the output file parameters
      */
     //find the encodec by Name
-    QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
-    char *codec = ba.data();
+    // QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
+    const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
     encoder->videoCodec = avcodec_find_encoder_by_name(codec);
 
     //find the encodec by ID
@@ -293,7 +293,7 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     ret = avcodec_open2(encoder->videoCodecCtx, encoder->videoCodec, NULL);
     if(ret < 0)
     {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        //av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         return false;
     }
 
@@ -347,9 +347,6 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     // {
     //     av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
     // }
-
-
-
 
     return true;
 }

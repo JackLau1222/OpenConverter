@@ -14,25 +14,27 @@ SOURCES += \
     encode_setting.cpp \
     info.cpp \
     main.cpp \
+    open_converter.cpp \
     process_parameter.cpp \
-    transcoder.cpp \
-    widget.cpp
+    stream_context.cpp \
+    transcoder.cpp
 
 HEADERS += \
     converter.h \
     encode_parameter.h \
     encode_setting.h \
     info.h \
+    open_converter.h \
     process_parameter.h \
-    transcoder.h \
-    widget.h
+    stream_context.h \
+    transcoder.h
 
 FORMS += \
     encode_setting.ui \
-    widget.ui
+    open_converter.ui
 
 
-LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/3.5/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/3.6/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.9/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
 
 INCLUDEPATH += /usr/local/include
 
@@ -40,7 +42,14 @@ INCLUDEPATH +=/opt/homebrew/Cellar/x264/r3108/include
 
 INCLUDEPATH +=/opt/homebrew/Cellar/x265/3.5/include
 
+TRANSLATIONS += lang_chinese.ts
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
+RESOURCES += \
+    lang.qrc

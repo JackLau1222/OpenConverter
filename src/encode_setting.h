@@ -11,7 +11,9 @@ class EncodeSetting;
 class EncodeSetting : public QMainWindow
 {
     Q_OBJECT
-
+protected:
+    // this event is called, when a new translator is loaded or the system language is changed
+    void changeEvent(QEvent*);
 public:
     explicit EncodeSetting(QWidget *parent = nullptr, EncodeParameter *encodeParamter = NULL);
 

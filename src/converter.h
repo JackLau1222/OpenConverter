@@ -17,7 +17,7 @@ public:
     ~Converter();
 
 private:
-    Transcoder *transcoder;
+    Transcoder *transcoder = NULL;
 
     //encoder's parameters
     bool copyVideo;

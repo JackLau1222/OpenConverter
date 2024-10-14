@@ -6,6 +6,7 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
+#include <libavutil/opt.h>
 };
 
 class StreamContext
@@ -29,7 +30,6 @@ public:
     AVCodecContext *audioCodecCtx = NULL;
 
     AVPacket *pkt = NULL;
-    // AVFrame *frame = NULL;
     AVFrame *videoFrame = NULL;
     AVFrame *audioFrame = NULL;
 };

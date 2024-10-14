@@ -17,7 +17,6 @@ void Converter::convert_Format(QString src, QString dst)
     if(encodeParameter->get_Video_Codec_Name() == "")
     {
         copyVideo = false;
-        copyVideo = false;
     }else
     {
         copyVideo = false;
@@ -25,7 +24,6 @@ void Converter::convert_Format(QString src, QString dst)
 
     if(encodeParameter->get_Audio_Codec_Name() == "")
     {
-        copyAudio = false;
         copyAudio = false;
     }else
     {
@@ -57,17 +55,13 @@ bool Converter::transcode(char *src, char *dst)
 
     transcoder->open_Media(decoder, encoder);
 
-    av_log(NULL, AV_LOG_INFO, "Start decoder\n");
     if(!transcoder->prepare_Decoder(decoder))
     {
         flag = false;
         goto end;
     }
-    
-    av_log(NULL, AV_LOG_INFO, "End decoder\n");
 
     if(!copyVideo)
-    // if(1)
     {
         if(!transcoder->prepare_Encoder_Video(decoder, encoder))
         {
@@ -78,12 +72,8 @@ bool Converter::transcode(char *src, char *dst)
     {
         transcoder->prepare_Copy(encoder->fmtCtx, &encoder->videoStream, decoder->videoStream->codecpar);
     }
-    // transcoder->prepare_Encoder_Video(decoder, encoder);
-    // transcoder->prepare_Encoder_Audio(decoder, encoder);
 
-    av_log(NULL, AV_LOG_INFO, "prepare_Encoder_Audio\n");
     if(!copyAudio)
-    // if(1)
     {
         if(!transcoder->prepare_Encoder_Audio(decoder, encoder))
         {
@@ -107,7 +97,7 @@ bool Converter::transcode(char *src, char *dst)
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0)
     {
-//        fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
+    //    fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
         flag = false;
         goto end;
     }
@@ -127,21 +117,17 @@ bool Converter::transcode(char *src, char *dst)
             av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[stream_index]->time_base, decoder->videoCodecCtx->time_base);
             if(!copyVideo)
             {
-                av_log(NULL, AV_LOG_INFO, "decoder->videoIdx:%d", decoder->videoIdx);
                 transcoder->transcode_Video(decoder, encoder);
             }else
             {
                 transcoder->remux(decoder->pkt, encoder->fmtCtx, decoder->videoStream, encoder->videoStream);
             }
-
-            //encode(oFmtCtx, outCodecCtx, outFrame, outPkt, inStream, outStream);
         }else if(decoder->pkt->stream_index == decoder->audioIdx)
         {
             // set packet pts
             av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[stream_index]->time_base, decoder->audioCodecCtx->time_base);
             if(!copyAudio)
             {
-                av_log(NULL, AV_LOG_INFO, "decoder->audioIdx:%d", decoder->audioIdx);
                 transcoder->transcode_Audio(decoder, encoder);
             }else
             {
@@ -160,19 +146,9 @@ bool Converter::transcode(char *src, char *dst)
     {
         // encoder->audioFrame = NULL;
         decoder->audioFrame = NULL;
-        encoder->videoFrame = NULL;
         //write the buffered frame
         transcoder->encode_Video(decoder->videoStream, decoder, encoder);
     }
-    if(!copyAudio)
-    {
-        encoder->audioFrame = NULL;
-        //write the buffered frame
-        transcoder->encode_Audio(decoder->audioStream, decoder, encoder);
-        transcoder->encode_Audio(decoder->audioStream, decoder, encoder);
-    }
-
-
 
     processParameter->set_Process_Number(1, 1);
 
@@ -224,11 +200,6 @@ end:
     {
         avcodec_free_context(&encoder->videoCodecCtx);
         encoder->videoCodecCtx = NULL;
-    }
-    if(encoder->audioCodecCtx)
-    {
-        avcodec_free_context(&encoder->audioCodecCtx);
-        encoder->audioCodecCtx = NULL;
     }
     if(encoder->audioCodecCtx)
     {

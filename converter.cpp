@@ -16,7 +16,7 @@ void Converter::convert_Format(QString src, QString dst)
 {
     if(encodeParameter->get_Video_Codec_Name() == "")
     {
-        copyVideo = false;
+        copyVideo = true;
     }else
     {
         copyVideo = false;
@@ -24,7 +24,7 @@ void Converter::convert_Format(QString src, QString dst)
 
     if(encodeParameter->get_Audio_Codec_Name() == "")
     {
-        copyAudio = false;
+        copyAudio = true;
     }else
     {
         copyAudio = false;
@@ -102,8 +102,7 @@ bool Converter::transcode(char *src, char *dst)
         goto end;
     }
 
-    av_log(NULL, AV_LOG_INFO, "start transcode\n");
-    av_dump_format(encoder->fmtCtx, 0, encoder->filename, 1);
+    // av_dump_format(encoder->fmtCtx, 0, encoder->filename, 1);
 
     //read video data from multimedia files to write into destination file
     while(av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0)

@@ -80,14 +80,16 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *decoder, Stream
     int ret = -1;
     // encoder->videoFrame = decoder->videoFrame;
     // AVPacket *enc_pkt = av_packet_alloc();
+    AVFrame *frame = decoder->videoFrame;
+    AVPacket *enc_pkt = av_packet_alloc();
 
     //send frame to encoder
-    ret = avcodec_send_frame(encoder->videoCodecCtx, decoder->videoFrame);
+    ret = avcodec_send_frame(encoder->videoCodecCtx, frame);
     if(ret < 0)
     {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         ret = av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // av_packet_free(&enc_pkt);
+        av_packet_free(&enc_pkt);
         av_log(NULL, AV_LOG_ERROR, "Failed to send video frame to encoder! %s\n", errbuf);
         goto end;
     }
@@ -95,7 +97,7 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *decoder, Stream
 
     while (ret >= 0)
     {
-        ret = avcodec_receive_packet(encoder->videoCodecCtx, encoder->pkt);
+        ret = avcodec_receive_packet(encoder->videoCodecCtx, enc_pkt);
         if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
             return true;
         }else if(ret < 0){
@@ -103,25 +105,31 @@ bool Transcoder::encode_Video(AVStream *inStream, StreamContext *decoder, Stream
             return false;
         }
         /* set the frameNumber of processParameter */
-        //frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
+        // frameNumber = encoder->videoFrame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
 
-        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
-        processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+        // processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
 
-        encoder->pkt->stream_index = encoder->videoStream->index;
-        encoder->pkt->duration = encoder->videoStream->time_base.den / encoder->videoStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
+        // encoder->pkt->stream_index = encoder->videoStream->index;
+        // encoder->pkt->duration = encoder->videoStream->time_base.den / encoder->videoStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
 
         // av_packet_rescale_ts(enc_pkt, inStream->time_base, encoder->videoStream->time_base);
-        av_packet_rescale_ts(encoder->pkt, encoder->videoCodecCtx->time_base, encoder->videoStream->time_base);
+
+        enc_pkt->stream_index = encoder->videoStream->index;
+        if(frame)
+        {
+            enc_pkt->pts = frame->pts;
+        }
+
+        av_packet_rescale_ts(enc_pkt, encoder->videoCodecCtx->time_base, encoder->videoStream->time_base);
 
 
-        ret = av_interleaved_write_frame(encoder->fmtCtx, encoder->pkt);
+        ret = av_interleaved_write_frame(encoder->fmtCtx, enc_pkt);
         if(ret < 0)
         {
             //fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
         }
 
-        av_packet_unref(encoder->pkt);
+        av_packet_unref(enc_pkt);
     }
 
 
@@ -133,21 +141,22 @@ bool Transcoder::encode_Audio(AVStream *inStream, StreamContext *decoder, Stream
 {
     int ret = -1;
     // encoder->audioFrame = decoder->audioFrame;
-    // AVPacket *enc_pkt = av_packet_alloc();
+    AVFrame *frame = decoder->audioFrame;
+    AVPacket *enc_pkt = av_packet_alloc();
 
-    ret = avcodec_send_frame(encoder->audioCodecCtx, decoder->audioFrame);
+    ret = avcodec_send_frame(encoder->audioCodecCtx, frame);
     if(ret < 0)
     {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         ret = av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // av_packet_free(&enc_pkt);
+        av_packet_free(&enc_pkt);
         av_log(NULL, AV_LOG_ERROR, "Failed to send audio frame to encoder! %s\n", errbuf);
         goto end;
     }
 
     while (ret >= 0)
     {
-        ret = avcodec_receive_packet(encoder->audioCodecCtx, encoder->pkt);
+        ret = avcodec_receive_packet(encoder->audioCodecCtx, enc_pkt);
         if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
             return true;
         }else if(ret < 0){
@@ -155,23 +164,28 @@ bool Transcoder::encode_Audio(AVStream *inStream, StreamContext *decoder, Stream
             return false;
         }
         /* set the frameNumber of processParameter */
-        //frameNumber = encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
+        // frameNumber = encoder->audioFrame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
 
-        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
-        processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+        // processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
 
-        encoder->pkt->stream_index = encoder->audioStream->index;
-        encoder->pkt->duration = encoder->audioStream->time_base.den / encoder->audioStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
+        // encoder->pkt->stream_index = encoder->audioStream->index;
+        // encoder->pkt->duration = encoder->audioStream->time_base.den / encoder->audioStream->time_base.num / inStream->avg_frame_rate.num * inStream->avg_frame_rate.den;
 
-        av_packet_rescale_ts(encoder->pkt, encoder->audioCodecCtx->time_base, encoder->audioStream->time_base);
+        enc_pkt->stream_index = encoder->audioStream->index;
+        if(frame)
+        {
+            enc_pkt->pts = frame->pts;
+        }
 
-        ret = av_interleaved_write_frame(encoder->fmtCtx, encoder->pkt);
+        av_packet_rescale_ts(enc_pkt, encoder->audioCodecCtx->time_base, encoder->audioStream->time_base);
+
+        ret = av_interleaved_write_frame(encoder->fmtCtx, enc_pkt);
         if(ret < 0)
         {
             //fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
         }
 
-        av_packet_unref(encoder->pkt);
+        av_packet_unref(enc_pkt);
     }
 
 

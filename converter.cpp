@@ -16,7 +16,7 @@ void Converter::convert_Format(QString src, QString dst)
 {
     if(encodeParameter->get_Video_Codec_Name() == "")
     {
-        copyVideo = true;
+        copyVideo = false;
     }else
     {
         copyVideo = false;
@@ -24,7 +24,7 @@ void Converter::convert_Format(QString src, QString dst)
 
     if(encodeParameter->get_Audio_Codec_Name() == "")
     {
-        copyAudio = true;
+        copyAudio = false;
     }else
     {
         copyAudio = false;
@@ -54,11 +54,13 @@ bool Converter::transcode(char *src, char *dst)
 
     transcoder->open_Media(decoder, encoder);
 
+    av_log(NULL, AV_LOG_INFO, "Start decoder\n");
     if(!transcoder->prepare_Decoder(decoder))
     {
         flag = false;
         goto end;
     }
+    av_log(NULL, AV_LOG_INFO, "End decoder\n");
 
     if(!copyVideo)
     {
@@ -131,10 +133,18 @@ bool Converter::transcode(char *src, char *dst)
     }
     if(!copyVideo)
     {
-        encoder->frame = NULL;
+        encoder->videoFrame = NULL;
         //write the buffered frame
-        transcoder->encode_Video(decoder->videoStream, encoder);
+        transcoder->encode_Video(decoder->videoStream, decoder, encoder);
     }
+    if(!copyAudio)
+    {
+        encoder->audioFrame = NULL;
+        //write the buffered frame
+        transcoder->encode_Audio(decoder->audioStream, decoder, encoder);
+    }
+
+
 
     processParameter->set_Process_Number(1, 1);
 
@@ -152,10 +162,20 @@ end:
         avcodec_free_context(&decoder->videoCodecCtx);
         decoder->videoCodecCtx = NULL;
     }
-    if (decoder->frame)
+    if(decoder->audioCodecCtx)
     {
-        av_frame_free(&decoder->frame);
-        decoder->frame = NULL;
+        avcodec_free_context(&decoder->audioCodecCtx);
+        decoder->audioCodecCtx = NULL;
+    }
+    if (decoder->videoFrame)
+    {
+        av_frame_free(&decoder->videoFrame);
+        decoder->videoFrame = NULL;
+    }
+    if (decoder->audioFrame)
+    {
+        av_frame_free(&decoder->audioFrame);
+        decoder->audioFrame = NULL;
     }
     if (decoder->pkt)
     {
@@ -177,10 +197,20 @@ end:
         avcodec_free_context(&encoder->videoCodecCtx);
         encoder->videoCodecCtx = NULL;
     }
-    if(encoder->frame)
+    if(encoder->audioCodecCtx)
     {
-        av_frame_free(&encoder->frame);
-        encoder->frame = NULL;
+        avcodec_free_context(&encoder->audioCodecCtx);
+        encoder->audioCodecCtx = NULL;
+    }
+    if(encoder->videoFrame)
+    {
+        av_frame_free(&encoder->videoFrame);
+        encoder->videoFrame = NULL;
+    }
+    if(encoder->audioFrame)
+    {
+        av_frame_free(&encoder->audioFrame);
+        encoder->audioFrame = NULL;
     }
     if(encoder->pkt)
     {

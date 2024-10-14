@@ -29,7 +29,9 @@ public:
     AVCodecContext *audioCodecCtx = NULL;
 
     AVPacket *pkt = NULL;
-    AVFrame *frame = NULL;
+    // AVFrame *frame = NULL;
+    AVFrame *videoFrame = NULL;
+    AVFrame *audioFrame = NULL;
 };
 
 #endif // STREAMCONTEXT_H

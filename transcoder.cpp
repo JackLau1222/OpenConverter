@@ -34,6 +34,8 @@ bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
         return -1;
     }
 
+    av_dump_format(encoder->fmtCtx, 0, encoder->filename, 1);
+
     return true;
 }
 
@@ -66,12 +68,12 @@ bool Transcoder::copyFrame(AVFrame* oldFrame, AVFrame* newFrame)
     return true;
 }
 
-bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder)
+bool Transcoder::encode_Video(AVStream *inStream, StreamContext *decoder, StreamContext *encoder)
 {
     int ret = -1;
 
     //send frame to encoder
-    ret = avcodec_send_frame(encoder->videoCodecCtx, encoder->frame);
+    ret = avcodec_send_frame(encoder->videoCodecCtx, decoder->videoFrame);
     if(ret < 0)
     {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
@@ -116,11 +118,11 @@ end:
     return true;
 }
 
-bool Transcoder::encode_Audio(AVStream *inStream, StreamContext *encoder)
+bool Transcoder::encode_Audio(AVStream *inStream, StreamContext *decoder, StreamContext *encoder)
 {
     int ret = -1;
 
-    ret = avcodec_send_frame(encoder->audioCodecCtx, encoder->frame);
+    ret = avcodec_send_frame(encoder->audioCodecCtx, encoder->audioFrame);
     if(ret < 0)
     {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
@@ -176,7 +178,7 @@ bool Transcoder::transcode_Video(StreamContext *decoder, StreamContext *encoder)
 
     while (ret >= 0)
     {
-        ret = avcodec_receive_frame(decoder->videoCodecCtx, decoder->frame);
+        ret = avcodec_receive_frame(decoder->videoCodecCtx, decoder->videoFrame);
         if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         {
             return 0;
@@ -186,16 +188,16 @@ bool Transcoder::transcode_Video(StreamContext *decoder, StreamContext *encoder)
             return -1;
         }
 
-        copyFrame(decoder->frame, encoder->frame);
+        // copyFrame(decoder->frame, encoder->frame);
 
-        encode_Video(decoder->videoStream, encoder);
+        encode_Video(decoder->videoStream, decoder, encoder);
 
         if (decoder->pkt)
         {
             av_packet_unref(decoder->pkt);
         }
 
-        av_frame_unref(decoder->frame);
+        av_frame_unref(decoder->videoFrame);
     }
 
 
@@ -217,7 +219,7 @@ bool Transcoder::transcode_Audio(StreamContext *decoder, StreamContext *encoder)
 
     while(ret >= 0)
     {
-        ret = avcodec_receive_frame(decoder->audioCodecCtx, decoder->frame);
+        ret = avcodec_receive_frame(decoder->audioCodecCtx, decoder->audioFrame);
         if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         {
             return 0;
@@ -229,14 +231,14 @@ bool Transcoder::transcode_Audio(StreamContext *decoder, StreamContext *encoder)
 
         //copyFrame(decoder->frame, encoder->frame);
 
-        encode_Audio(decoder->audioStream, encoder);
+        encode_Audio(decoder->audioStream, decoder, encoder);
 
         if(decoder->pkt)
         {
             av_packet_unref(decoder->pkt);
         }
 
-        av_frame_unref(decoder->frame);
+        av_frame_unref(decoder->audioFrame);
     }
 
 end:
@@ -270,12 +272,20 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
         av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s \n", avcodec_get_name(decoder->videoStream->codecpar->codec_id));
         //return -1;
     }
+    av_log(NULL, AV_LOG_INFO, "Decoder: %s\n", decoder->videoCodec->name);
+
+    if (!decoder->audioStream || !decoder->audioStream->codecpar) 
+    {
+        av_log(NULL, AV_LOG_ERROR, "Audio stream or codec parameters are null!\n");
+        return false; // 或其他错误处理逻辑
+    }
 
     decoder->audioCodec = avcodec_find_decoder(decoder->audioStream->codecpar->codec_id);
     if(!decoder->audioCodec)
     {
         av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s \n", avcodec_get_name(decoder->audioStream->codecpar->codec_id));
     }
+    av_log(NULL, AV_LOG_INFO, "Decoder: %s\n", decoder->audioCodec->name);
 
     //init decoder context
     decoder->videoCodecCtx = avcodec_alloc_context3(decoder->videoCodec);
@@ -307,8 +317,14 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder)
     }
 
     //create AVFrame
-    decoder->frame = av_frame_alloc();
-    if(!decoder->frame)
+    decoder->videoFrame = av_frame_alloc();
+    if(!decoder->videoFrame)
+    {
+        av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
+        return false;
+    }
+    decoder->audioFrame = av_frame_alloc();
+    if(!decoder->audioFrame)
     {
         av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
         return false;
@@ -339,11 +355,11 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
      */
     //find the encodec by Name
     // QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
-    const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
-    encoder->videoCodec = avcodec_find_encoder_by_name(codec);
+    // const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
+    // encoder->videoCodec = avcodec_find_encoder_by_name(codec);
 
     //find the encodec by ID
-    //encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
+    encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
     if(!encoder->videoCodec)
     {
         av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: \n");
@@ -384,23 +400,23 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
     }
 
     //create AVFrame
-    encoder->frame = av_frame_alloc();
-    if(!encoder->frame)
+    encoder->videoFrame = av_frame_alloc();
+    if(!encoder->videoFrame)
     {
         av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
         return false;
     }
 
-    encoder->frame->width = encoder->videoCodecCtx->width;
-    encoder->frame->height = encoder->videoCodecCtx->height;
-    encoder->frame->format = encoder->videoCodecCtx->pix_fmt;
+    // encoder->frame->width = encoder->videoCodecCtx->width;
+    // encoder->frame->height = encoder->videoCodecCtx->height;
+    // encoder->frame->format = encoder->videoCodecCtx->pix_fmt;
 
-    ret = av_frame_get_buffer(encoder->frame, 0);
-    if(ret < 0)
-    {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't allocate the video frame\n");
-        return false;
-    }
+    // ret = av_frame_get_buffer(encoder->videoFrame, 0);
+    // if(ret < 0)
+    // {
+    //     av_log(NULL, AV_LOG_ERROR, "Couldn't allocate the video frame\n");
+    //     return false;
+    // }
 
     //create AVPacket
     encoder->pkt = av_packet_alloc();
@@ -447,11 +463,13 @@ bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *en
     frameTotalNumber = decoder->audioStream->nb_frames;
 
     // find the encodec by Name
-    const char *codec = encodeParamter->get_Audio_Codec_Name().c_str();
-    encoder->audioCodec = avcodec_find_encoder_by_name(codec);
+    // const char *codec = encodeParamter->get_Audio_Codec_Name().c_str();
+    // encoder->audioCodec = avcodec_find_encoder_by_name(codec);
+    encoder->audioCodec = avcodec_find_encoder(decoder->audioCodecCtx->codec_id);
     if(!encoder->audioCodec)
     {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s\n", codec);
+        // av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s\n", codec);
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find audio codec\n");
         return false;
     }
 
@@ -478,23 +496,23 @@ bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *en
         return false;
     }
 
-    encoder->frame = av_frame_alloc();
-    if(!encoder->frame)
+    encoder->audioFrame = av_frame_alloc();
+    if(!encoder->audioFrame)
     {
         av_log(NULL, AV_LOG_ERROR, "No Memory!\n");
         return false;
     }
 
-    encoder->frame->nb_samples = encoder->audioCodecCtx->frame_size;
-    encoder->frame->format = encoder->audioCodecCtx->sample_fmt;
+    // encoder->frame->nb_samples = encoder->audioCodecCtx->frame_size;
+    // encoder->frame->format = encoder->audioCodecCtx->sample_fmt;
     // encoder->frame->channel_layout = encoder->audioCodecCtx->ch_layout;
     
-    ret = av_frame_get_buffer(encoder->frame, 0);
-    if(ret < 0)
-    {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't allocate the audio frame\n");
-        return false;
-    }
+    // ret = av_frame_get_buffer(encoder->audioFrame, 0);
+    // if(ret < 0)
+    // {
+    //     av_log(NULL, AV_LOG_ERROR, "Couldn't allocate the audio frame\n");
+    //     return false;
+    // }
 
     encoder->pkt = av_packet_alloc();
     if(!encoder->pkt)

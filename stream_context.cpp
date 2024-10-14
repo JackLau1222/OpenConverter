@@ -16,7 +16,9 @@ StreamContext::StreamContext()
     audioCodecCtx = NULL;
 
     pkt = NULL;
-    frame = NULL;
+    // frame = NULL;
+    videoFrame = NULL;
+    audioFrame = NULL;
 }
 
 StreamContext::~StreamContext()

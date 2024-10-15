@@ -385,11 +385,10 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
      * set the output file parameters
      */
     //find the encodec by Name
-    // QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
-    // const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
-    // encoder->videoCodec = avcodec_find_encoder_by_name(codec);
-    encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
-    av_log(NULL, AV_LOG_INFO, "Encoder: %s\n", avcodec_get_name(encoder->videoCodec->id));
+    QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
+    const char *codec = encodeParamter->get_Video_Codec_Name().c_str();
+    encoder->videoCodec = avcodec_find_encoder_by_name(codec);
+    // encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
 
     //find the encodec by ID
     encoder->videoCodec = avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
@@ -398,7 +397,6 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
         av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: \n");
         return false;
     }
-    av_log(NULL, AV_LOG_INFO, "Encoder: %s\n", avcodec_get_name(encoder->videoCodec->id));
 
     //init codec context
     encoder->videoCodecCtx = avcodec_alloc_context3(encoder->videoCodec);
@@ -407,7 +405,6 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder, StreamContext *en
         av_log(NULL, AV_LOG_ERROR, "No memory!\n");
         return false;
     }
-    av_log(NULL, AV_LOG_INFO, "Successfully allocated video encoder context\n");
 
     if(decoder->videoCodecCtx->codec_type == AVMEDIA_TYPE_VIDEO)
     {
@@ -498,15 +495,14 @@ bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *en
     frameTotalNumber = decoder->audioStream->nb_frames;
 
     // find the encodec by Name
-    // const char *codec = encodeParamter->get_Audio_Codec_Name().c_str();
-    // encoder->audioCodec = avcodec_find_encoder_by_name(codec);
-    encoder->audioCodec = avcodec_find_encoder(decoder->audioCodecCtx->codec_id);
+    const char *codec = encodeParamter->get_Audio_Codec_Name().c_str();
+    encoder->audioCodec = avcodec_find_encoder_by_name(codec);
+    // encoder->audioCodec = avcodec_find_encoder(decoder->audioCodecCtx->codec_id);
     if(!encoder->audioCodec)
     {
         // av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: %s\n", codec);
         return false;
     }
-    av_log(NULL, AV_LOG_INFO, "Audio encoder codec: %s\n", encoder->audioCodec->name);
 
     encoder->audioCodecCtx = avcodec_alloc_context3(encoder->audioCodec);
     if(!encoder->audioCodecCtx)
@@ -514,7 +510,6 @@ bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *en
         av_log(NULL, AV_LOG_ERROR, "No memory!\n");
         return false;
     }
-    av_log(NULL, AV_LOG_INFO, "Successfully allocated audio encoder context\n");
 
 
     if(decoder->audioCodecCtx->codec_type == AVMEDIA_TYPE_AUDIO)
@@ -579,7 +574,6 @@ bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder, StreamContext *en
 
 bool Transcoder::prepare_Copy(AVFormatContext *avCtx, AVStream **stream, AVCodecParameters *codecParam)
 {
-    av_log(NULL, AV_LOG_INFO, "prepare_Copy\n");
     *stream = avformat_new_stream(avCtx, NULL);
     avcodec_parameters_copy((*stream)->codecpar, codecParam);
     return true;

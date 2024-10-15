@@ -24,7 +24,7 @@ public:
 
     bool open_Media(StreamContext *decoder, StreamContext *encoder);
 
-    bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
+    bool copy_Frame(AVFrame *oldFrame, AVFrame *newFrame);
 
     bool encode_Video(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
 

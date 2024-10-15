@@ -46,7 +46,7 @@ bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder)
     return true;
 }
 
-bool Transcoder::copyFrame(AVFrame* oldFrame, AVFrame* newFrame)
+bool Transcoder::copy_Frame(AVFrame* oldFrame, AVFrame* newFrame)
 {
     int response;
     newFrame->pts = oldFrame->pts;

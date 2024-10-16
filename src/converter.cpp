@@ -107,13 +107,10 @@ bool Converter::transcode(char *src, char *dst)
     //read video data from multimedia files to write into destination file
     while(av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0)
     {
-        stream_index = decoder->pkt->stream_index;
-        // decoder->videoIdx = decoder->pkt->stream_index;
-        // decoder->audioIdx = decoder->pkt->stream_index;
         if(decoder->pkt->stream_index == decoder->videoIdx )
         {
             // set packet pts
-            av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[stream_index]->time_base, decoder->videoCodecCtx->time_base);
+            av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[decoder->pkt->stream_index]->time_base, decoder->videoCodecCtx->time_base);
             if(!copyVideo)
             {
                 transcoder->transcode_Video(decoder, encoder);
@@ -124,7 +121,7 @@ bool Converter::transcode(char *src, char *dst)
         }else if(decoder->pkt->stream_index == decoder->audioIdx)
         {
             // set packet pts
-            av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[stream_index]->time_base, decoder->audioCodecCtx->time_base);
+            av_packet_rescale_ts(decoder->pkt, decoder->fmtCtx->streams[decoder->pkt->stream_index]->time_base, decoder->audioCodecCtx->time_base);
             if(!copyAudio)
             {
                 transcoder->transcode_Audio(decoder, encoder);

@@ -41,9 +41,8 @@ bool Converter::transcode(char *src, char *dst)
 {
     bool flag = true;
     int ret = -1;
-    int stream_index = -1;
-    //deal with arguments
 
+    //deal with arguments
     StreamContext *decoder = new StreamContext;
     StreamContext *encoder = new StreamContext;
 
@@ -93,6 +92,7 @@ bool Converter::transcode(char *src, char *dst)
         flag = false;
         goto end;
     }
+
     /* Write the stream header, if any. */
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0)
@@ -101,8 +101,6 @@ bool Converter::transcode(char *src, char *dst)
         flag = false;
         goto end;
     }
-
-    // av_dump_format(encoder->fmtCtx, 0, encoder->filename, 1);
 
     //read video data from multimedia files to write into destination file
     while(av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0)

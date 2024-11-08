@@ -1,24 +1,24 @@
 # OpenConverter
+[Chinese](./README_ZH.md) 
+## 📢  Project Introduction
 
-## 📢  项目介绍
+OpenConverter is a software built on the **FFmpeg** source code and the **Qt** open source framework. It provides a set of easy-to-use tools for conveniently converting, editing, and processing audio and video files.
 
-OpenConverter 是一个基于 **FFmpeg**源代码、**Qt**开源框架构建的软件，它提供了一些简单易用的工具，可以方便地转换、编辑和处理音视频文件。
+This converter has the following main features:
 
-这款转换器具有以下主要功能：
+1. Supports changing video codecs for encoding(e.g., libx264, libx265).
+2. Supports transcoding multimedia without re-encoding.
+3. Supports displaying information about video and audio streams in multimedia files.
+4. Supports showing progress while converting files.
+5. Supports opening files from the file manager.
 
-1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
-2. 支持无编码转换多媒体。
-3. 支持显示多媒体文件中视频和音频流的信息。
-4. 支持在转换文件时显示进度。
-5. 支持从文件管理器中打开文件。
+This project is developed using the [Qt framework](./doc/Qt.md) and the FFmpeg libav library。
 
-本项目使用[Qt框架](./doc/Qt.md)和FFmpeg libav库完成开发。
+FFmpeg development tutorial can be reference at [Learn FFmpeg the Hard Way](https://github.com/TSGU-OSC/Learn_FFmpeg_the_Hard_Way)
 
-FFmpeg 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU-OSC/Learn_FFmpeg_the_Hard_Way)
+## 🌟  Detailed Fucionality
 
-## 🌟  功能详解
-
-运行 OpenConverter 后，您可以看到并使用以下功能：
+After running OpenConverter, you can see and use the following functions:
 
 <div align="center">
 
@@ -28,30 +28,30 @@ FFmpeg 开发教程可参考 [Learn FFmpeg the Hard Way](https://github.com/TSGU
 
 </div>
 
-### 1. 支持更改视频编解码器以进行编码（例如libx264，libx265）
+### 1. Support for changing video codecs for encoding（e.g.,libx264，libx265）
 
-这款转换器允许用户轻松地更改视频编解码器，以便在转换过程中使用不同的编码器。例如，您可以选择使用libx264或libx265编码器，以获得更高的压缩率和更好的视频质量。
+This converter allows users to easily change the video codec, so that different encoders can be used during the conversion process. For example, you can choose to use the libx264 or libx265 encoder to achieve higher compression rates and better video quality.
 
-### 2. 支持无编码转换多媒体。
+### 2. Support for media transcoding without re-encoding
 
-该转换器还支持无需编码即可转换多媒体文件。这意味着您可以在不改变原始视频和音频流的情况下，直接将文件从一种格式转换为另一种格式。这对于快速转换文件非常有用。
+This converter also supports transcoding multimedia files without re-encoding. This means you can directly convert files from one format to another without changing the original video and audio streams. This is very useful for quickly convering files.
 
-### 3. 支持显示多媒体文件中视频和音频流的信息
+### 3. Support for displaying information about video and audio streams in multimedia files
 
-这款转换器可以显示有关视频和音频流的详细信息，包括分辨率、帧率、比特率等。这有助于您了解多媒体文件的属性，以便在转换过程中进行相应的调整。
+This converter can display detailed information about video and audio streams, including resolution, frame rate, bitrate, and more. This helps you understand the properties of multimedia files, so that you can make appropriate adjustments during the converion process.
 
-### 4. 支持在转换文件时显示进度
+### 4. Support for displaying progress during file conversion
 
-在转换文件时，该播放器会实时显示转换进度，以便您了解转换过程所需的时间。这有助于您更好地安排时间，避免不必要的等待。
+When converting files, this player will display the conversion progress in real-time, so that you can understand the time required for the conversion process. This helps you better plan your time and avoid unnecessary waiting.
 
-### 5. 支持从文件管理器中打开文件
+### 5. Support for opening files from the file manager
 
-该转换器支持从Finder或其他文件管理器中直接打开多媒体文件。这使得文件管理变得更加简单，方便您快速找到并打开需要转换的文件。
+This converter supports directly opening multimedia files from Finder or other file managers. This makes file management more straightforward, making it easier for you to quickly find and open the files you need to convert.
 
-## 📖 贡献指南
+## 📖 Contribution Guide
 
-如果你有兴趣贡献项目或发现了错误，请参考我们的 [贡献指南](./CONTRIBUTING.md)
+If you are interested in contributing to the project or have found any issues, please refer to our [Contribution Guide](./CONTRIBUTING.md)
 
-## ☘️ 许可证
+## ☘️ License
 
-OpenConverter 是基于 Apache 2.0 许可证开源的。请在使用前阅读 [LICENSE](./LICENSE) 文件。
+OpenConverter is an open-source project licensed under the Apache 2.0 license. Please read it before using. [LICENSE](./LICENSE) file。

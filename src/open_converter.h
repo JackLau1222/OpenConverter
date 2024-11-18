@@ -11,20 +11,22 @@
 #include <QTranslator>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class OpenConverter; }
+namespace Ui {
+class OpenConverter;
+}
 QT_END_NAMESPACE
 
-class OpenConverter : public QMainWindow
-{
+class OpenConverter : public QMainWindow {
     Q_OBJECT
-protected:
-    // this event is called, when a new translator is loaded or the system language is changed
-    void changeEvent(QEvent*);
-signals:
+  protected:
+    // this event is called, when a new translator is loaded or the system
+    // language is changed
+    void changeEvent(QEvent *);
+  signals:
     void activateConverterThread(QString src, QString dst);
-protected slots:
+  protected slots:
     void slotLanguageChanged(QAction *);
-public slots:
+  public slots:
     void apply_Pushed();
 
     void convert_Pushed();
@@ -36,18 +38,20 @@ public slots:
     void update_Process_Bar(double result);
 
     void handle_Converter_Result(bool flag);
-public:
+
+  public:
     OpenConverter(QWidget *parent = nullptr);
     ~OpenConverter();
 
-private:
+  private:
     // loads a language by the given language shortcur (e.g. de, en)
-    void loadLanguage(const QString& rLanguage);
+    void loadLanguage(const QString &rLanguage);
 
     QTranslator m_translator; // contains the translations for this application
-//    QTranslator m_translatorQt; // contains the translations for qt
+    //    QTranslator m_translatorQt; // contains the translations for qt
     QString m_currLang; // contains the currently loaded language
-    QString m_langPath; // Path of language files. This is always fixed to /languages.
+    QString m_langPath; // Path of language files. This is always fixed to
+                        // /languages.
 
     Ui::OpenConverter *ui;
 
@@ -66,6 +70,5 @@ private:
     QMessageBox *displayResult = NULL;
 
     QThread converterThread;
-
 };
 #endif // OPEN_CONVERTER_H

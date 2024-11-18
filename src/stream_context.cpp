@@ -1,7 +1,6 @@
 #include "stream_context.h"
 
-StreamContext::StreamContext()
-{
+StreamContext::StreamContext() {
     fmtCtx = NULL;
     filename = NULL;
 
@@ -19,7 +18,4 @@ StreamContext::StreamContext()
     frame = NULL;
 }
 
-StreamContext::~StreamContext()
-{
-
-}
+StreamContext::~StreamContext() {}

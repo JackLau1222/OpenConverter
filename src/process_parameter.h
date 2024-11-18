@@ -4,12 +4,11 @@
 #include <QObject>
 
 /* inherit the QObject to use slot and signals */
-class ProcessParameter : public QObject
-{
-private:
+class ProcessParameter : public QObject {
+  private:
     Q_OBJECT
 
-public:
+  public:
     explicit ProcessParameter(QObject *parent = nullptr);
     ~ProcessParameter();
 
@@ -23,15 +22,13 @@ public:
 
     ProcessParameter get_Process_Parmeter();
 
-signals:
+  signals:
     void update_Process_Number(double result);
 
-
-private:
+  private:
     double processNumber;
 
     int timeRequired;
-
 };
 
 #endif // PROCESSPARAMETER_H

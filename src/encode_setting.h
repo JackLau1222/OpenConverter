@@ -8,14 +8,16 @@ namespace Ui {
 class EncodeSetting;
 }
 
-class EncodeSetting : public QMainWindow
-{
+class EncodeSetting : public QMainWindow {
     Q_OBJECT
-protected:
-    // this event is called, when a new translator is loaded or the system language is changed
-    void changeEvent(QEvent*);
-public:
-    explicit EncodeSetting(QWidget *parent = nullptr, EncodeParameter *encodeParamter = NULL);
+  protected:
+    // this event is called, when a new translator is loaded or the system
+    // language is changed
+    void changeEvent(QEvent *);
+
+  public:
+    explicit EncodeSetting(QWidget *parent = nullptr,
+                           EncodeParameter *encodeParamter = NULL);
 
     ~EncodeSetting();
 
@@ -23,17 +25,15 @@ public:
 
     bool get_Available();
 
-public slots:
+  public slots:
     void cancel_Pushed();
 
     void apply_Pushed();
 
-private:
-
+  private:
     EncodeParameter *encodeParameter = NULL;
 
     Ui::EncodeSetting *ui;
-
 };
 
 #endif // ENCODE_SETTING_H

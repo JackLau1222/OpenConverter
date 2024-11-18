@@ -1,19 +1,16 @@
 #ifndef INFO_H
 #define INFO_H
 
-
-extern "C"
-{
+extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 };
 #include <string>
 #include <map>
 
-//store some info of video and audio
-typedef struct QuickInfo
-{
-    //video
+// store some info of video and audio
+typedef struct QuickInfo {
+    // video
     int videoIdx;
     int width;
     int height;
@@ -23,7 +20,7 @@ typedef struct QuickInfo
 
     int64_t videoBitRate;
     double frameRate;
-    //audio
+    // audio
     int audioIdx;
     std::string audioCodec;
     int64_t audioBitRate;
@@ -31,26 +28,24 @@ typedef struct QuickInfo
     std::string sampleFmt;
     int sampleRate;
 
-    //subtitle
+    // subtitle
     int subIdx;
     std::string subCodec;
     std::string subFmt;
     std::string displayTime;
     int position;
-    //QSize subSize;
+    // QSize subSize;
     std::string subColor;
-}QuickInfo;
+} QuickInfo;
 
+// deal with info of video and audio and stored as QuickInfo type
+class Info {
 
-//deal with info of video and audio and stored as QuickInfo type
-class Info
-{
-
-public:
+  public:
     Info();
     ~Info();
 
-private:
+  private:
     AVFormatContext *avCtx = NULL;
 
     const AVCodec *audioCodec = NULL;
@@ -59,23 +54,22 @@ private:
 
     QuickInfo *quickInfo = NULL;
 
-public:
+  public:
     // init quick info
     void init();
     // get qucik info reference
-    QuickInfo* get_Quick_Info();
-    //send the info to front-end
+    QuickInfo *get_Quick_Info();
+    // send the info to front-end
     void send_Info(char *src);
 
-    //convert video color space into string
+    // convert video color space into string
     std::string enum_To_String(AVColorSpace e);
 
-    //convert audio and video codec enum into string
+    // convert audio and video codec enum into string
     std::string enum_To_String(AVCodecID e);
 
-    //convert audio sample format enum into string
+    // convert audio sample format enum into string
     std::string enum_To_String(AVSampleFormat sample_fmt);
 };
 
 #endif // INFO_H
-

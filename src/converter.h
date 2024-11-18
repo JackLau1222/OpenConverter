@@ -8,32 +8,32 @@
 #include <QString>
 #include <QObject>
 
-class Converter : public QObject
-{
+class Converter : public QObject {
     Q_OBJECT;
-public:
+
+  public:
     Converter();
-    Converter(ProcessParameter *processParamter, EncodeParameter *encodeParamter);
+    Converter(ProcessParameter *processParamter,
+              EncodeParameter *encodeParamter);
     ~Converter();
 
-private:
+  private:
     Transcoder *transcoder = NULL;
 
-    //encoder's parameters
+    // encoder's parameters
     bool copyVideo;
     bool copyAudio;
 
-public slots:
+  public slots:
     void convert_Format(QString src, QString dst);
 
-signals:
+  signals:
     void return_Value_Converter(bool flag);
 
-public:
+  public:
     ProcessParameter *processParameter = NULL;
 
     EncodeParameter *encodeParameter = NULL;
 
     bool transcode(char *src, char *dst);
-
 };

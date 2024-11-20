@@ -11,15 +11,15 @@ You can contribute by:
 
 ## Report problems and make recommendations
 
-1. In our [Issues](https://github.com/JackLau1222/OpenConverter/issues) to create a new Issue.
+1. Please create a new Issue in the [Issues](https://github.com/JackLau1222/OpenConverter/issues) page.
 
 2. Select the appropriate label, such as "bug" or "enhancement".
 
 3. Provide clear and detailed instructions, including steps to reproduce the problem (if reporting the problem) or your suggestions.
 
-## Submit project
+## Submit Pull Request
 
-1. Fork the repository and clone its develop branch locally:
+1. Fork the repository and clone its main branch locally:
 
     ```bash
    git clone -b develop https://github.com/your-username/your-repo-name.git
@@ -35,14 +35,14 @@ You can contribute by:
     git commit -m "Add/modify your-documentation"
     ```
     
-5. Push to your Fork
+5. Push to your forked remote repo
     ```bash
     git push origin feature/your-feature
     ```
     
 6. Create a Pull Request (PR) :
 
-- Go to your Fork page and click "New Pull Request".
+- Go to your forked repository and click "New Pull Request".
 - Select the target branch to which your changes should be merged.
 - Provide clear and concise PR descriptions.
 7. We will review your PR and make suggestions or request changes if needed.

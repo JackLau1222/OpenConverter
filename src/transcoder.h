@@ -6,6 +6,7 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
+#include <libavutil/channel_layout.h>
 };
 
 #include "process_parameter.h"
@@ -23,11 +24,15 @@ public:
 
     bool open_Media(StreamContext *decoder, StreamContext *encoder);
 
-    bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
+    bool copy_Frame(AVFrame *oldFrame, AVFrame *newFrame);
 
-    bool encode_Video(AVStream *inStream, StreamContext *encoder);
+    bool encode_Video(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
+
+    bool encode_Audio(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
 
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
+
+    bool transcode_Audio(StreamContext *decoder, StreamContext *encoder);
 
     bool prepare_Decoder(StreamContext *decoder);
 

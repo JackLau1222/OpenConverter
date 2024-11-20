@@ -6,7 +6,7 @@ Welcome to contribute to this repository! Your help is greatly appreciated and h
 
 You can contribute by:
 
-1. **Reporting problems**： Found an error or improvement in the documentation? Please create an Issue to report the problem.
+1. **Reporting problems**： Found an error or improvement in the documentation? Please send us through an issue.
 2. **Propose improvements**： If you have suggestions for this project, please send them through an Issue.
 
 ## Report problems and make recommendations

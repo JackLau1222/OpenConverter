@@ -1,52 +1,57 @@
-# 贡献指南
+# Contribution Guidelines
 
-欢迎您对本仓库做出贡献！非常感谢您的帮助，以下是一些建议和指导，以确保贡献的顺利进行。
+Welcome to contribute to this repository! Your help is greatly appreciated and here are some suggestions and guidance to ensure the contribution goes smoothly.
 
-## 贡献方式
+## Contribution mode
 
-您可以通过以下方式贡献：
+You can contribute by:
 
-1. **报告问题**：发现了文档中的错误或有改进的地方？请创建一个 Issue 来报告问题。
-2. **提出改进**：如果您有本项目的建议，请通过 Issue 提出您的想法。
+1. **Reporting problems**： Found an error or improvement in the documentation? Please create an Issue to report the problem.
+2. **Propose improvements**： If you have suggestions for this project, please send them through an Issue.
 
-## 报告问题和提出建议
+## Report problems and make recommendations
 
-1. 在我们的 [Issues 页面](https://github.com/JackLau1222/OpenConverter/issues) 创建一个新的 Issue。
+1. In our [Issues](https://github.com/JackLau1222/OpenConverter/issues) to create a new Issue.
 
-2. 选择相应的标签，例如“bug”或“enhancement”。
+2. Select the appropriate label, such as "bug" or "enhancement".
 
-3. 提供清晰而详细的说明，包括问题的复现步骤（如果是报告问题）或您的建议。
+3. Provide clear and detailed instructions, including steps to reproduce the problem (if reporting the problem) or your suggestions.
 
-## 提交项目
+## Submit project
 
-1. Fork 这个仓库并在本地克隆它的develop分支：
+1. Fork the repository and clone its develop branch locally:
 
     ```bash
    git clone -b develop https://github.com/your-username/your-repo-name.git
    ```
    
-2. 在此目录下进行修改
+2. Make changes in this directory
    
     
    
-4. 提交您的修改
+4. Commit your changes
     ```bash
     git add .
     git commit -m "Add/modify your-documentation"
     ```
     
-5. 推送到您的Fork
+5. Push to your Fork
     ```bash
     git push origin feature/your-feature
     ```
     
-6. 创建一个 Pull Request（PR）：
+6. Create a Pull Request (PR) :
 
-- 到您的 Fork 页面，点击 "New Pull Request"。
-- 选择要将您的修改合并到的目标分支。
-- 提供清晰而简洁的 PR 描述。
-7. 我们将审查您的 PR，并在需要时提出建议或请求修改。
+- Go to your Fork page and click "New Pull Request".
+- Select the target branch to which your changes should be merged.
+- Provide clear and concise PR descriptions.
+7. We will review your PR and make suggestions or request changes if needed.
 
-## 注意事项
+## Code Style Guides
 
-- 请确保您的修改符合本项目所规定的开发编码规范，具体可查看[项目开发编码规范](https://github.com/JackLau1222/OpenConverter/blob/develop/README.md)
+- See [C++ Code clang-format](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format).
+  After clang-format installed(version 16.0.6, can be installed by: pip install clang-format==16.0.6), using command:
+    ```bash
+    clang-format -sort-includes=false -style="{BasedOnStyle: llvm, IndentWidth: 4}" -i <your file>
+    ```
+

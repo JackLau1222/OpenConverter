@@ -18,6 +18,9 @@ OpenConverter::OpenConverter(QWidget *parent)
 
     ui->setupUi(this);
 
+    // Open the file drag
+    setAcceptDrops(true);
+
     /* set the converter thread */
     converter->moveToThread(&converterThread);
 
@@ -46,6 +49,22 @@ OpenConverter::OpenConverter(QWidget *parent)
 
     m_currLang = "english";
     m_langPath = ":/";
+}
+
+// This function is called when a file is dragged and dropped on the window
+void OpenConverter::dragEnterEvent(QDragEnterEvent *event){
+    if(event->mimeData()->hasUrls()){
+        event->acceptProposedAction();
+    }
+}
+
+// This function is called when a file is dropped on the window
+void OpenConverter::dropEvent(QDropEvent *event){
+    if(event->mimeData()->hasUrls()){
+        const QUrl url = event->mimeData()->urls().first();
+        ui->lineEdit_inputFile->setText(url.toLocalFile());
+        event->acceptProposedAction();
+    }
 }
 
 // Called every time, when a menu entry of the language menu is called

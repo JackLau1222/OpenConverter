@@ -9,6 +9,10 @@
 #include <QFileDialog>
 #include <QThread>
 #include <QTranslator>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class OpenConverter; }
@@ -20,6 +24,10 @@ class OpenConverter : public QMainWindow
 protected:
     // this event is called, when a new translator is loaded or the system language is changed
     void changeEvent(QEvent*);
+
+    // this event is called, when the user drags and drops a file onto the application
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 signals:
     void activateConverterThread(QString src, QString dst);
 protected slots:

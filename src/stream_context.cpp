@@ -1,6 +1,7 @@
 #include "stream_context.h"
 
-StreamContext::StreamContext() {
+StreamContext::StreamContext()
+{
     fmtCtx = NULL;
     filename = NULL;
 
@@ -15,7 +16,11 @@ StreamContext::StreamContext() {
     audioCodecCtx = NULL;
 
     pkt = NULL;
-    frame = NULL;
+    videoFrame = NULL;
+    audioFrame = NULL;
 }
 
-StreamContext::~StreamContext() {}
+StreamContext::~StreamContext()
+{
+
+}

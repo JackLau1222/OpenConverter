@@ -1,10 +1,12 @@
 #ifndef TRANSCODER_H
 #define TRANSCODER_H
 
-extern "C" {
+extern "C"
+{
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
+#include <libavutil/channel_layout.h>
 };
 
 #include "process_parameter.h"
@@ -13,20 +15,24 @@ extern "C" {
 
 #define ENCODE_BIT_RATE 5000000
 
-class Transcoder {
-  public:
+class Transcoder
+{
+public:
     Transcoder();
-    Transcoder(ProcessParameter *processParameter,
-               EncodeParameter *encodeParamter);
+    Transcoder(ProcessParameter *processParameter, EncodeParameter *encodeParamter);
     ~Transcoder();
 
     bool open_Media(StreamContext *decoder, StreamContext *encoder);
 
-    bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
+    bool copy_Frame(AVFrame *oldFrame, AVFrame *newFrame);
 
-    bool encode_Video(AVStream *inStream, StreamContext *encoder);
+    bool encode_Video(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
+
+    bool encode_Audio(AVStream *inStream, StreamContext *decoder, StreamContext *encoder);
 
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
+
+    bool transcode_Audio(StreamContext *decoder, StreamContext *encoder);
 
     bool prepare_Decoder(StreamContext *decoder);
 
@@ -34,13 +40,11 @@ class Transcoder {
 
     bool prepare_Encoder_Audio(StreamContext *decoder, StreamContext *encoder);
 
-    bool prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
-                      AVCodecParameters *codecParam);
+    bool prepare_Copy(AVFormatContext *avCtx, AVStream **stream, AVCodecParameters *codecParam);
 
-    bool remux(AVPacket *pkt, AVFormatContext *avCtx, AVStream *inStream,
-               AVStream *outStream);
+    bool remux(AVPacket *pkt, AVFormatContext *avCtx, AVStream *inStream, AVStream *outStream);
 
-  private:
+private:
     ProcessParameter *processParameter = NULL;
 
     EncodeParameter *encodeParamter = NULL;
@@ -48,6 +52,7 @@ class Transcoder {
     static int frameNumber;
 
     int64_t frameTotalNumber;
+
 };
 
 #endif // TRANSCODER_H

@@ -1,15 +1,18 @@
 #ifndef STREAMCONTEXT_H
 #define STREAMCONTEXT_H
 
-extern "C" {
+extern "C"
+{
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
+#include <libavutil/opt.h>
 };
 
-class StreamContext {
+class StreamContext
+{
 
-  public:
+public:
     StreamContext();
     ~StreamContext();
 
@@ -27,7 +30,8 @@ class StreamContext {
     AVCodecContext *audioCodecCtx = NULL;
 
     AVPacket *pkt = NULL;
-    AVFrame *frame = NULL;
+    AVFrame *videoFrame = NULL;
+    AVFrame *audioFrame = NULL;
 };
 
 #endif // STREAMCONTEXT_H

@@ -15,6 +15,9 @@ OpenConverter::OpenConverter(QWidget *parent)
 
     ui->setupUi(this);
 
+    // Enable drag and drop
+    setAcceptDrops(true);
+
     /* set the converter thread */
     converter->moveToThread(&converterThread);
 
@@ -52,6 +55,21 @@ OpenConverter::OpenConverter(QWidget *parent)
     m_currLang = "english";
     m_langPath = ":/";
 }
+
+void OpenConverter::dragEnterEvent(QDragEnterEvent *event){
+    if(event->mimeData()->hasUrls()){
+        event->acceptProposedAction();
+    }
+}
+
+void OpenConverter::dropEvent(QDropEvent *event){
+    if(event->mimeData()->hasUrls()){
+        const QUrl url = event->mimeData()->urls().first();
+        ui->lineEdit_inputFile->setText(url.toLocalFile());
+        event->acceptProposedAction();
+    }
+}
+
 
 // Called every time, when a menu entry of the language menu is called
 void OpenConverter::slotLanguageChanged(QAction *action) {

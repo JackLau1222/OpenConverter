@@ -39,4 +39,6 @@ class Converter : public QObject {
     EncodeParameter *encodeParameter = NULL;
 
     bool transcode(char *src, char *dst);
+
+    bool transcode();
 };

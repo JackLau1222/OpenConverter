@@ -17,7 +17,8 @@ SOURCES += \
     open_converter.cpp \
     process_parameter.cpp \
     stream_context.cpp \
-    transcoder.cpp
+    transcoder.cpp \
+    transcoder_bmf.cpp
 
 HEADERS += \
     converter.h \
@@ -27,20 +28,25 @@ HEADERS += \
     open_converter.h \
     process_parameter.h \
     stream_context.h \
-    transcoder.h
+    transcoder.h \
+    transcoder_bmf.h
 
 FORMS += \
     encode_setting.ui \
     open_converter.ui
 
 
-LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/3.6/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.9/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/4.0_1/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.9/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+
+LIBS += -L/Users/jacklau/Documents/Programs/Git/Github/bmf_origin/output/bmf/lib -lengine -lbmf_module_sdk -lhmp -lbuiltin_modules
 
 INCLUDEPATH += /usr/local/include
 
-INCLUDEPATH +=/opt/homebrew/Cellar/x264/r3108/include
+INCLUDEPATH += /opt/homebrew/Cellar/x264/r3108/include
 
-INCLUDEPATH +=/opt/homebrew/Cellar/x265/3.5/include
+INCLUDEPATH += /opt/homebrew/Cellar/x265/4.0_1/include
+
+INCLUDEPATH += /Users/jacklau/Documents/Programs/Git/Github/bmf_origin/output/bmf/include
 
 TRANSLATIONS += lang_chinese.ts
 

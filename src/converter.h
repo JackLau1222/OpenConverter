@@ -4,6 +4,7 @@
 #endif // CONVERTER_H
 
 #include "transcoder.h"
+#include "transcoder_bmf.h"
 #include "encode_parameter.h"
 #include <QString>
 #include <QObject>
@@ -19,6 +20,8 @@ class Converter : public QObject {
 
   private:
     Transcoder *transcoder = NULL;
+
+    TranscoderBMF *transcoder_bmf = NULL;
 
     // encoder's parameters
     bool copyVideo;

@@ -7,6 +7,84 @@ TranscoderBMF::TranscoderBMF(ProcessParameter *processParameter,
     frameTotalNumber = 0;
 }
 
+double TranscoderBMF::compute_smooth_duration(double new_duration) {
+    if (new_duration >= min_duration_threshold) {
+        duration_history.push_back(new_duration);
+        if (duration_history.size() > max_history_size) {
+            duration_history.erase(duration_history.begin());
+        }
+    }
+    return duration_history.empty() ? 0.0 :
+               std::accumulate(duration_history.begin(), duration_history.end(), 0.0) / duration_history.size();
+}
+
+bmf_sdk::CBytes TranscoderBMF::decoder_callback(bmf_sdk::CBytes input) {
+    std::string strInfo;
+    strInfo.assign(reinterpret_cast<const char*>(input.buffer), input.size);
+    // BMFLOG(BMF_INFO) << "====Callback==== " << strInfo;
+
+
+    std::regex frame_regex(R"(\btotal frame number:\s*(\d+))");
+    std::smatch match;
+
+    if (std::regex_search(strInfo, match, frame_regex) && match.size() > 1) {
+        std::istringstream(match[1]) >> frame_number_total; // Convert to int
+        BMFLOG(BMF_DEBUG) << "Extracted Frame Number: " << frame_number_total;
+    } else {
+        BMFLOG(BMF_WARNING) << "Failed to extract frame number";
+    }
+
+    uint8_t bytes[] = {97, 98, 99, 100, 101, 0};
+    return bmf_sdk::CBytes{bytes, 6};
+}
+
+bmf_sdk::CBytes TranscoderBMF::encoder_callback(bmf_sdk::CBytes input) {
+    std::string strInfo;
+    strInfo.assign(reinterpret_cast<const char*>(input.buffer), input.size);
+    // BMFLOG(BMF_INFO) << "====Callback==== " << strInfo;
+
+    std::regex frame_regex(R"(\bframe number:\s*(\d+))");
+    std::smatch match;
+
+    if (std::regex_search(strInfo, match, frame_regex) && match.size() > 1) {
+        std::istringstream(match[1]) >> frame_number_global; // Convert to int
+        BMFLOG(BMF_DEBUG) << "Extracted Total Frame Number: " << frame_number_global;
+        process_number = frame_number_global * 100 / frame_number_total;
+
+        processParameter->set_Process_Number(process_number);
+
+        static auto last_encoder_call_time = std::chrono::system_clock::now();
+        auto now = std::chrono::system_clock::now();
+
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_encoder_call_time).count();
+        last_encoder_call_time = now;
+
+        double smooth_duration = compute_smooth_duration(duration);
+        if (frame_number_global > 0 && frame_number_total > 0) {
+            rest_time = smooth_duration * (frame_number_total-frame_number_global) / 1000;
+            processParameter->set_Time_Required(rest_time);
+        }
+
+        BMFLOG(BMF_INFO) << "Process Number (percentage): " << process_number << "%\t"
+                         << "Current duration (milliseconds): " << duration << "\t"
+                         << "Smoothed Duration: " << smooth_duration << " ms\t"
+                         << "Estimated Rest Time (seconds): " << rest_time;
+
+
+
+        if (frame_number_global == frame_number_total) {
+            BMFLOG(BMF_INFO) << "====Callback==== Finish";
+        }
+
+    } else {
+        BMFLOG(BMF_WARNING) << "Failed to extract frame number";
+    }
+
+    uint8_t bytes[] = {97, 98, 99, 100, 101, 0};
+    return bmf_sdk::CBytes{bytes, 6};
+}
+
+
 bool TranscoderBMF::prepare_info(std::string input_path, std::string output_path) {
     // decoder init
     if (encodeParameter->get_Video_Codec_Name() == "") {
@@ -84,9 +162,15 @@ bool TranscoderBMF::transcode(std::string input_path, std::string output_path) {
 
     auto graph = bmf::builder::Graph(bmf::builder::NormalMode);
 
-    auto video = graph.Decode(bmf_sdk::JsonParam(decoder_para), "", scheduler_cnt++);
+    auto decoder = graph.Decode(bmf_sdk::JsonParam(decoder_para), "", scheduler_cnt++);
 
-    graph.Encode(video["video"], video["audio"], bmf_sdk::JsonParam(encoder_para), "", scheduler_cnt++);
+    auto encoder = graph.Encode(decoder["video"], decoder["audio"], bmf_sdk::JsonParam(encoder_para), "", scheduler_cnt++);
+
+    auto de_callback = std::bind(&TranscoderBMF::decoder_callback, this, std::placeholders::_1);
+    auto en_callback = std::bind(&TranscoderBMF::encoder_callback, this, std::placeholders::_1);
+
+    decoder.AddCallback(0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(de_callback));
+    encoder.AddCallback(0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(en_callback));
 
     nlohmann::json graph_para = {{"dump_graph", 1}};
     graph.SetOption(bmf_sdk::JsonParam(graph_para));

@@ -35,6 +35,9 @@ OpenConverter::OpenConverter(QWidget *parent)
     connect(processParameter, &ProcessParameter::update_Process_Number, this,
             &OpenConverter::update_Process_Bar);
 
+    connect(processParameter, &ProcessParameter::update_Time_Required, this,
+            &OpenConverter::update_Time_Required);
+
     connect(ui->toolButton, &QToolButton::clicked, [&]() {
         QString filename = QFileDialog::getOpenFileName();
         ui->lineEdit_inputFile->setText(filename);
@@ -136,6 +139,7 @@ void OpenConverter::changeEvent(QEvent *event) {
 void OpenConverter::handle_Converter_Result(bool flag) {
     if (flag) {
         displayResult->setText("Convert success!");
+        ui->label_timeRequiredResult->setText(QString("%1s").arg(0));
     } else {
         displayResult->setText("Convert failed! Please ensure the file path "
                                "and encode setting is correct");
@@ -145,9 +149,14 @@ void OpenConverter::handle_Converter_Result(bool flag) {
 
 void OpenConverter::update_Process_Bar(double result) {
     // static int x = 0;
-    int process = result * 100;
+    // int process = result * 100;
+    int process = result;
     ui->progressBar->setValue(process);
     ui->label_processResult->setText(QString("%1%").arg(process));
+}
+
+void OpenConverter::update_Time_Required(double result) {
+    ui->label_timeRequiredResult->setText(QString("%1s").arg(QString::number(result, 'f', 2)));
 }
 
 void OpenConverter::encode_Setting_Pushed() { encodeSetting->show(); }

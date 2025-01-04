@@ -36,9 +36,11 @@ FORMS += \
     open_converter.ui
 
 
+BMF_ROOT_PATH=/Users/jacklau/Documents/Programs/Git/Github/bmf
+
 LIBS += -L/usr/local/lib -L/opt/homebrew/Cellar/x264/r3108/lib -L/opt/homebrew/Cellar/x265/4.0_1/lib -L/usr/local/lib -L/opt/homebrew/Cellar/libx11/1.8.9/lib -lavformat -lavcodec -lavutil -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security -lavcodec -liconv -lm -framework AudioToolbox -lx264 -lx265 -pthread -lz -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices -lswresample -lm -lavutil -pthread -lm -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
 
-LIBS += -L/Users/jacklau/Documents/Programs/Git/Github/bmf_origin/output/bmf/lib -lengine -lbmf_module_sdk -lhmp -lbuiltin_modules
+LIBS += -L/Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/lib -lengine -lbmf_module_sdk -lhmp -lbuiltin_modules
 
 INCLUDEPATH += /usr/local/include
 
@@ -46,7 +48,7 @@ INCLUDEPATH += /opt/homebrew/Cellar/x264/r3108/include
 
 INCLUDEPATH += /opt/homebrew/Cellar/x265/4.0_1/include
 
-INCLUDEPATH += /Users/jacklau/Documents/Programs/Git/Github/bmf_origin/output/bmf/include
+INCLUDEPATH += /Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/include
 
 TRANSLATIONS += lang_chinese.ts
 

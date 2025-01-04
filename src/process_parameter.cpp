@@ -16,15 +16,21 @@ void ProcessParameter::set_Process_Number(int64_t frameNumber,
     }
 }
 
+void ProcessParameter::set_Process_Number(int64_t processNumber) {
+    if (processNumber > 0)
+        emit update_Process_Number(processNumber);
+}
+
 double ProcessParameter::get_Process_Number() { return processNumber; }
 
-void ProcessParameter::set_Time_Required() {
-    // TODO
+void ProcessParameter::set_Time_Required(double timeRequired) {
+    if (timeRequired > 0) {
+        this->timeRequired = timeRequired;
+        emit update_Time_Required(this->timeRequired);
+    }
 }
 
-int ProcessParameter::get_Time_Required() {
-    // TODO
-}
+double ProcessParameter::get_Time_Required() { return timeRequired; }
 
 ProcessParameter get_Process_Parmeter() {
     // TODO

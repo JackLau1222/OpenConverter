@@ -2,7 +2,7 @@
 name: Codety
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "**" ]
 jobs:

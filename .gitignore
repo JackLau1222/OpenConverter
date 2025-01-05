@@ -1,1 +1,5 @@
 open_converter.pro.user
+build*
+.vscode
+.DS_Store
+./src/.DS_Store

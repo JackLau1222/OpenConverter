@@ -6,6 +6,7 @@ Converter::Converter(ProcessParameter *processParamter,
                      EncodeParameter *encodeParamter)
     : processParameter(processParamter), encodeParameter(encodeParamter) {
     transcoder = new Transcoder(this->processParameter, this->encodeParameter);
+    transcoder_bmf = new TranscoderBMF(this->processParameter, this->encodeParameter);
     this->encodeParameter = encodeParamter;
 }
 
@@ -26,7 +27,8 @@ void Converter::convert_Format(QString src, QString dst) {
 
     QByteArray bb = dst.toLocal8Bit();
     char *destinationFileName = bb.data();
-    emit return_Value_Converter(transcode(sourceFileName, destinationFileName));
+    //emit return_Value_Converter(transcode(sourceFileName, destinationFileName));
+    emit return_Value_Converter(transcoder_bmf->transcode(src.toStdString(), dst.toStdString()));
 }
 
 bool Converter::transcode(char *src, char *dst) {

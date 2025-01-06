@@ -152,7 +152,7 @@ bool TranscoderBMF::prepare_info(std::string input_path, std::string output_path
              }
         }
     };
-
+    return true;
 }
 
 bool TranscoderBMF::transcode(std::string input_path, std::string output_path) {

@@ -32,8 +32,8 @@ void ProcessParameter::set_Time_Required(double timeRequired) {
 
 double ProcessParameter::get_Time_Required() { return timeRequired; }
 
-ProcessParameter get_Process_Parmeter() {
-    // TODO
-}
+//ProcessParameter get_Process_Parmeter() {
+//    // TODO
+//}
 
 ProcessParameter::~ProcessParameter() {}

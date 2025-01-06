@@ -1,4 +1,4 @@
-#include "converter.h"
+#include "../include/converter.h"
 
 Converter::Converter() {}
 /* Receive pointers from widget */

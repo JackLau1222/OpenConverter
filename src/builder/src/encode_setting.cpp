@@ -1,4 +1,4 @@
-#include "encode_setting.h"
+#include "../include/encode_setting.h"
 #include "ui_encode_setting.h"
 
 /* Receive pointers from widget */

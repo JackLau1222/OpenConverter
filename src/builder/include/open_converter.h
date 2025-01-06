@@ -19,8 +19,8 @@
 #define OPEN_CONVERTER_H
 
 #include <QMainWindow>
-#include "info.h"
-#include "converter.h"
+#include "../../common/include/info.h"
+#include "../../engine/include/converter.h"
 #include "encode_setting.h"
 #include <QMessageBox>
 #include <QFileDialog>

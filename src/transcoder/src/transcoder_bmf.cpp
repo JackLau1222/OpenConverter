@@ -1,4 +1,4 @@
-#include "transcoder_bmf.h"
+#include "../include/transcoder_bmf.h"
 
 /* Receive pointers from converter */
 TranscoderBMF::TranscoderBMF(ProcessParameter *processParameter,

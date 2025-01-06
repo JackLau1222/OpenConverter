@@ -1,4 +1,4 @@
-#include "encode_parameter.h"
+#include "../include/encode_parameter.h"
 
 EncodeParameter::EncodeParameter() {
     videoCodec = "";

@@ -19,7 +19,7 @@
 #define ENCODE_SETTING_H
 
 #include <QMainWindow>
-#include "encode_parameter.h"
+#include "../../common/include/encode_parameter.h"
 
 namespace Ui {
 class EncodeSetting;

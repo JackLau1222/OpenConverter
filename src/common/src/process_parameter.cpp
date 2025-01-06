@@ -1,5 +1,4 @@
-#include "process_parameter.h"
-// #include "moc_process_parameter.h"
+#include "../include/process_parameter.h"
 
 ProcessParameter::ProcessParameter(QObject *parent) : QObject(parent) {
     processNumber = 0;

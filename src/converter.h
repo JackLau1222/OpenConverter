@@ -18,8 +18,6 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#endif // CONVERTER_H
-
 #include "transcoder.h"
 #include "transcoder_bmf.h"
 #include "encode_parameter.h"
@@ -57,3 +55,5 @@ class Converter : public QObject {
 
     bool transcode(char *src, char *dst);
 };
+
+#endif // CONVERTER_H

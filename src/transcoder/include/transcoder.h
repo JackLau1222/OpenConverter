@@ -22,9 +22,9 @@ extern "C" {
 #include <libavutil/avutil.h>
 };
 
-#include "process_parameter.h"
-#include "encode_parameter.h"
-#include "stream_context.h"
+#include "../../common/include/process_parameter.h"
+#include "../../common/include/encode_parameter.h"
+#include "../../common/include/stream_context.h"
 
 #define ENCODE_BIT_RATE 5000000
 

@@ -16,9 +16,9 @@
 #ifndef TRANSCODER_BMF_H
 #define TRANSCODER_BMF_H
 
-#include "process_parameter.h"
-#include "encode_parameter.h"
-#include "stream_context.h"
+#include "../../common/include/process_parameter.h"
+#include "../../common/include/encode_parameter.h"
+#include "../../common/include/stream_context.h"
 
 #include "builder.hpp"
 #include "nlohmann/json.hpp"

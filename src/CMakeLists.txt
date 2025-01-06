@@ -12,24 +12,36 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+# Ensure pkg-config is found
+find_package(PkgConfig REQUIRED)
+
+# Find the FFmpeg libraries (avcodec, avformat, avutil)
+pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil)
+
+## Use pkg-config to find x264
+#pkg_check_modules(X264 REQUIRED x264)
+
+## Use pkg-config to find x265 (if necessary)
+#pkg_check_modules(X265 REQUIRED x265)
+
+# Check if the BMF_ROOT_PATH environment variable is set
+if (DEFINED ENV{BMF_ROOT_PATH})
+    set(BMF_ROOT_PATH $ENV{BMF_ROOT_PATH})
+else()
+    message(STATUS "BMF_ROOT_PATH environment variable is not set, using default paths.")
+    # You can set a default path here if you want
+    set(BMF_ROOT_PATH "/Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf")
+endif()
+
 # Add include directories for external libraries
 include_directories(
-    /usr/local/include
-    /opt/homebrew/Cellar/x264/r3108/include
-    /opt/homebrew/Cellar/x265/4.0_1/include
-    /Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/include
-    ${CMAKE_SOURCE_DIR}/builder/include
-    ${CMAKE_SOURCE_DIR}/common/include
-    ${CMAKE_SOURCE_DIR}/engine/include
-    ${CMAKE_SOURCE_DIR}/transcoder/include
+    ${FFMPEG_INCLUDE_DIRS}
+    ${BMF_ROOT_PATH}/include
 )
 
 link_directories(
-    /usr/local/lib
-    /opt/homebrew/Cellar/x264/r3108/lib
-    /opt/homebrew/Cellar/x265/4.0_1/lib
-    /opt/homebrew/Cellar/libx11/1.8.9/lib
-    /Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/lib
+    ${FFMPEG_LIBRARIES}
+    ${BMF_ROOT_PATH}/lib
 )
 
 # Add source files
@@ -99,30 +111,15 @@ else()
     endif()
 endif()
 
-# target_link_libraries(OpenConverter PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-#target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}_autogen/include)
-
-
 target_link_libraries(OpenConverter
     PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-    avformat
-    avcodec
-    avutil
-#    bz2
-#    z
-#    iconv
-    x264
-    x265
-    pthread
-    swresample
-#    VideoToolbox
-#    CoreFoundation
-#    Security
-#    AudioToolbox
-#    CoreMedia
-#    CoreVideo
-#    CoreServices
+    ${FFMPEG_LDFLAGS}
+#    avformat
+#    avcodec
+#    avutil
+#    pthread
+#    swresample
+
     engine
     bmf_module_sdk 
     hmp 

@@ -18,9 +18,9 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#include "transcoder.h"
-#include "transcoder_bmf.h"
-#include "encode_parameter.h"
+#include "../../transcoder/include/transcoder.h"
+#include "../../transcoder/include/transcoder_bmf.h"
+#include "../../common/include/encode_parameter.h"
 #include <QString>
 #include <QObject>
 

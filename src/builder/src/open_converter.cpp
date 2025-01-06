@@ -1,4 +1,4 @@
-#include "open_converter.h"
+#include "../include/open_converter.h"
 #include "ui_open_converter.h"
 
 OpenConverter::OpenConverter(QWidget *parent)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(OpenConverterCmake VERSION 0.1 LANGUAGES CXX)
+project(OpenConverter VERSION 1.2 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -18,6 +18,10 @@ include_directories(
     /opt/homebrew/Cellar/x264/r3108/include
     /opt/homebrew/Cellar/x265/4.0_1/include
     /Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/include
+    ${CMAKE_SOURCE_DIR}/builder/include
+    ${CMAKE_SOURCE_DIR}/common/include
+    ${CMAKE_SOURCE_DIR}/engine/include
+    ${CMAKE_SOURCE_DIR}/transcoder/include
 )
 
 link_directories(
@@ -28,82 +32,79 @@ link_directories(
     /Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf/lib
 )
 
-# # Add source files
-# set(SOURCES
-#     converter.cpp
-#     encode_parameter.cpp
-#     encode_setting.cpp
-#     info.cpp
-#     main.cpp
-#     open_converter.cpp
-#     process_parameter.cpp
-#     stream_context.cpp
-#     transcoder.cpp
-# )
-
-# # Add header files
-# set(HEADERS
-#     converter.h
-#     encode_parameter.h
-#     encode_setting.h
-#     info.h
-#     open_converter.h
-#     process_parameter.h
-#     stream_context.h
-#     transcoder.h
-# )
-
-set(PROJECT_SOURCES
-        converter.h
-        encode_parameter.h
-        encode_setting.h
-        info.h
-        open_converter.h
-        process_parameter.h
-        stream_context.h
-        transcoder.h
-        transcoder_bmf.h
-        converter.cpp
-        encode_parameter.cpp
-        encode_setting.cpp
-        info.cpp
-        main.cpp
-        open_converter.cpp
-        process_parameter.cpp
-        stream_context.cpp
-        transcoder.cpp
-        transcoder_bmf.cpp
-        open_converter.ui
-        encode_setting.ui
-        lang.qrc
+# Add source files
+set(SOURCES
+    ${CMAKE_SOURCE_DIR}/main.cpp
+    ${CMAKE_SOURCE_DIR}/builder/src/encode_setting.cpp
+    ${CMAKE_SOURCE_DIR}/builder/src/open_converter.cpp
+    ${CMAKE_SOURCE_DIR}/common/src/encode_parameter.cpp
+    ${CMAKE_SOURCE_DIR}/common/src/info.cpp
+    ${CMAKE_SOURCE_DIR}/common/src/process_parameter.cpp
+    ${CMAKE_SOURCE_DIR}/common/src/stream_context.cpp
+    ${CMAKE_SOURCE_DIR}/engine/src/converter.cpp
+    ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder.cpp
+    ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
 )
 
+# Add header files
+set(HEADERS
+    ${CMAKE_SOURCE_DIR}/builder/include/encode_setting.h
+    ${CMAKE_SOURCE_DIR}/builder/include/open_converter.h
+    ${CMAKE_SOURCE_DIR}/common/include/encode_parameter.h
+    ${CMAKE_SOURCE_DIR}/common/include/info.h
+    ${CMAKE_SOURCE_DIR}/common/include/process_parameter.h
+    ${CMAKE_SOURCE_DIR}/common/include/stream_context.h
+    ${CMAKE_SOURCE_DIR}/engine/include/converter.h
+    ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder.h
+    ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_bmf.h
+)
+
+# Add UI files
+set(UI_FILES
+    ${CMAKE_SOURCE_DIR}/builder/src/encode_setting.ui
+    ${CMAKE_SOURCE_DIR}/builder/src/open_converter.ui
+)
+
+# Add resource files
+set(RESOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/resources/lang.qrc
+)
+
+# Handle MOC, UIC, and RCC (Qt build steps)
+# Automatically handle UI files using UIC
+#qt_wrap_ui(UI_HEADERS ${UI_FILES})
+# qt_add_resources(RESOURCE_OBJECTS ${RESOURCE_FILES})
+# qt_wrap_cpp(MOC_HEADERS ${HEADERS})
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(OpenConverterCmake
+    qt_add_executable(OpenConverter
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+        ${SOURCES} ${UI_FILES} ${RESOURCE_FILES} ${HEADERS}
     )
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET OpenConverterCmake APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET OpenConverter APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(OpenConverterCmake SHARED
+        add_library(OpenConverter SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(OpenConverterCmake
+        add_executable(OpenConverter
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-# target_link_libraries(OpenConverterCmake PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+# target_link_libraries(OpenConverter PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-target_link_libraries(OpenConverterCmake
+#target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}_autogen/include)
+
+
+target_link_libraries(OpenConverter
     PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
     avformat
     avcodec
@@ -129,9 +130,9 @@ target_link_libraries(OpenConverterCmake
 )
 
 # Set translation files
-set(TRANSLATIONS lang_chinese.ts)
+set(TRANSLATIONS ${CMAKE_SOURCE_DIR}/resources/lang_chinese.ts)
 
-set_target_properties(OpenConverterCmake PROPERTIES
+set_target_properties(OpenConverter PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -139,12 +140,12 @@ set_target_properties(OpenConverterCmake PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS OpenConverterCmake
+install(TARGETS OpenConverter
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(OpenConverterCmake)
+    qt_finalize_executable(OpenConverter)
 endif()

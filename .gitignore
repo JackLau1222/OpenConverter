@@ -1,5 +1,6 @@
 open_converter.pro.user
-build*
+build-*
 .vscode
 .DS_Store
 ./src/.DS_Store
+src/CMakeLists.txt.user

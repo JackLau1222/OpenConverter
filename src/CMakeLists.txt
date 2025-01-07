@@ -16,7 +16,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(PkgConfig REQUIRED)
 
 # Find the FFmpeg libraries (avcodec, avformat, avutil)
-pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil)
+pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavfilter libavutil libswresample libswscale)
 
 ## Use pkg-config to find x264
 #pkg_check_modules(X264 REQUIRED x264)
@@ -40,7 +40,7 @@ include_directories(
 )
 
 link_directories(
-    ${FFMPEG_LIBRARIES}
+    ${FFMPEG_LIBRARY_DIRS}
     ${BMF_ROOT_PATH}/lib
 )
 
@@ -100,13 +100,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 else()
     if(ANDROID)
         add_library(OpenConverter SHARED
-            ${PROJECT_SOURCES}
+            ${SOURCES} ${UI_FILES} ${RESOURCE_FILES} ${HEADERS}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(OpenConverter
-            ${PROJECT_SOURCES}
+            ${SOURCES} ${UI_FILES} ${RESOURCE_FILES} ${HEADERS}
         )
     endif()
 endif()

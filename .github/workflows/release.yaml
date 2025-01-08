@@ -10,9 +10,9 @@ on:
   # push:
   #   branches:
   #     - 'main'
-  pull_request:
-    branches:
-      - '**'
+  # pull_request:
+  #   branches:
+  #     - '**'
 
 jobs:
   build:
@@ -95,6 +95,8 @@ jobs:
         cp /usr/local/lib/libavfilter.so.8 src/build/lib
         cp /usr/local/lib/libpostproc.so.56 src/build/lib
         cp bmf/output/bmf/lib/libbuiltin_modules.so src/build/lib
+        touch src/build/activate_env.sh
+        echo export LD_LIBRARY_PATH="$BASEDIR/lib" >> src/build/activate_env.sh
 
     # Step to package the build directory
     - name: Create tar.gz package

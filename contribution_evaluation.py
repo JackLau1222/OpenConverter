@@ -3,11 +3,11 @@ from collections import defaultdict
 import requests
 import lizard
 import os
-
+import tempfile
 
 
 # GitHub API 配置
-GITHUB_TOKEN = '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'
+GITHUB_TOKEN = ''
 REPO_OWNER = 'JackLau1222'
 REPO_NAME = 'OpenConverter'
 PR_NUMBER = 36  # PR号码
@@ -21,15 +21,20 @@ def get_pr_files(owner, repo, pr_number):
     else:
         print(f"Error fetching PR files: {response.status_code}, {response.text}")
         return []
-def get_function_complexity(file_content):
+def analyze_complexity_from_string(file_content):
     try:
-        # 使用 lizard 库计算函数的圈复杂度
-        result = lizard.analyze_file(file_content)
+        # 创建一个临时文件并将内容写入该文件
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cpp') as temp_file:
+            temp_file.write(file_content)
+            temp_file_path = temp_file.name
 
-        if result.function_list is None:
-            return []
+        # 使用 lizard 分析临时文件
+        result = lizard.analyze_file(temp_file_path)
 
-        # 存储结果的列表
+        # 输出文件分析结果
+        print(f"File analyzed: {temp_file_path}")
+        print(f"Number of functions: {len(result.function_list)}")
+
         complexity_data = []
         for function in result.function_list:
             complexity_data.append({
@@ -38,7 +43,14 @@ def get_function_complexity(file_content):
                 "lines": function.length
             })
 
-        return complexity_data  # 确保返回完整列表
+            print(f"Function: {function.name}")
+            print(f"  Complexity: {function.cyclomatic_complexity}")
+            print(f"  Lines: {function.length}")
+
+        # 删除临时文件
+        os.remove(temp_file_path)
+
+        return complexity_data
 
     except Exception as e:
         print(f"Error analyzing complexity: {e}")
@@ -101,7 +113,7 @@ def calculate_pr_workload(changes, owner, repo):
             continue
 
         # 获取文件函数的复杂度
-        function_complexity = get_function_complexity(file_content)
+        function_complexity = analyze_complexity_from_string(file_content)
 
         # 假设修改涉及函数复杂度与文件层级
         for func_data in function_complexity:

@@ -84,7 +84,7 @@ def get_pr_info(owner, repo, pr_number):
 # Get changed files in PR
 def get_pr_files(owner, repo, pr_number):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
-    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
@@ -100,7 +100,7 @@ def get_pr_files(owner, repo, pr_number):
 # Get the history records of a file
 def get_file_commits(owner, repo, sha, file_path):
     url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
-    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
@@ -119,7 +119,7 @@ def get_file_commits(owner, repo, sha, file_path):
 def get_file_content(owner, repo, file_path, sha):
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
     headers = {
-        "Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}",
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when getting origin file content
     }
     try:
@@ -244,9 +244,9 @@ def get_function_complexity(file_content, level, patch, file_name):
                 'changed': modified_lines,
             })
 
-        if file_name.endswith(DEFAULT_CPP_ENDS_WITH_FILE):
+        if os.path.splitext(file_name)[1] in DEFAULT_CPP_ENDS_WITH_FILE:
             result = analyse_cpp_file(file_content)
-        elif file_name.endswith(DEFAULT_PYTHON_ENDS_WITH_FILE):
+        elif os.path.splitext(file_name)[1] in DEFAULT_PYTHON_ENDS_WITH_FILE:
             result = analyse_python_file(file_content)
         else:
             return []
@@ -344,7 +344,7 @@ def calculate_pr_workload(changes):
         file_content = change['file_content']
 
         changedLine += additions + deletions
-        if  not filename.endswith(DEFAULT_CPP_ENDS_WITH_FILE) and  not filename.endswith(DEFAULT_PYTHON_ENDS_WITH_FILE):
+        if not os.path.splitext(filename)[1] in DEFAULT_CPP_ENDS_WITH_FILE and not os.path.splitext(filename)[1] in DEFAULT_PYTHON_ENDS_WITH_FILE:
             workload += (additions + deletions) * DEFAULT_NOT_ANALYSE_COMPLEXITY * 1 * 0.01
             continue
 
@@ -376,7 +376,7 @@ def main():
     parser.add_argument("--default-not-analyse-complexity", type=int, default=1, help="Default not analyse complexity")
     parser.add_argument("--default-cpp-ends-with-file", default=".cpp,.h,.hpp,.m,.mm,.cc",
                         help="Default C++ ends with file")
-    parser.add_argument("--default-python-ends-with-file", default=".py", help="Default Python ends with file")
+    parser.add_argument("--default-python-ends-with-file", default=".py,", help="Default Python ends with file")
     parser.add_argument("--api-base-url", default="https://api.github.com", help="API base URL")
     parser.add_argument("--sleep-time", type=int, default=0, help="Sleep time between requests")
 
@@ -391,8 +391,8 @@ def main():
     PR_NUMBER = args.pr_number
     DEFAULT_CODE_LEVEL = args.default_code_level
     DEFAULT_NOT_ANALYSE_COMPLEXITY = args.default_not_analyse_complexity
-    DEFAULT_CPP_ENDS_WITH_FILE = args.default_cpp_ends_with_file
-    DEFAULT_PYTHON_ENDS_WITH_FILE = args.default_python_ends_with_file
+    DEFAULT_CPP_ENDS_WITH_FILE =  args.default_cpp_ends_with_file.split(',')
+    DEFAULT_PYTHON_ENDS_WITH_FILE = args.default_python_ends_with_file.split(',')
     API_BASE_URL = args.api_base_url
     SLEEP_TIME = args.sleep_time
 

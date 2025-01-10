@@ -1,46 +1,43 @@
-from collections import defaultdict
 
 import requests
 import lizard
 import os
 import tempfile
 from enum import Enum
-
-# GitHub API 配置
+import re
+# GitHub API configuration
 GITHUB_TOKEN = ''
 REPO_OWNER = 'JackLau1222'
 REPO_NAME = 'OpenConverter'
-PR_NUMBER = 36  # PR号码
+PR_NUMBER = 36  # Your PR number here
 
-
-
-
-# 定义枚举类型，表示不同的难度等级
-class ComplexityLevel(Enum):
+# declare some enum classes to represent complexity weight
+class ComplexityWeight(Enum):
     TRANSCODER = 5
     ENGINE = 4
     BUILDER = 3
     COMMON = 2
     SIMPLE = 1
-# 根据文件路径判断文件所属的目录层级
+
+# analyse the complexity weight of file by its path
 def get_complexity_weight(filename):
-    # 提取文件所在的目录
+    # take the path of file
     file_dir = os.path.dirname(filename)
 
-    # 根据目录结构设置复杂度
+    # set complexity weight by file path
     if 'transcoder' in file_dir:
-        return ComplexityLevel.TRANSCODER.value
+        return ComplexityWeight.TRANSCODER.value
     elif 'engine' in file_dir:
-        return ComplexityLevel.ENGINE.value
+        return ComplexityWeight.ENGINE.value
     elif 'builder' in file_dir:
-        return ComplexityLevel.BUILDER.value
+        return ComplexityWeight.BUILDER.value
     elif 'common' in file_dir:
-        return ComplexityLevel.COMMON.value
+        return ComplexityWeight.COMMON.value
     else:
-        return ComplexityLevel.SIMPLE.value
+        return ComplexityWeight.SIMPLE.value
 
 
-# 请求 GitHub PR 文件变更信息
+# get some information of changed file
 def get_pr_files(owner, repo, pr_number):
     url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files'
     headers = {'Authorization': f'token {GITHUB_TOKEN}'}
@@ -50,35 +47,41 @@ def get_pr_files(owner, repo, pr_number):
     else:
         print(f"Error fetching PR files: {response.status_code}, {response.text}")
         return []
-def analyze_complexity_from_string(file_content,level):
+
+
+# analyze the complexity of file by its content
+def get_function_complexity(file_content,level):
     try:
-        # 创建一个临时文件并将内容写入该文件
+        # create a temporary file to store the file content
         with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cpp') as temp_file:
             temp_file.write(file_content)
             temp_file_path = temp_file.name
 
-        # 使用 lizard 分析临时文件
+        # use lizard to analyze the file
         result = lizard.analyze_file(temp_file_path)
 
-        # 输出文件分析结果
+        # analyse the result of file
         print(f"File analyzed: {temp_file_path}")
         print(f"Number of functions: {len(result.function_list)}")
         print(f"Complexity Level: {level}")
 
         complexity_data = []
+        # analyse the result of each function
         for function in result.function_list:
             complexity_data.append({
                 "function_name": function.name,
                 "complexity": function.cyclomatic_complexity,
                 "lines": function.length,
+                "start_line": function.start,  # function start line
+                "end_line": function.end,  # function end line
             })
 
             print(f"Function: {function.name}")
             print(f"  Complexity: {function.cyclomatic_complexity}")
             print(f"  Lines: {function.length}")
-            print(f"ComplexityLevel : {level}")
+            print(f"  ComplexityWeight : {level}")
 
-        # 删除临时文件
+        # delete the temporary file
         os.remove(temp_file_path)
 
         return complexity_data
@@ -87,14 +90,14 @@ def analyze_complexity_from_string(file_content,level):
         print(f"Error analyzing complexity: {e}")
         return []
 
-# 获取文件内容
+# get the content of file by its url
 def get_file_content(contents_url):
     headers = {
         "Authorization": f'token {GITHUB_TOKEN}',
         "Accept": "application/vnd.github.raw+json",
     }
 
-    # 发起 GET 请求
+    # post request to get the file content
 
     url = f'{contents_url}'
     response = requests.get(url, headers=headers)
@@ -103,8 +106,47 @@ def get_file_content(contents_url):
     else:
         print(f"Error fetching file content: {response.status_code}, {response.text}")
         return ""
+# extract changed functions from patch
+def extract_changed_functions(patch, file_content,file_name):
+    added_functions = []
+    modified_functions = []
 
-# 计算每个文件的改动行数
+    added_lines = []
+    removed_lines = []
+
+    # analyse the patch
+    lines = patch.splitlines()
+
+    for line in lines:
+        if line.startswith('+'):
+            added_lines.append(line[1:])
+        elif line.startswith('-'):
+            removed_lines.append(line[1:])
+
+    # get the added and removed lines
+    added_lines_set = set(added_lines)
+    removed_lines_set = set(removed_lines)
+
+    # get the function complexity
+    function_complexity = get_function_complexity(file_content,file_name)
+
+    # confirm that the function is changed
+    for function in function_complexity:
+        start_line = function["start_line"]
+        end_line = function["end_line"]
+
+        # if the function is changed
+        if any(line in added_lines_set or line in removed_lines_set for line in range(start_line, end_line + 1)):
+            # analyse the function
+            if any(line in added_lines_set for line in range(start_line, end_line + 1)):
+                added_functions.append(function)
+            else:
+                modified_functions.append(function)
+
+    return added_functions, modified_functions
+
+
+# calculate the changes of files
 def calculate_changes(files):
     changes = []
 
@@ -124,13 +166,13 @@ def calculate_changes(files):
             'deletions': deletions,
             'contents_url':contents_url,
             'patch': patch,
-            'complexity_weight': complexity_weight , # 添加复杂度权重
+            'complexity_weight': complexity_weight,
         })
 
     return changes
 
-# 计算 PR 的工作量评估
-def calculate_pr_workload(changes, owner, repo):
+# calculate the workload of PR
+def calculate_pr_workload(changes):
     workload = 0
 
     for change in changes:
@@ -139,40 +181,39 @@ def calculate_pr_workload(changes, owner, repo):
         additions = change['additions']
         deletions = change['deletions']
         complexity_weight = change['complexity_weight']
-        # 跳过非 C++ 文件
+        # skip non-C++ files
         if not filename.endswith(('.cpp', '.h')):
             continue
-        # 获取文件内容
+        # get the content of file by its url
         file_content = get_file_content(change['contents_url'])
-
         if not file_content:
             continue
+        # extract changed functions from patch
+        added_functions, modified_functions = extract_changed_functions(patch, file_content,filename)
 
-        # 分析文件中函数的复杂度
-        function_complexity = analyze_complexity_from_string(file_content, get_complexity_weight(filename))
+        # set the workload
+        for function in added_functions + modified_functions:
+            function_name = function["function_name"]
+            complexity = function["complexity"]
 
-
-        # 对函数的复杂度进行评估，这里简单地计算函数的复杂度值
-        for func_data in function_complexity:
-            complexity_value = func_data['complexity']
-            # 假设为文件的层级、代码行数等设定权重
-            workload += (additions + deletions) * complexity_value * complexity_weight
+            # workload calculation: (additions + deletions) * complexity * complexity_weight
+            workload += (additions + deletions) * complexity * complexity_weight
 
     return workload
 
 def main():
-    # 获取 PR 文件变更信息
+    # get the files of PR
     files = get_pr_files(REPO_OWNER, REPO_NAME, PR_NUMBER)
 
     if not files:
         print("No files found in the PR.")
         return
 
-    # 计算文件的改动行数
+    # calculate the changes of files
     changes = calculate_changes(files)
 
-    # 计算 PR 的工作量
-    workload = calculate_pr_workload(changes, REPO_OWNER, REPO_NAME)
+    # calculate the workload of PR
+    workload = calculate_pr_workload(changes)
 
     print(f"Estimated workload for PR {PR_NUMBER}: {workload}")
 

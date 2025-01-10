@@ -1,15 +1,18 @@
-
 import requests
 import lizard
 import os
+import bisect
 import tempfile
 from enum import Enum
 import re
+
 # GitHub API configuration
-GITHUB_TOKEN = ''
-REPO_OWNER = 'JackLau1222'
-REPO_NAME = 'OpenConverter'
-PR_NUMBER = 29  # Your PR number here
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN') or ''
+REPO_OWNER = os.getenv('REPO_OWNER') or 'JackLau1222'
+REPO_NAME = os.getenv('REPO_NAME') or 'OpenConverter'
+PR_NUMBER = os.getenv('PR_NUMBER') or 36
+DEFAULT_COMPLEXITY_WEIGHT = os.getenv('DEFAULT_COMPLEXITY_WEIGHT') or 1
+DEFAULT_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.cpp', '.h', '.hpp', '.m', '.mm', '.cc')
 
 # declare some enum classes to represent complexity weight
 class ComplexityWeight(Enum):
@@ -17,7 +20,8 @@ class ComplexityWeight(Enum):
     ENGINE = 4
     BUILDER = 3
     COMMON = 2
-    SIMPLE = 1
+    DEFAULT = DEFAULT_COMPLEXITY_WEIGHT
+
 
 # analyse the complexity weight of file by its path
 def get_complexity_weight(filename):
@@ -34,7 +38,7 @@ def get_complexity_weight(filename):
     elif 'common' in file_dir:
         return ComplexityWeight.COMMON.value
     else:
-        return ComplexityWeight.SIMPLE.value
+        return ComplexityWeight.DEFAULT.value
 
 
 # get some information of changed file
@@ -47,6 +51,8 @@ def get_pr_files(owner, repo, pr_number):
     else:
         print(f"Error fetching PR files: {response.status_code}, {response.text}")
         return []
+
+
 # get the content of file by its url
 def get_file_content(contents_url):
     headers = {
@@ -64,30 +70,45 @@ def get_file_content(contents_url):
         print(f"Error fetching file content: {response.status_code}, {response.text}")
         return ""
 
+
 # analyze the complexity of file by its content
-def get_function_complexity(file_content,level,patch):
+def get_function_complexity(file_content, level, patch, file_name):
     try:
-        # 初始化结果列表
-        added_ranges = []
-        removed_ranges = []
+        complexity_data = []
 
-        # 按行分割patch
-        patch_lines = patch.splitlines()
+        changes = []
+        # match diff lines
+        diff_line_pattern = r'@@ -(\d+),(\d+) \+(\d+),(\d+) @@'
+        lines = patch.split('\n')
+        # match the range of lines
+        match = re.search(diff_line_pattern, patch)
+        if not match:
+            return changes
+        # extract data of lines
+        old_start, old_count, new_start, new_count = map(int, match.groups())
+        # record changed lines
+        modified_lines = []
+        count = old_start - 1
+        # analyse the  changed lines
+        for line in lines:
+            count += 1
+            if line.startswith('@@'):
+                # step into when have more changed result in a file
+                match = re.search(diff_line_pattern, line)
+                if not match:
+                    return changes
+                # extract data of lines
+                a, b, c, d = map(int, match.groups())
+                count = a - 1
 
-        # 遍历每一行，查找 @@ 中的行号范围
-        for line in patch_lines:
-            # 匹配 @@ -start,count +start,count @@ 格式
-            match = re.match(r'@@ -(\d+),(\d+) \+(\d+),(\d+) @@', line)
-            if match:
-                old_start, old_count, new_start, new_count = map(int, match.groups())
+            if line.startswith('-') or line.startswith('+'):
+                modified_lines.append(count)
 
-                # 计算删除的行号范围 (旧文件中的)
-                old_end = old_start + old_count - 1
-                removed_ranges.append((old_start, old_end))
-
-                # 计算添加的行号范围 (新文件中的)
-                new_end = new_start + new_count - 1
-                added_ranges.append((new_start, new_end))
+        # record changed lines
+        if modified_lines:
+            changes.append({
+                'changed': modified_lines,
+            })
 
         # create a temporary file to store the file content
         with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cpp') as temp_file:
@@ -98,39 +119,31 @@ def get_function_complexity(file_content,level,patch):
         result = lizard.analyze_file(temp_file_path)
 
         # analyse the result of file
-        print(f"File analyzed: {temp_file_path}")
+        print(f"File path: {file_name}")
+        print(f"File changed lines : {len(modified_lines)}")
         print(f"Number of functions: {len(result.function_list)}")
         print(f"Complexity Level: {level}")
 
-        complexity_data = []
         # analyse the result of each function
         for function in result.function_list:
-            complexity_data.append({
-                "function_name": function.name,
-                "complexity": function.cyclomatic_complexity,
-                "lines": function.length,
-                'start_line': function.start_line,  # 函数起始行
-                'end_line': function.end_line,  # 函数结束行
-            })
-            # 检查添加的行号区间是否与函数的行号范围重叠
-            for start, end in added_ranges:
-                if (function.start_line >= start and function.start_line <= end) or \
-                        (function.end_line >= start and function.end_line <= end) or \
-                        (start >= function.start_line and end <= function.end_line):
-                    print(f"  Function: {function.name}")
-                    print(f"  Complexity: {function.cyclomatic_complexity}")
-                    print(f"  Lines: {function.length}")
-                    print(f"  ComplexityWeight : {level}")
-
-            # 检查删除的行号区间是否与函数的行号范围重叠
-            for start, end in removed_ranges:
-                if (function.start_line >= start and function.start_line <= end) or \
-                        (function.end_line >= start and function.end_line <= end) or \
-                        (start >= function.start_line and end <= function.end_line):
-                    print(f"  Function: {function.name}")
-                    print(f"  Complexity: {function.cyclomatic_complexity}")
-                    print(f"  Lines: {function.length}")
-                    print(f"  ComplexityWeight : {level}")
+            for change in changes:
+                start = function.start_line
+                end = function.end_line
+                c = change['changed']
+                start_pos = bisect.bisect_left(c, start)
+                if start_pos < len(c) and c[start_pos] <= end:
+                    complexity_data.append({
+                        "function_name": function.name,
+                        "complexity": function.cyclomatic_complexity,
+                        "lines": function.length,
+                        'start_line': function.start_line,
+                        'end_line': function.end_line,
+                    })
+                    print(f"  ——The information of changed function——")
+                    print(f"  1.Function: {function.name}")
+                    print(f"  2.Complexity: {function.cyclomatic_complexity}")
+                    print(f"  3.Lines: {function.length}")
+                    print(f"  4.ComplexityWeight : {level}")
 
         # delete the temporary file
         os.remove(temp_file_path)
@@ -140,8 +153,6 @@ def get_function_complexity(file_content,level,patch):
     except Exception as e:
         print(f"Error analyzing complexity: {e}")
         return []
-
-
 
 
 # calculate the changes of files
@@ -155,19 +166,22 @@ def calculate_changes(files):
         deletions = file['deletions']
         contents_url = file['contents_url']
 
-        # 获取该文件的复杂度权重
+        # get the  complexity weight of the file
         complexity_weight = get_complexity_weight(filename)
-
+        # skip non-C++ files
+        if not filename.endswith(DEFAULT_ENDS_WITH_FILE):
+            complexity_weight = ComplexityWeight.DEFAULT.value
         changes.append({
             'filename': filename,
             'additions': additions,
             'deletions': deletions,
-            'contents_url':contents_url,
+            'contents_url': contents_url,
             'patch': patch,
             'complexity_weight': complexity_weight,
         })
 
     return changes
+
 
 # calculate the workload of PR
 def calculate_pr_workload(changes):
@@ -179,17 +193,20 @@ def calculate_pr_workload(changes):
         additions = change['additions']
         deletions = change['deletions']
         complexity_weight = change['complexity_weight']
-        # skip non-C++ files
-        if not filename.endswith(('.cpp', '.h')):
-            continue
+
         # get the content of file by its url
         file_content = get_file_content(change['contents_url'])
         if not file_content:
             continue
-        function_complexity = get_function_complexity(file_content, get_complexity_weight(filename),patch)
+
+        function_complexity = []
+        if filename.endswith(DEFAULT_ENDS_WITH_FILE):
+            function_complexity = get_function_complexity(file_content, get_complexity_weight(filename), patch,
+                                                          filename)
+        else:
+            function_complexity.append({'complexity': 1})
         # set the workload
         for function in function_complexity:
-            function_name = function["function_name"]
             complexity = function["complexity"]
 
             # workload calculation: (additions + deletions) * complexity * complexity_weight
@@ -197,10 +214,10 @@ def calculate_pr_workload(changes):
 
     return workload
 
+
 def main():
     # get the files of PR
     files = get_pr_files(REPO_OWNER, REPO_NAME, PR_NUMBER)
-
     if not files:
         print("No files found in the PR.")
         return
@@ -208,8 +225,8 @@ def main():
     changes = calculate_changes(files)
     # calculate the workload of PR
     workload = calculate_pr_workload(changes)
-
     print(f"Estimated workload for PR {PR_NUMBER}: {workload}")
+
 
 if __name__ == '__main__':
     main()

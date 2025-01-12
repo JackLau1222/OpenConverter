@@ -6,12 +6,14 @@ import requests
 import lizard
 
 # GitHub API configuration
-TOKEN = os.getenv('GITHUB_TOKEN') or ''
+TOKEN = os.getenv('TOKEN') or ''
 OWNER = os.getenv('OWNER') or 'JackLau1222'
 REPO = os.getenv('REPO') or 'OpenConverter'
-PR_NUMBER = os.getenv('PR_NUMBER') or 16
+PR_NUMBER = os.getenv('PR_NUMBER') or 37
 DEFAULT_CODE_LEVEL = os.getenv('DEFAULT_CODE_LEVEL') or 1
-DEFAULT_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.cpp', '.h', '.hpp', '.m', '.mm', '.cc')
+DEFAULT_CPP_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.cpp', '.h', '.hpp', '.m', '.mm', '.cc')
+DEFAULT_PYTHON_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.py',)
+DEFAULT_NOT_ANALYSE_COMPLEXITY = os.getenv('DEFAULT_NOT_ANALYSE_COMPLEXITY') or 1
 API_BASE_URL = "https://api.github.com"
 
 
@@ -43,57 +45,86 @@ def get_code_level(filename):
     else:
         return CodeLevel.DEFAULT
 
-
-# send request by GitHub API
+# Send request by GitHub API
 def send_request(url, headers):
     response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
+    return response
+
+
+# get basic information of PR that contains SHA in the origin branch
+def get_pr_info(owner, repo, pr_number):
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
+    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    try:
+        response = send_request(url, headers)
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 404:
+            print(f"PR {pr_number} not found.")
+            return None
+        else:
+            print(f"Error fetching PR info: {response.status_code}, {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error during request: {e}")
         return None
 
 
-# get basic information of PR that contain SHA in origin branch
-def get_pr_info(owner, repo, pr_number):
-    url = f"{API_BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
-    return send_request(url, {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json"})
-
-
-# get changed file in PR
+# Get changed files in PR
 def get_pr_files(owner, repo, pr_number):
-    url = f"{API_BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}/files"
-    return send_request(url, {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json"})
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
+    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    try:
+        response = send_request(url, headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error fetching PR files: {response.status_code}, {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error during request: {e}")
+        return None
 
 
-# get the history records of file
+# Get the history records of a file
 def get_file_commits(owner, repo, sha, file_path):
-    url = f"{API_BASE_URL}/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
-    return send_request(url, {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json"})
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
+    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    try:
+        response = send_request(url, headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error fetching commit history for {file_path} and branch {sha}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error during request: {e}")
+        return None
 
 
-# get content in file
+# Get content in file
 def get_file_content(owner, repo, file_path, sha):
-    url = f"{API_BASE_URL}/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
     headers = {
-        "Authorization": f"token {TOKEN}",
-        "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when you get origin file content
+        "Authorization": f"TOKEN {TOKEN}",
+        "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when getting origin file content
     }
-    return send_request(url, headers)
-# get file content (origin content)
-def get_file_content(owner, repo, file_path, sha):
-    url = f"{API_BASE_URL}/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
-    headers = {
-        "Authorization": f"token {TOKEN}",
-        "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when you get origin file content
-    }
-    return send_request(url, headers)
+    try:
+        response = send_request(url, headers)
+        if response.status_code == 200:
+            return response.text
+        else:
+            print(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error during request: {e}")
+        return None
 
 
 # get origin files from pr
 def get_original_files_from_pr(owner, repo, pr_number):
     # get data from PR
-    pr_info = get_pr_info(owner, repo, pr_number).json()
+    pr_info = get_pr_info(owner, repo, pr_number)
     if not pr_info:
         return []
 
@@ -112,17 +143,21 @@ def get_original_files_from_pr(owner, repo, pr_number):
 
     original_files = []
 
-    for file_info in pr_files.json():
+    for file_info in pr_files:
         file_path = file_info["filename"]
 
         # get the earliest history record records of file in source branch and find the earliest commit
-        commits = get_file_commits(owner, repo, head_sha, file_path).json()
+        commits = get_file_commits(owner, repo, head_ref, file_path)
         if not commits or len(commits) == 0:
+            # new file in source branch but not merge
+            original_files.append({
+                "file_path": file_path,
+                "original_content": ''
+            })
             continue
-
         earliest_commit_sha = commits[-1]['sha']
         # get the content of file in source branch
-        file_content = get_file_content(owner, repo, file_path, earliest_commit_sha).text
+        file_content = get_file_content(owner, repo, file_path, earliest_commit_sha)
         if file_content:
             original_files.append({
                 "file_path": file_path,
@@ -133,6 +168,30 @@ def get_original_files_from_pr(owner, repo, pr_number):
 
 
 # Analyze complexity by file content
+def analyse_cpp_file(file_content):
+    # Create a temporary file to store the file content
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cpp') as temp_file:
+        temp_file.write(file_content)
+        temp_file_path = temp_file.name
+    # Use lizard to analyze the file
+    result = lizard.analyze_file(temp_file_path)
+    # Delete the temporary file
+    os.remove(temp_file_path)
+    return result
+
+
+def analyse_python_file(file_content):
+    # Create a temporary file to store the file content
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.py') as temp_file:
+        temp_file.write(file_content)
+        temp_file_path = temp_file.name
+    # Use lizard to analyze the file
+    result = lizard.analyze_file(temp_file_path)
+    # Delete the temporary file
+    os.remove(temp_file_path)
+    return result
+
+
 def get_function_complexity(file_content, level, patch, file_name):
     try:
         complexity_data = []
@@ -171,13 +230,12 @@ def get_function_complexity(file_content, level, patch, file_name):
                 'changed': modified_lines,
             })
 
-        # Create a temporary file to store the file content
-        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cpp') as temp_file:
-            temp_file.write(file_content)
-            temp_file_path = temp_file.name
-
-        # Use lizard to analyze the file
-        result = lizard.analyze_file(temp_file_path)
+        if file_name.endswith(DEFAULT_CPP_ENDS_WITH_FILE):
+            result = analyse_cpp_file(file_content)
+        elif file_name.endswith(DEFAULT_PYTHON_ENDS_WITH_FILE):
+            result = analyse_python_file(file_content)
+        else:
+            return []
 
         # Analyze the result of file
         print(f"File path: {file_name}")
@@ -193,6 +251,17 @@ def get_function_complexity(file_content, level, patch, file_name):
                 c = change['changed']
                 start_pos = bisect.bisect_left(c, start)
                 if start_pos < len(c) and c[start_pos] <= end:
+                    # analyse different level according to different function cyclomatic complexity
+                    if function.cyclomatic_complexity <= 5:
+                        function.cyclomatic_complexity = 1
+                    elif function.cyclomatic_complexity <= 10:
+                        function.cyclomatic_complexity = 2
+                    elif function.cyclomatic_complexity <= 20:
+                        function.cyclomatic_complexity = 3
+                    elif function.cyclomatic_complexity <= 50:
+                        function.cyclomatic_complexity = 4
+                    else:
+                        function.cyclomatic_complexity = 5
                     complexity_data.append({
                         "function_name": function.name,
                         "complexity": function.cyclomatic_complexity,
@@ -205,9 +274,6 @@ def get_function_complexity(file_content, level, patch, file_name):
                     print(f"  2.Complexity: {function.cyclomatic_complexity}")
                     print(f"  3.Lines: {function.length}")
                     print(f"  4.CodeLevel : {level}")
-
-        # Delete the temporary file
-        os.remove(temp_file_path)
 
         return complexity_data
 
@@ -230,12 +296,9 @@ def calculate_changes(files):
         sha = file['sha']  # We need to use the SHA to get the original content
         # Get the complexity weight of the file
         code_level = get_code_level(filename)
-        # Skip non-C++ files
-        if not filename.endswith(DEFAULT_ENDS_WITH_FILE):
-            code_level = CodeLevel.DEFAULT
         # determine whether there are corresponding attributes in the object
-        if 'previous_filename' in file :
-            filename = file['previous_filename']
+        # if 'previous_filename' in file:
+        #     filename = file['previous_filename']
         for original_file in original_files:
             if original_file['file_path'] == filename:
                 changes.append({
@@ -248,6 +311,7 @@ def calculate_changes(files):
                     'sha': sha,
                     'file_content': original_file['original_content']
                 })
+                original_files.remove(original_file)
 
     return changes
 
@@ -255,7 +319,7 @@ def calculate_changes(files):
 # Calculate the workload of PR
 def calculate_pr_workload(changes):
     workload = 0
-
+    changedLine = 0
     for change in changes:
         filename = change['filename']
         patch = change['patch']
@@ -264,30 +328,31 @@ def calculate_pr_workload(changes):
         code_level = change['code_level']
         file_content = change['file_content']
 
-        function_complexity = []
+        changedLine += additions + deletions
+        if  not filename.endswith(DEFAULT_CPP_ENDS_WITH_FILE) and  not filename.endswith(DEFAULT_PYTHON_ENDS_WITH_FILE):
+            workload += (additions + deletions) * DEFAULT_NOT_ANALYSE_COMPLEXITY * 1 * 0.01
+            continue
 
-        if not file_content:
-            print(f"Error: Could not fetch the original content of {filename}")
-            function_complexity.append({'complexity': 1})
-        # Analyze the complexity using the original content
-        if filename.endswith(DEFAULT_ENDS_WITH_FILE):
-            function_complexity = get_function_complexity(file_content, code_level, patch, filename)
-        else:
-            function_complexity.append({'complexity': 1})
+        if not file_content :
+            print(f"This PR add a new file but not merged:{filename}")
+            workload += (additions + deletions) * DEFAULT_NOT_ANALYSE_COMPLEXITY * code_level * 0.01
+            continue
+        function_complexity = get_function_complexity(file_content, code_level, patch, filename)
+
+
         # Calculate workload
         for function in function_complexity:
             complexity = function["complexity"]
-
             # Workload calculation: (additions + deletions) * complexity * code_level
-            workload += (additions + deletions) * complexity * code_level
+            workload += (additions + deletions) * complexity * code_level * 0.01
 
-    return workload
+    return workload, changedLine
 
 
 # Main function to execute the calculation
 def main():
     # Get the files of the PR
-    files = get_pr_files(OWNER, REPO, PR_NUMBER).json()
+    files = get_pr_files(OWNER, REPO, PR_NUMBER)
     if not files:
         print("No files found in the PR.")
         return
@@ -296,8 +361,9 @@ def main():
     changes = calculate_changes(files)
 
     # Calculate the workload of PR
-    workload = calculate_pr_workload(changes)
-    print(f"Estimated workload for PR {PR_NUMBER}: {workload}")
+    workload, changedLine = calculate_pr_workload(changes)
+    print(f"Estimated workload for PR {PR_NUMBER}: {workload:.2f}")
+    print(f"Estimated changedLine for PR {PR_NUMBER}: {changedLine}")
 
 
 if __name__ == '__main__':

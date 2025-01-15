@@ -69,7 +69,7 @@ include_directories(
 )
 
 link_directories(
-    ${FFMPEG_LIBRARIES}
+    ${FFMPEG_LIBRARY_DIRS}
 )
 
 # Add common source files

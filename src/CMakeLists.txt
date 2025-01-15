@@ -148,12 +148,16 @@ target_link_libraries(OpenConverter
 #    avutil
 #    pthread
 #    swresample
-
-    engine
-    bmf_module_sdk 
-    hmp 
-    builtin_modules
 )
+
+if(USE_BMF_TRANSCODER)
+    target_link_libraries(OpenConverter PRIVATE
+        engine
+        bmf_module_sdk
+        hmp
+        builtin_modules
+    )
+endif()
 
 # Set translation files
 set(TRANSLATIONS ${CMAKE_SOURCE_DIR}/resources/lang_chinese.ts)

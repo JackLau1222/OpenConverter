@@ -57,29 +57,17 @@ This Python script analyzes the workload of a GitHub pull request (PR) by examin
 
 ## How to Run the Script
 
-1. **Set Environment Variables**: On Linux/MacOS:
+**Set Environment Variables And Run the Script**:
 
-   ```bash
-   export GITHUB_TOKEN=your_token_here
-   export OWNER=your_repo_owner
-   export REPO=your_repo_name
-   export PR_NUMBER=pr_number_to_analyze
-   ```
+```bash
+python.exe workload_analyzation.py --owner JackLau1222 --repo OpenConverter --pr-number 36 --token yourtoken 
+```
 
-   On Windows (Command Prompt):
+or you can add more parameters 
 
-   ```cmd
-   set PR_NUMBER=123
-   set OWNER=my-org
-   set REPO=my-repo
-   set GITHUB_TOKEN=my-github-token
-   ```
-
-2. **Run the Script**:
-
-   ```bash
-   python workload_analyzation.py
-   ```
+````
+python.exe workload_analyzation.py --owner JackLau1222 --repo OpenConverter --pr-number 36 --token yourtoken --default-code-level 1 --default-not-analyse-complexity 1 --default-cpp-ends-with-file .cpp,.h,.hpp,.m,.mm,.cc --default-python-ends-with-file .py 
+````
 
 ## Script Output
 
@@ -209,31 +197,11 @@ This guide explains how to use the provided Python script to fetch metrics from 
 
 ## How to Run the Script
 
-1. **Set Environment Variables**: On Linux/MacOS:
+**Set Environment Variables And Run the Script**:
 
-   ```bash
-   export PR_NUMBER=123
-   export OWNER=my-org
-   export REPO=my-repo
-   export SONARCLOUD_API_TOKEN=my-sonarcloud-token
-   export OUTPUT_TYPE=ALL
-   ```
-
-   On Windows (Command Prompt):
-
-   ```cmd
-   set PR_NUMBER=123
-   set OWNER=my-org
-   set REPO=my-repo
-   set SONARCLOUD_API_TOKEN=my-sonarcloud-token
-   set OUTPUT_TYPE=ALL
-   ```
-
-2. **Run the Script**:
-
-   ```bash
-   python quality_rate.py
-   ```
+```bash
+python.exe quality_rate.py --owner JackLau1222 --repo OpenConverter --pr-number 36 --token yourtoken --output-type ALL
+```
 
 ## Script Output
 
@@ -291,11 +259,7 @@ You can enhance or format the output further by editing the respective `print` s
 Environment Variables:
 
 ```
-PR_NUMBER=456
-OWNER=my-org
-REPO=my-repo
-SONARCLOUD_API_TOKEN=my-sonarcloud-token
-OUTPUT_TYPE=RATE
+python.exe quality_rate.py --owner JackLau1222 --repo OpenConverter --pr-number 36 --token yourtoken --output-type ALL
 ```
 
 ### Output:

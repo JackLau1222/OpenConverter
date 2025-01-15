@@ -4,17 +4,8 @@ import re
 import bisect
 import requests
 import lizard
-
-# GitHub API configuration
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-OWNER = os.getenv('OWNER')
-REPO = os.getenv('REPO')
-PR_NUMBER = os.getenv('PR_NUMBER')
-DEFAULT_CODE_LEVEL = os.getenv('DEFAULT_CODE_LEVEL') or 1
-DEFAULT_NOT_ANALYSE_COMPLEXITY = os.getenv('DEFAULT_NOT_ANALYSE_COMPLEXITY') or 1
-DEFAULT_CPP_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.cpp', '.h', '.hpp', '.m', '.mm', '.cc')
-DEFAULT_PYTHON_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.py',)
-API_BASE_URL = "https://api.github.com"
+import time
+import argparse
 
 
 # Define the complexity weights (you may need to adjust this to your enum or constants)
@@ -90,6 +81,8 @@ def get_file_commits(owner, repo, sha, file_path):
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
+            # stop a little time to provide time to GitHub
+            time.sleep(SLEEP_TIME)
             return response.json()
         else:
             print(f"Error fetching commit history for {file_path} and branch {sha}\n Error url: {url}")
@@ -109,6 +102,8 @@ def get_file_content(owner, repo, file_path, sha):
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
+            # stop a little time to provide time to GitHub
+            time.sleep(SLEEP_TIME)
             return response.text
         else:
             print(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}\n Error url: {url}")
@@ -248,19 +243,20 @@ def get_function_complexity(file_content, level, patch, file_name):
                 start_pos = bisect.bisect_left(c, start)
                 if start_pos < len(c) and c[start_pos] <= end:
                     # analyse different level according to different function cyclomatic complexity
+                    categorized_complexity = 1
                     if function.cyclomatic_complexity <= 5:
-                        function.cyclomatic_complexity = 1
+                        categorized_complexity = 1
                     elif function.cyclomatic_complexity <= 10:
-                        function.cyclomatic_complexity = 2
+                        categorized_complexity = 2
                     elif function.cyclomatic_complexity <= 20:
-                        function.cyclomatic_complexity = 3
+                        categorized_complexity = 3
                     elif function.cyclomatic_complexity <= 50:
-                        function.cyclomatic_complexity = 4
+                        categorized_complexity = 4
                     else:
-                        function.cyclomatic_complexity = 5
+                        categorized_complexity = 5
                     complexity_data.append({
                         "function_name": function.name,
-                        "complexity": function.cyclomatic_complexity,
+                        "complexity": categorized_complexity,
                         "lines": function.length,
                         'start_line': function.start_line,
                         'end_line': function.end_line,
@@ -346,12 +342,38 @@ def calculate_pr_workload(changes):
 
 # Main function to execute the calculation
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--owner", required=True, help="Repository owner")
+    parser.add_argument("--repo", required=True, help="Repository name")
+    parser.add_argument("--pr-number", type=int, required=True, help="Pull request number")
+    parser.add_argument("--token", required=True, help="GitHub API token")
+    parser.add_argument("--default-code-level", type=int, default=1, help="Default code level")
+    parser.add_argument("--default-not-analyse-complexity", type=int, default=1, help="Default not analyse complexity")
+    parser.add_argument("--default-cpp-ends-with-file", default=".cpp,.h,.hpp,.m,.mm,.cc",
+                        help="Default C++ ends with file")
+    parser.add_argument("--default-python-ends-with-file", default=".py", help="Default Python ends with file")
+    parser.add_argument("--api-base-url", default="https://api.github.com", help="API base URL")
+    parser.add_argument("--sleep-time", type=int, default=0, help="Sleep time between requests")
+
+    args = parser.parse_args()
+
+    global  GITHUB_TOKEN, OWNER, REPO, PR_NUMBER, DEFAULT_CODE_LEVEL, DEFAULT_NOT_ANALYSE_COMPLEXITY, DEFAULT_CPP_ENDS_WITH_FILE, DEFAULT_PYTHON_ENDS_WITH_FILE, API_BASE_URL,SLEEP_TIME
+    GITHUB_TOKEN = args.token
+    OWNER = args.owner
+    REPO = args.repo
+    PR_NUMBER = args.pr_number
+    DEFAULT_CODE_LEVEL = args.default_code_level
+    DEFAULT_NOT_ANALYSE_COMPLEXITY = args.default_not_analyse_complexity
+    DEFAULT_CPP_ENDS_WITH_FILE = args.default_cpp_ends_with_file
+    DEFAULT_PYTHON_ENDS_WITH_FILE = args.default_python_ends_with_file
+    API_BASE_URL = args.api_base_url
+    SLEEP_TIME = args.sleep_time
+
     # Get the files of the PR
     files = get_pr_files(OWNER, REPO, PR_NUMBER)
     if not files:
         print("No files found in the PR.")
         return
-
     # Calculate the changes of files
     changes = calculate_changes(files)
 
@@ -363,7 +385,11 @@ def main():
 
 if __name__ == '__main__':
     try:
+        start_time = time.time()  # Record the start tim
         main()
+        end_time = time.time()  # Record the end time
+        execution_time = end_time - start_time  # Calculate the elapsed time
+        print(f"Script executed in {execution_time:.2f} seconds")
     except Exception as e:
         print(f"Error: {e}")
 

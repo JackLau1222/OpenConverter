@@ -47,7 +47,7 @@ class ProcessParameter : public QObject {
     void update_Time_Required(double result);
 
   private:
-    double processNumber;
+    int64_t processNumber;
 
     double timeRequired;
 };

@@ -16,16 +16,14 @@
 #ifndef TRANSCODER_BMF_H
 #define TRANSCODER_BMF_H
 
-#include "../../common/include/process_parameter.h"
-#include "../../common/include/encode_parameter.h"
-#include "../../common/include/stream_context.h"
+#include "transcoder.h"
 
 #include "builder.hpp"
 #include "nlohmann/json.hpp"
 
 #include <regex>
 
-class TranscoderBMF {
+class TranscoderBMF : public Transcoder {
 public:
     TranscoderBMF(ProcessParameter *processParameter,
                   EncodeParameter *encodeParamter);
@@ -41,9 +39,6 @@ public:
     bmf_sdk::CBytes encoder_callback(bmf_sdk::CBytes input);
 
 private:
-    ProcessParameter *processParameter = NULL;
-
-    EncodeParameter *encodeParameter = NULL;
 
     static int frameNumber;
 

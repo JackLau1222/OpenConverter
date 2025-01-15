@@ -29,7 +29,7 @@ class StreamContext {
     ~StreamContext();
 
     AVFormatContext *fmtCtx = NULL;
-    char *filename = NULL;
+    const char *filename = NULL;
 
     int videoIdx;
     AVStream *videoStream = NULL;

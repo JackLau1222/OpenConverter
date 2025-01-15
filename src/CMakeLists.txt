@@ -14,11 +14,23 @@ option(USE_BMF_TRANSCODER "Use BMF Transcoder" ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-# Ensure pkg-config is found
-find_package(PkgConfig REQUIRED)
+if(WIN32)
+    message(STATUS "This is a Windows platform.")
+    if (DEFINED ENV{FFMPEG_ROOT_PATH})
+        set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
+    else()
+        message(STATUS "FFMPEG_ROOT_PATH environment variable is not set, using default path.")
+        set(FFMPEG_ROOT_PATH "D:/ffmpeg/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1")
+    endif()
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
+    set(FFMPEG_LIBRARIES ${FFMPEG_ROOT_PATH}/lib)
+else()
+    # Ensure pkg-config is found
+    find_package(PkgConfig REQUIRED)
 
-# Find the FFmpeg libraries (avcodec, avformat, avutil)
-pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavfilter libavutil libswresample libswscale)
+    # Find the FFmpeg libraries (avcodec, avformat, avutil)
+    pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavfilter libavutil libswresample libswscale)
+endif()
 
 ## Use pkg-config to find x264
 #pkg_check_modules(X264 REQUIRED x264)
@@ -57,7 +69,7 @@ include_directories(
 )
 
 link_directories(
-    ${FFMPEG_LIBRARY_DIRS}
+    ${FFMPEG_LIBRARIES}
 )
 
 # Add common source files
@@ -71,20 +83,6 @@ list(APPEND SOURCES
     ${CMAKE_SOURCE_DIR}/common/src/stream_context.cpp
     ${CMAKE_SOURCE_DIR}/engine/src/converter.cpp
 )
-
-# Add source files
-# set(SOURCES
-#     ${CMAKE_SOURCE_DIR}/main.cpp
-#     ${CMAKE_SOURCE_DIR}/builder/src/encode_setting.cpp
-#     ${CMAKE_SOURCE_DIR}/builder/src/open_converter.cpp
-#     ${CMAKE_SOURCE_DIR}/common/src/encode_parameter.cpp
-#     ${CMAKE_SOURCE_DIR}/common/src/info.cpp
-#     ${CMAKE_SOURCE_DIR}/common/src/process_parameter.cpp
-#     ${CMAKE_SOURCE_DIR}/common/src/stream_context.cpp
-#     ${CMAKE_SOURCE_DIR}/engine/src/converter.cpp
-#     ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder.cpp
-#     ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
-# )
 
 # Add header files
 set(HEADERS
@@ -142,12 +140,11 @@ endif()
 
 target_link_libraries(OpenConverter
     PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-    ${FFMPEG_LDFLAGS}
-#    avformat
-#    avcodec
-#    avutil
-#    pthread
-#    swresample
+    avformat
+    avcodec
+    avutil
+    pthread
+    swresample
 )
 
 if(USE_BMF_TRANSCODER)

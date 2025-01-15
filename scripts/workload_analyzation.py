@@ -6,14 +6,14 @@ import requests
 import lizard
 
 # GitHub API configuration
-TOKEN = os.getenv('TOKEN') or ''
-OWNER = os.getenv('OWNER') or 'JackLau1222'
-REPO = os.getenv('REPO') or 'OpenConverter'
-PR_NUMBER = os.getenv('PR_NUMBER') or 37
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+OWNER = os.getenv('OWNER')
+REPO = os.getenv('REPO')
+PR_NUMBER = os.getenv('PR_NUMBER')
 DEFAULT_CODE_LEVEL = os.getenv('DEFAULT_CODE_LEVEL') or 1
+DEFAULT_NOT_ANALYSE_COMPLEXITY = os.getenv('DEFAULT_NOT_ANALYSE_COMPLEXITY') or 1
 DEFAULT_CPP_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.cpp', '.h', '.hpp', '.m', '.mm', '.cc')
 DEFAULT_PYTHON_ENDS_WITH_FILE = os.getenv('DEFAULT_ENDS_WITH_FILE') or ('.py',)
-DEFAULT_NOT_ANALYSE_COMPLEXITY = os.getenv('DEFAULT_NOT_ANALYSE_COMPLEXITY') or 1
 API_BASE_URL = "https://api.github.com"
 
 
@@ -24,10 +24,7 @@ class CodeLevel:
     BUILDER = 5
     COMMON = 3
     DEFAULT = 1
-
-
-# Assume GITHUB_TOKEN, OWNER, REPO, and PR_NUMBER are already defined globally
-
+# Assume GITHUB_GITHUB_TOKEN, OWNER, REPO, and PR_NUMBER are already defined globally
 # Get the complexity level based on the file's directory
 def get_code_level(filename):
     # Take the path of file
@@ -54,7 +51,7 @@ def send_request(url, headers):
 # get basic information of PR that contains SHA in the origin branch
 def get_pr_info(owner, repo, pr_number):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
-    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
@@ -63,7 +60,7 @@ def get_pr_info(owner, repo, pr_number):
             print(f"PR {pr_number} not found.")
             return None
         else:
-            print(f"Error fetching PR info: {response.status_code}, {response.text}")
+            print(f"Error fetching PR info: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
         print(f"Error during request: {e}")
@@ -73,13 +70,13 @@ def get_pr_info(owner, repo, pr_number):
 # Get changed files in PR
 def get_pr_files(owner, repo, pr_number):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
-    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Error fetching PR files: {response.status_code}, {response.text}")
+            print(f"Error fetching PR files: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
         print(f"Error during request: {e}")
@@ -89,13 +86,13 @@ def get_pr_files(owner, repo, pr_number):
 # Get the history records of a file
 def get_file_commits(owner, repo, sha, file_path):
     url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
-    headers = {"Authorization": f"TOKEN {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Error fetching commit history for {file_path} and branch {sha}")
+            print(f"Error fetching commit history for {file_path} and branch {sha}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
         print(f"Error during request: {e}")
@@ -106,7 +103,7 @@ def get_file_commits(owner, repo, sha, file_path):
 def get_file_content(owner, repo, file_path, sha):
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
     headers = {
-        "Authorization": f"TOKEN {TOKEN}",
+        "Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when getting origin file content
     }
     try:
@@ -114,12 +111,11 @@ def get_file_content(owner, repo, file_path, sha):
         if response.status_code == 200:
             return response.text
         else:
-            print(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}")
+            print(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
         print(f"Error during request: {e}")
         return None
-
 
 # get origin files from pr
 def get_original_files_from_pr(owner, repo, pr_number):
@@ -339,7 +335,6 @@ def calculate_pr_workload(changes):
             continue
         function_complexity = get_function_complexity(file_content, code_level, patch, filename)
 
-
         # Calculate workload
         for function in function_complexity:
             complexity = function["complexity"]
@@ -367,4 +362,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"Error: {e}")
+

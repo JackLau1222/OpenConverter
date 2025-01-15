@@ -1,24 +1,25 @@
 import os
 import requests
-import json
 
+PR_NUMBER = os.getenv("PR_NUMBER")
+OWNER = os.getenv('OWNER')
+REPO = os.getenv('REPO')
+SONARCLOUD_API_TOKEN = os.getenv("SONARCLOUD_API_TOKEN")
+OUTPUT_TYPE = os.getenv("OUTPUT_TYPE")   # Options: "RATE", "NON_RATE", "ALL"
 
-pr_number = os.getenv("PR_NUMBER") or 37
-repository = os.getenv("REPOSITORY") or "JackLau1222_OpenConverter"
-api_token = os.getenv("SONARCLOUD_API_TOKEN") or ""
-OUTPUT_TYPE = "ALL"  # Options: "RATE", "NON_RATE", "ALL"
-
+REPOSITORY = OWNER + "_" + REPO
 def fetch_sonar_metrics():
     """
     Fetch metrics from SonarCloud API and print metric names with their ratings.
     """
 
-    if not all([pr_number, repository, api_token]):
-        raise EnvironmentError("Please ensure PR_NUMBER, REPOSITORY, and SONARCLOUD_API_TOKEN are set as environment variables.")
+    if not all([PR_NUMBER, REPOSITORY, SONARCLOUD_API_TOKEN]):
+        raise EnvironmentError("Please ensure PR_NUMBER, REPOSITORY, and SONARCLOUD_SONARCLOUD_API_TOKEN are set as "
+                               "environment variables.")
 
     # Construct the API URL
     base_url = "https://sonarcloud.io/api/measures/component"
-    component = repository  # Convert "owner/repo" to "owner_repo"
+    component = REPOSITORY  # Convert "owner/repo" to "owner_repo"
     # rate_metrics, non_rate_metrics = fetch_all_metrics()
     rate_metrics = ['new_reliability_rating','new_security_rating', 'new_security_review_rating', 'new_maintainability_rating']
     non_rate_metrics = ['new_technical_debt', 'new_branch_coverage', 'new_conditions_to_cover', 'new_coverage', 'new_duplicated_blocks', 'new_duplicated_lines_density', 'new_duplicated_lines', 'new_line_coverage', 'new_lines_to_cover', 'new_maintainability_rating', 'new_accepted_issues', 'new_blocker_violations', 'new_bugs', 'new_code_smells', 'new_critical_violations', 'new_info_violations', 'new_violations', 'new_lines', 'new_major_violations', 'new_minor_violations', 'new_security_hotspots', 'new_vulnerabilities', 'new_reliability_rating', 'new_reliability_remediation_effort', 'new_security_hotspots_reviewed', 'new_security_rating', 'new_security_remediation_effort', 'new_security_review_rating', 'new_sqale_debt_ratio', 'new_uncovered_conditions', 'new_uncovered_lines']
@@ -36,11 +37,11 @@ def fetch_sonar_metrics():
     params = {
         "component": component,
         "metricKeys": metric_keys,
-        "pullRequest": pr_number
+        "pullRequest": PR_NUMBER
     }
 
     # Make the API request
-    response = requests.get(base_url, params=params, auth=(api_token, ""))
+    response = requests.get(base_url, params=params, auth=(SONARCLOUD_API_TOKEN, ""))
 
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data from SonarCloud API. HTTP Status: {response.status_code}, Response: {response.text}")
@@ -52,7 +53,7 @@ def fetch_sonar_metrics():
     component_measures = data.get("component", {}).get("measures", [])
 
     if not component_measures:
-        print("No measures found for the specified PR and repository.")
+        print("No measures found for the specified PR and REPOSITORY.")
         return
 
     # Define rating mappings

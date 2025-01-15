@@ -23,7 +23,7 @@ if(WIN32)
         set(FFMPEG_ROOT_PATH "D:/ffmpeg/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1")
     endif()
     set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
-    set(FFMPEG_LIBRARIES ${FFMPEG_ROOT_PATH}/lib)
+    set(FFMPEG_LIBRARY_DIRS ${FFMPEG_ROOT_PATH}/lib)
 else()
     # Ensure pkg-config is found
     find_package(PkgConfig REQUIRED)

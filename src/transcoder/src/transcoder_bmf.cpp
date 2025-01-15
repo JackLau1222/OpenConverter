@@ -3,7 +3,7 @@
 /* Receive pointers from converter */
 TranscoderBMF::TranscoderBMF(ProcessParameter *processParameter,
                        EncodeParameter *encodeParameter)
-    : processParameter(processParameter), encodeParameter(encodeParameter) {
+    : Transcoder(processParameter, encodeParameter) {
     frameTotalNumber = 0;
 }
 

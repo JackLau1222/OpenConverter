@@ -8,7 +8,7 @@ ProcessParameter::ProcessParameter(QObject *parent) : QObject(parent) {
 
 void ProcessParameter::set_Process_Number(int64_t frameNumber,
                                           int64_t frameTotalNumnber) {
-    double result = (double)frameNumber / (double)frameTotalNumnber;
+    int64_t result = (double)frameNumber / (double)frameTotalNumnber * 100 ;
     if (processNumber != result) {
         processNumber = result;
         emit update_Process_Number(result);
@@ -17,6 +17,7 @@ void ProcessParameter::set_Process_Number(int64_t frameNumber,
 
 void ProcessParameter::set_Process_Number(int64_t processNumber) {
     if (processNumber > 0)
+        this->processNumber = processNumber;
         emit update_Process_Number(processNumber);
 }
 

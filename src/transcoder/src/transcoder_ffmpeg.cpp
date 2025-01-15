@@ -1,17 +1,144 @@
-#include "../include/transcoder.h"
+#include "../include/transcoder_ffmpeg.h"
 
-Transcoder::Transcoder() {}
-
-int Transcoder::frameNumber = 0;
+int TranscoderFFmpeg::frameNumber = 0;
 
 /* Receive pointers from converter */
-Transcoder::Transcoder(ProcessParameter *processParameter,
-                       EncodeParameter *encodeParamter)
-    : processParameter(processParameter), encodeParamter(encodeParamter) {
+TranscoderFFmpeg::TranscoderFFmpeg(ProcessParameter *processParameter,
+                       EncodeParameter *encodeParameter)
+    : Transcoder(processParameter, encodeParameter) {
     frameTotalNumber = 0;
 }
 
-bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder) {
+bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path) {
+    bool flag = true;
+    int ret = -1;
+    // deal with arguments
+
+    StreamContext *decoder = new StreamContext;
+    StreamContext *encoder = new StreamContext;
+
+    av_log_set_level(AV_LOG_DEBUG);
+
+    decoder->filename = input_path.c_str();
+    encoder->filename = output_path.c_str();
+
+    open_Media(decoder, encoder);
+
+    if (!prepare_Decoder(decoder)) {
+        flag = false;
+        goto end;
+    }
+
+    if (!copyVideo) {
+        if (!prepare_Encoder_Video(decoder, encoder)) {
+            flag = false;
+            goto end;
+        }
+    } else {
+        prepare_Copy(encoder->fmtCtx, &encoder->videoStream,
+                                 decoder->videoStream->codecpar);
+    }
+
+    if (!copyAudio) {
+        if (!prepare_Encoder_Audio(decoder, encoder)) {
+            flag = false;
+            goto end;
+        }
+    } else {
+        prepare_Copy(encoder->fmtCtx, &encoder->audioStream,
+                                 decoder->audioStream->codecpar);
+    }
+
+    // binding
+    ret = avio_open2(&encoder->fmtCtx->pb, encoder->filename, AVIO_FLAG_WRITE,
+                     NULL, NULL);
+    if (ret < 0) {
+        // av_log(encoder->fmtCtx, AV_LOG_ERROR, "%s", av_err2str(ret));
+        flag = false;
+        goto end;
+    }
+    /* Write the stream header, if any. */
+    ret = avformat_write_header(encoder->fmtCtx, NULL);
+    if (ret < 0) {
+//        fprintf(stderr, "Error occurred when opening output file: %s\n",
+//                av_err2str(ret));
+        flag = false;
+        goto end;
+    }
+
+    // read video data from multimedia files to write into destination file
+    while (av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0) {
+        if (decoder->pkt->stream_index == decoder->videoIdx) {
+            if (!copyVideo) {
+                transcode_Video(decoder, encoder);
+            } else {
+                remux(decoder->pkt, encoder->fmtCtx,
+                                  decoder->videoStream, encoder->videoStream);
+            }
+
+            // encode(oFmtCtx, outCodecCtx, outFrame, outPkt, inStream,
+            // outStream);
+        } else if (decoder->pkt->stream_index == decoder->audioIdx) {
+            if (!copyAudio) {
+
+            } else {
+                remux(decoder->pkt, encoder->fmtCtx,
+                                  decoder->audioStream, encoder->audioStream);
+            }
+        }
+    }
+    if (!copyVideo) {
+        encoder->frame = NULL;
+        // write the buffered frame
+        encode_Video(decoder->videoStream, encoder);
+    }
+
+    processParameter->set_Process_Number(1, 1);
+
+    av_write_trailer(encoder->fmtCtx);
+
+// free memory
+end:
+    if (decoder->fmtCtx) {
+        avformat_close_input(&decoder->fmtCtx);
+        decoder->fmtCtx = NULL;
+    }
+    if (decoder->videoCodecCtx) {
+        avcodec_free_context(&decoder->videoCodecCtx);
+        decoder->videoCodecCtx = NULL;
+    }
+    if (decoder->frame) {
+        av_frame_free(&decoder->frame);
+        decoder->frame = NULL;
+    }
+    if (decoder->pkt) {
+        av_packet_free(&decoder->pkt);
+        decoder->pkt = NULL;
+    }
+
+    if (encoder->fmtCtx && !(encoder->fmtCtx->oformat->flags & AVFMT_NOFILE)) {
+        avio_closep(&encoder->fmtCtx->pb);
+    }
+    if (encoder->fmtCtx) {
+        avformat_free_context(encoder->fmtCtx);
+        encoder->fmtCtx = NULL;
+    }
+    if (encoder->videoCodecCtx) {
+        avcodec_free_context(&encoder->videoCodecCtx);
+        encoder->videoCodecCtx = NULL;
+    }
+    if (encoder->frame) {
+        av_frame_free(&encoder->frame);
+        encoder->frame = NULL;
+    }
+    if (encoder->pkt) {
+        av_packet_free(&encoder->pkt);
+        encoder->pkt = NULL;
+    }
+    return flag;
+}
+
+bool TranscoderFFmpeg::open_Media(StreamContext *decoder, StreamContext *encoder) {
     int ret = -1;
     /* set the frameNumber to zero to avoid some bugs */
     frameNumber = 0;
@@ -32,7 +159,7 @@ bool Transcoder::open_Media(StreamContext *decoder, StreamContext *encoder) {
     return true;
 }
 
-bool Transcoder::copyFrame(AVFrame *oldFrame, AVFrame *newFrame) {
+bool TranscoderFFmpeg::copyFrame(AVFrame *oldFrame, AVFrame *newFrame) {
     int response;
     newFrame->pts = oldFrame->pts;
     newFrame->format = oldFrame->format;
@@ -57,7 +184,7 @@ bool Transcoder::copyFrame(AVFrame *oldFrame, AVFrame *newFrame) {
     return true;
 }
 
-bool Transcoder::encode_Video(AVStream *inStream, StreamContext *encoder) {
+bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder) {
     int ret = -1;
 
     // send frame to encoder
@@ -107,7 +234,7 @@ end:
     return true;
 }
 
-bool Transcoder::transcode_Video(StreamContext *decoder,
+bool TranscoderFFmpeg::transcode_Video(StreamContext *decoder,
                                  StreamContext *encoder) {
     int ret = -1;
 
@@ -142,7 +269,7 @@ end:
     return 0;
 }
 
-bool Transcoder::prepare_Decoder(StreamContext *decoder) {
+bool TranscoderFFmpeg::prepare_Decoder(StreamContext *decoder) {
     int ret = -1;
 
     for (int i = 0; i < decoder->fmtCtx->nb_streams; i++) {
@@ -221,7 +348,7 @@ bool Transcoder::prepare_Decoder(StreamContext *decoder) {
     return true;
 }
 
-bool Transcoder::prepare_Encoder_Video(StreamContext *decoder,
+bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
                                        StreamContext *encoder) {
     int ret = -1;
 
@@ -232,7 +359,7 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder,
      */
     // find the encodec by Name
     //  QByteArray ba = encodeParamter->get_Video_Codec_Name().toLocal8Bit();
-    std::string codec = encodeParamter->get_Video_Codec_Name();
+    std::string codec = encodeParameter->get_Video_Codec_Name();
     encoder->videoCodec = avcodec_find_encoder_by_name(codec.c_str());
 
     // find the encodec by ID
@@ -328,20 +455,20 @@ bool Transcoder::prepare_Encoder_Video(StreamContext *decoder,
     return true;
 }
 
-bool Transcoder::prepare_Encoder_Audio(StreamContext *decoder,
+bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
                                        StreamContext *encoder) {
     // TODO
     return true;
 }
 
-bool Transcoder::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
+bool TranscoderFFmpeg::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
                               AVCodecParameters *codecParam) {
     *stream = avformat_new_stream(avCtx, NULL);
     avcodec_parameters_copy((*stream)->codecpar, codecParam);
     return true;
 }
 
-bool Transcoder::remux(AVPacket *pkt, AVFormatContext *avCtx,
+bool TranscoderFFmpeg::remux(AVPacket *pkt, AVFormatContext *avCtx,
                        AVStream *inStream, AVStream *outStream) {
     av_packet_rescale_ts(pkt, inStream->time_base, outStream->time_base);
     if (av_interleaved_write_frame(avCtx, pkt) < 0) {
@@ -351,4 +478,4 @@ bool Transcoder::remux(AVPacket *pkt, AVFormatContext *avCtx,
     return true;
 }
 
-Transcoder::~Transcoder() {}
+TranscoderFFmpeg::~TranscoderFFmpeg() {}

@@ -9,6 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(USE_BMF_TRANSCODER "Use BMF Transcoder" ON)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
@@ -24,28 +26,42 @@ pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavfilter libavutil l
 ## Use pkg-config to find x265 (if necessary)
 #pkg_check_modules(X265 REQUIRED x265)
 
-# Check if the BMF_ROOT_PATH environment variable is set
-if (DEFINED ENV{BMF_ROOT_PATH})
-    set(BMF_ROOT_PATH $ENV{BMF_ROOT_PATH})
+# Add source files conditionally based on whether to use BMF or FFmpeg transcoder
+if (USE_BMF_TRANSCODER)
+    # Check if the BMF_ROOT_PATH environment variable is set
+    if (DEFINED ENV{BMF_ROOT_PATH})
+        set(BMF_ROOT_PATH $ENV{BMF_ROOT_PATH})
+    else()
+        message(STATUS "BMF_ROOT_PATH environment variable is not set, using default path.")
+        # You can set a default path here if you want
+        set(BMF_ROOT_PATH "/Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf")
+    endif()
+    # Add BMF include and library directories
+    include_directories(${BMF_ROOT_PATH}/include)
+    link_directories(${BMF_ROOT_PATH}/lib)
+
+    add_definitions(-DUSE_BMF)  # Define a macro for BMF transcoder
+    list(APPEND SOURCES
+        ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
+    )
 else()
-    message(STATUS "BMF_ROOT_PATH environment variable is not set, using default paths.")
-    # You can set a default path here if you want
-    set(BMF_ROOT_PATH "/Users/jacklau/Documents/Programs/Git/Github/bmf/output/bmf")
+    add_definitions(-DUSE_FFMPEG)  # Define a macro for FFmpeg transcoder
+    list(APPEND SOURCES
+        ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_ffmpeg.cpp
+    )
 endif()
 
-# Add include directories for external libraries
+# Add include directories for FFmpeg
 include_directories(
     ${FFMPEG_INCLUDE_DIRS}
-    ${BMF_ROOT_PATH}/include
 )
 
 link_directories(
     ${FFMPEG_LIBRARY_DIRS}
-    ${BMF_ROOT_PATH}/lib
 )
 
-# Add source files
-set(SOURCES
+# Add common source files
+list(APPEND SOURCES
     ${CMAKE_SOURCE_DIR}/main.cpp
     ${CMAKE_SOURCE_DIR}/builder/src/encode_setting.cpp
     ${CMAKE_SOURCE_DIR}/builder/src/open_converter.cpp
@@ -54,9 +70,21 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}/common/src/process_parameter.cpp
     ${CMAKE_SOURCE_DIR}/common/src/stream_context.cpp
     ${CMAKE_SOURCE_DIR}/engine/src/converter.cpp
-    ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder.cpp
-    ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
 )
+
+# Add source files
+# set(SOURCES
+#     ${CMAKE_SOURCE_DIR}/main.cpp
+#     ${CMAKE_SOURCE_DIR}/builder/src/encode_setting.cpp
+#     ${CMAKE_SOURCE_DIR}/builder/src/open_converter.cpp
+#     ${CMAKE_SOURCE_DIR}/common/src/encode_parameter.cpp
+#     ${CMAKE_SOURCE_DIR}/common/src/info.cpp
+#     ${CMAKE_SOURCE_DIR}/common/src/process_parameter.cpp
+#     ${CMAKE_SOURCE_DIR}/common/src/stream_context.cpp
+#     ${CMAKE_SOURCE_DIR}/engine/src/converter.cpp
+#     ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder.cpp
+#     ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
+# )
 
 # Add header files
 set(HEADERS
@@ -69,6 +97,7 @@ set(HEADERS
     ${CMAKE_SOURCE_DIR}/engine/include/converter.h
     ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder.h
     ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_bmf.h
+    ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_ffmpeg.h
 )
 
 # Add UI files
@@ -119,12 +148,16 @@ target_link_libraries(OpenConverter
 #    avutil
 #    pthread
 #    swresample
-
-    engine
-    bmf_module_sdk 
-    hmp 
-    builtin_modules
 )
+
+if(USE_BMF_TRANSCODER)
+    target_link_libraries(OpenConverter PRIVATE
+        engine
+        bmf_module_sdk
+        hmp
+        builtin_modules
+    )
+endif()
 
 # Set translation files
 set(TRANSLATIONS ${CMAKE_SOURCE_DIR}/resources/lang_chinese.ts)

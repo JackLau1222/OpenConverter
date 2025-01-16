@@ -52,6 +52,7 @@ if (USE_BMF_TRANSCODER)
     # Check if the BMF_ROOT_PATH environment variable is set
     if (DEFINED ENV{BMF_ROOT_PATH})
         set(BMF_ROOT_PATH $ENV{BMF_ROOT_PATH})
+        message(STATUS "BMF_ROOT_PATH environment variable is set to ${BMF_ROOT_PATH}.")
     else()
         message(STATUS "BMF_ROOT_PATH environment variable is not set, using default path.")
         # You can set a default path here if you want

@@ -6,6 +6,26 @@ import requests
 import lizard
 import time
 import argparse
+import logging
+
+def setup_logging(verbose_level):
+    """Sets up logging based on the verbosity level"""
+    log_levels = {
+        0: logging.CRITICAL,   # Only critical logs
+        1: logging.ERROR,       # Warnings and errors
+        2: logging.INFO,      # Info, warnings, and errors
+    }
+
+    log_level = log_levels.get(verbose_level, logging.INFO)  # Default to INFO if invalid level
+
+    logging.basicConfig(
+        level=log_level,
+        format='%(message)s',  # Print only the message content
+        handlers=[
+            logging.StreamHandler(),  # If you still want console output
+            logging.FileHandler("workload_output.txt", mode='w')  # Logs also written to file
+        ]
+    )
 
 
 # Define the complexity weights (you may need to adjust this to your enum or constants)
@@ -14,6 +34,7 @@ class CodeLevel:
     ENGINE = 8
     BUILDER = 5
     COMMON = 3
+    SCRIPT = 2
     DEFAULT = 1
 # Assume GITHUB_GITHUB_TOKEN, OWNER, REPO, and PR_NUMBER are already defined globally
 # Get the complexity level based on the file's directory
@@ -30,6 +51,8 @@ def get_code_level(filename):
         return CodeLevel.BUILDER
     elif 'common' in file_dir:
         return CodeLevel.COMMON
+    elif 'scripts' or 'CMakeLists.txt' or 'yaml' in file_dir:
+        return CodeLevel.SCRIPT
     else:
         return CodeLevel.DEFAULT
 
@@ -42,19 +65,19 @@ def send_request(url, headers):
 # get basic information of PR that contains SHA in the origin branch
 def get_pr_info(owner, repo, pr_number):
     url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
-    headers = {"Authorization": f"GITHUB_TOKEN {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
-            print(f"PR {pr_number} not found.")
+            logging.error(f"PR {pr_number} not found.")
             return None
         else:
-            print(f"Error fetching PR info: {response.status_code}, {response.text}\n Error url: {url}")
+            logging.error(f"Error fetching PR info: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"Error during request: {e}")
+        logging.error(f"Error during request: {e}")
         return None
 
 
@@ -67,10 +90,10 @@ def get_pr_files(owner, repo, pr_number):
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Error fetching PR files: {response.status_code}, {response.text}\n Error url: {url}")
+            logging.error(f"Error fetching PR files: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"Error during request: {e}")
+        logging.error(f"Error during request: {e}")
         return None
 
 
@@ -85,10 +108,10 @@ def get_file_commits(owner, repo, sha, file_path):
             time.sleep(SLEEP_TIME)
             return response.json()
         else:
-            print(f"Error fetching commit history for {file_path} and branch {sha}\n Error url: {url}")
+            logging.error(f"Error fetching commit history for {file_path} and branch {sha}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"Error during request: {e}")
+        logging.error(f"Error during request: {e}")
         return None
 
 
@@ -106,10 +129,10 @@ def get_file_content(owner, repo, file_path, sha):
             time.sleep(SLEEP_TIME)
             return response.text
         else:
-            print(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}\n Error url: {url}")
+            logging.error(f"Error fetching file content for {file_path}: {response.status_code}, {response.text}\n Error url: {url}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"Error during request: {e}")
+        logging.error(f"Error during request: {e}")
         return None
 
 # get origin files from pr
@@ -154,7 +177,7 @@ def get_original_files_from_pr(owner, repo, pr_number):
                 "file_path": file_path,
                 "original_content": file_content
             })
-            print(f"Origin File: {file_path}")
+            logging.info(f"Origin File: {file_path}")
     return original_files
 
 
@@ -229,10 +252,10 @@ def get_function_complexity(file_content, level, patch, file_name):
             return []
 
         # Analyze the result of file
-        print(f"File path: {file_name}")
-        print(f"File changed lines : {len(modified_lines)}")
-        print(f"Number of functions: {len(result.function_list)}")
-        print(f"Complexity Level: {level}")
+        logging.info(f"File path: {file_name}")
+        logging.info(f"File changed lines : {len(modified_lines)}")
+        logging.info(f"Number of functions: {len(result.function_list)}")
+        logging.info(f"Complexity Level: {level}")
 
         # Analyze the result of each function
         for function in result.function_list:
@@ -261,16 +284,16 @@ def get_function_complexity(file_content, level, patch, file_name):
                         'start_line': function.start_line,
                         'end_line': function.end_line,
                     })
-                    print(f"  ——The information of changed function——")
-                    print(f"  1.Function: {function.name}")
-                    print(f"  2.Complexity: {function.cyclomatic_complexity}")
-                    print(f"  3.Lines: {function.length}")
-                    print(f"  4.CodeLevel : {level}")
+                    logging.info(f"  ——The information of changed function——")
+                    logging.info(f"  1.Function: {function.name}")
+                    logging.info(f"  2.Complexity: {function.cyclomatic_complexity}")
+                    logging.info(f"  3.Lines: {function.length}")
+                    logging.info(f"  4.CodeLevel : {level}")
 
         return complexity_data
 
     except Exception as e:
-        print(f"Error analyzing complexity: {e}")
+        logging.info(f"Error analyzing complexity: {e}")
         return []
 
 
@@ -326,7 +349,7 @@ def calculate_pr_workload(changes):
             continue
 
         if not file_content :
-            print(f"This PR add a new file but not merged:{filename}")
+            logging.info(f"This PR add a new file but not merged:{filename}")
             workload += (additions + deletions) * DEFAULT_NOT_ANALYSE_COMPLEXITY * code_level * 0.01
             continue
         function_complexity = get_function_complexity(file_content, code_level, patch, filename)
@@ -347,6 +370,8 @@ def main():
     parser.add_argument("--repo", required=True, help="Repository name")
     parser.add_argument("--pr-number", type=int, required=True, help="Pull request number")
     parser.add_argument("--token", required=True, help="GitHub API token")
+    parser.add_argument('--verbose', type=int, choices=[0, 1, 2], default=1,
+                        help='Set verbosity level: 0=critical, 1=info, 2=error (default: 1)')
     parser.add_argument("--default-code-level", type=int, default=1, help="Default code level")
     parser.add_argument("--default-not-analyse-complexity", type=int, default=1, help="Default not analyse complexity")
     parser.add_argument("--default-cpp-ends-with-file", default=".cpp,.h,.hpp,.m,.mm,.cc",
@@ -356,6 +381,8 @@ def main():
     parser.add_argument("--sleep-time", type=int, default=0, help="Sleep time between requests")
 
     args = parser.parse_args()
+
+    setup_logging(args.verbose)
 
     global  GITHUB_TOKEN, OWNER, REPO, PR_NUMBER, DEFAULT_CODE_LEVEL, DEFAULT_NOT_ANALYSE_COMPLEXITY, DEFAULT_CPP_ENDS_WITH_FILE, DEFAULT_PYTHON_ENDS_WITH_FILE, API_BASE_URL,SLEEP_TIME
     GITHUB_TOKEN = args.token
@@ -372,15 +399,15 @@ def main():
     # Get the files of the PR
     files = get_pr_files(OWNER, REPO, PR_NUMBER)
     if not files:
-        print("No files found in the PR.")
+        logging.error("No files found in the PR.")
         return
     # Calculate the changes of files
     changes = calculate_changes(files)
 
     # Calculate the workload of PR
     workload, changedLine = calculate_pr_workload(changes)
-    print(f"Estimated workload for PR {PR_NUMBER}: {workload:.2f}")
-    print(f"Estimated changedLine for PR {PR_NUMBER}: {changedLine}")
+    logging.critical(f"Estimated workload for PR {PR_NUMBER}: {workload:.2f}")
+    logging.critical(f"Estimated changedLine for PR {PR_NUMBER}: {changedLine}")
 
 
 if __name__ == '__main__':
@@ -389,7 +416,7 @@ if __name__ == '__main__':
         main()
         end_time = time.time()  # Record the end time
         execution_time = end_time - start_time  # Calculate the elapsed time
-        print(f"Script executed in {execution_time:.2f} seconds")
+        logging.info(f"Script executed in {execution_time:.2f} seconds")
     except Exception as e:
-        print(f"Error: {e}")
+        logging.error(f"Error: {e}")
 

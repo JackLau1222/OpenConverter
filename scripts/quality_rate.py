@@ -105,10 +105,10 @@ def main():
                                                                        args.output_type)
 
         print("Metrics:")
-        print("Rate Metrics:")
+        # print("Rate Metrics:")
         for measure in measure_rate_data:
             print(f"- {measure['metric_name']}: {measure['rating']}")
-        print("Non-Rate Metrics:")
+        # print("Non-Rate Metrics:")
         for measure in measure_non_rate_data:
             print(f"- {measure['metric_name']}: {measure['value']}")
     except Exception as e:

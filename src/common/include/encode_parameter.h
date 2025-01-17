@@ -19,6 +19,7 @@
 #define ENCODEPARAMETER_H
 
 #include <string>
+#include <cstdint>
 
 class EncodeParameter {
   private:

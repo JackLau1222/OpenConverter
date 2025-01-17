@@ -30,30 +30,43 @@ jobs:
         # sudo python3 -m pip install timeout_decorator numpy onnxruntime pytest opencv-python librosa
         
         git clone https://github.com/JackLau1222/bmf.git
-        (cd bmf && git checkout fork_by_oc && sudo scripts/build_ffmpeg.sh nasm yasm x264 x265 opus && ./build.sh )
-        # setup bmf root path
-        # echo "BMF_ROOT_PATH=${BMF_ROOT_PATH}:$(pwd)/bmf/output/bmf" >> $GITHUB_ENV
-        # export BMF_ROOT_PATH=${BMF_ROOT_PATH}:$(pwd)/bmf/output/bmf
+
+    # - name: Cache FFmpeg build
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: |
+    #       /usr/local/bin/ffmpeg
+    #       /usr/local/lib/
+    #       /usr/local/include/
+    #     key: ${{ runner.os }}-ffmpeg-${{ hashFiles('bmf/scripts/build_ffmpeg.sh') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-ffmpeg-
+
+    # - name: Cache BMF build
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: bmf/output/
+    #     key: ${{ runner.os }}-bmf-${{ hashFiles('bmf/build.sh') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-bmf-
+
+    - name: Compile FFmpeg and BMF if not cached
+      run: |
+        if [ ! -f "/usr/local/bin/ffmpeg" ]; then
+          echo "FFmpeg not found, starting build..."
+          (cd bmf && git checkout fork_by_oc && sudo scripts/build_ffmpeg.sh nasm yasm x264 x265 opus && ./build.sh )
+        else
+          echo "FFmpeg is already installed, skipping build."
+        fi
+
+    - name: Set up BMF
+      run: |
         cd bmf
         echo "C_INCLUDE_PATH=${C_INCLUDE_PATH}:$(pwd)/output/bmf/include" >> $GITHUB_ENV
         echo "CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:$(pwd)/output/bmf/include" >> $GITHUB_ENV
         echo "LIBRARY_PATH=${LIBRARY_PATH}:$(pwd)/output/bmf/lib" >> $GITHUB_ENV
         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/output/bmf/lib" >> $GITHUB_ENV
 
-    # - name: set envs
-    #   run: |
-    #     echo "C_INCLUDE_PATH=${C_INCLUDE_PATH}:$(pwd)/output/bmf/include" >> $GITHUB_ENV
-    #     echo "CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:$(pwd)/output/bmf/include" >> $GITHUB_ENV
-    #     echo "LIBRARY_PATH=${LIBRARY_PATH}:$(pwd)/output/bmf/lib" >> $GITHUB_ENV
-    #     echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/output/bmf/lib:/usr/local/lib" >> $GITHUB_ENV
-    #     echo "PYTHONPATH=$(pwd)/output/bmf/lib:$(pwd)/output" >> $GITHUB_ENV
-    #     echo "PATH=${PATH}:$(pwd)/output/bmf/bin" >> $GITHUB_ENV
-    #     echo "HMP_TEST_DATA_ROOT=$(pwd)/bmf/hml/tests/data" >> $GITHUB_ENV
-
-    # env:  
-    #   BMF_REPO: ${{ vars.BMF_REPOSITORY_URL }}  
-    #   BMF_BRANCH: ${{ vars.BMF_BRANCH }}  
-    #   BMF_ROOT_PATH: ${{ github.workspace }}/bmf/output/bmf 
 
     - name: Set up Qt
       run: |

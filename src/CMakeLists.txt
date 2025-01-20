@@ -45,7 +45,7 @@ endif()
 
 # 打印 FFmpeg 的包含目录和库目录
 message(STATUS "FFMPEG_INCLUDE_DIRS: ${FFMPEG_INCLUDE_DIRS}")
-message(STATUS "FFMPEG_LIBRARY_DIRS: ${FFMPEG_LIBRARY_DIRS
+message(STATUS "FFMPEG_LIBRARY_DIRS: ${FFMPEG_LIBRARY_DIRS")
 
 # Add source files conditionally based on whether to use BMF or FFmpeg transcoder
 if (USE_BMF_TRANSCODER)

@@ -14,29 +14,38 @@ option(USE_BMF_TRANSCODER "Use BMF Transcoder" ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-if(WIN32)
-    message(STATUS "This is a Windows platform.")
-    if (DEFINED ENV{FFMPEG_ROOT_PATH})
-        set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
-    else()
-        message(STATUS "FFMPEG_ROOT_PATH environment variable is not set, using default path.")
-        set(FFMPEG_ROOT_PATH "D:/ffmpeg/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1")
-    endif()
+if(DEFINED ENV{FFMPEG_ROOT_PATH})
+    # 如果 FFMPEG_ROOT_PATH 环境变量已经定义，使用该路径
+    set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
+    message(STATUS "Using FFMPEG_ROOT_PATH: ${FFMPEG_ROOT_PATH}")
+    
     set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
     set(FFMPEG_LIBRARY_DIRS ${FFMPEG_ROOT_PATH}/lib)
-else()
-    # Ensure pkg-config is found
-    find_package(PkgConfig REQUIRED)
 
-    # Find the FFmpeg libraries (avcodec, avformat, avutil)
+elseif(WIN32)
+    # 如果在 Windows 平台，且 FFMPEG_ROOT_PATH 未定义，使用默认路径
+    message(STATUS "This is a Windows platform.")
+    message(STATUS "FFMPEG_ROOT_PATH environment variable is not set, using default path.")
+    set(FFMPEG_ROOT_PATH "D:/ffmpeg/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1")
+    
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
+    set(FFMPEG_LIBRARY_DIRS ${FFMPEG_ROOT_PATH}/lib)
+
+else()
+    # 在其他平台，使用 pkg-config 查找 ffmpeg 库
+    message(STATUS "This is a non-Windows platform, using pkg-config.")
+    find_package(PkgConfig REQUIRED)
+    
     pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavfilter libavutil libswresample libswscale)
+    
+    # 设置包含目录和库目录
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS})
+    set(FFMPEG_LIBRARY_DIRS ${FFMPEG_LIBRARY_DIRS})
 endif()
 
-## Use pkg-config to find x264
-#pkg_check_modules(X264 REQUIRED x264)
-
-## Use pkg-config to find x265 (if necessary)
-#pkg_check_modules(X265 REQUIRED x265)
+# 打印 FFmpeg 的包含目录和库目录
+message(STATUS "FFMPEG_INCLUDE_DIRS: ${FFMPEG_INCLUDE_DIRS}")
+message(STATUS "FFMPEG_LIBRARY_DIRS: ${FFMPEG_LIBRARY_DIRS
 
 # Add source files conditionally based on whether to use BMF or FFmpeg transcoder
 if (USE_BMF_TRANSCODER)

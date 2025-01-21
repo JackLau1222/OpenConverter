@@ -130,12 +130,11 @@ jobs:
       - name: Set up BMF if not cached
         run: |
           if [ ! -d "$(pwd)/bmf/output/" ]; then
-            cd bmf && git checkout fork_by_oc && ./build.sh
+            (cd bmf && git checkout fork_by_oc && ./build.sh)
           else
             echo "BMF is already installed, skipping build."
           fi
           echo "BMF_ROOT_PATH=$(pwd)/bmf/output/bmf" >> $GITHUB_ENV
-
 
       - name: Set up Qt
         run: |
@@ -145,9 +144,14 @@ jobs:
         uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v4
       - name: Run Build Wrapper
         run: |
+          export PATH=$PATH:$FFMPEG_ROOT_PATH/bin
           (cd src && mkdir build && cmake -S . -B build)
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build src/build/ --config Release
           cat ${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
@@ -227,3 +231,5 @@ jobs:
                 body: combinedBody
               });
             }
+
+

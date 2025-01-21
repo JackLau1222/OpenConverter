@@ -57,12 +57,11 @@ jobs:
     - name: Set up BMF if not cached
       run: |
         if [ ! -d "$(pwd)/bmf/output/" ]; then
-          cd bmf && git checkout fork_by_oc && ./build.sh
+          (cd bmf && git checkout fork_by_oc && ./build.sh)
         else
           echo "BMF is already installed, skipping build."
         fi
         echo "BMF_ROOT_PATH=$(pwd)/bmf/output/bmf" >> $GITHUB_ENV
-
 
     - name: Set up Qt
       run: |
@@ -70,6 +69,7 @@ jobs:
 
     - name: Build with CMake
       run: |
+        export PATH=$PATH:$FFMPEG_ROOT_PATH/bin
         (cd src && cmake -B build && cd build && make -j$(nproc))
 
     - name: Copy libs

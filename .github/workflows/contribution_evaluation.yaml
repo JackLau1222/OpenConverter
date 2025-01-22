@@ -16,8 +16,10 @@ jobs:
       pull-requests: write  
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout target branch code (using pull_request_target)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -86,8 +88,10 @@ jobs:
       BUILD_WRAPPER_OUT_DIR: src/build
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout target branch code (using pull_request_target)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Checkout BMF repository (specific branch)
         run: |
@@ -160,6 +164,9 @@ jobs:
         with:
           args: >
             --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+            --define sonar.pullrequest.key=${{ github.event.pull_request.number }}
+            --define sonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            --define sonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
             --define sonar.coverage.exclusions=**/* 
             --define sonar.coverage.reportPaths=  
 

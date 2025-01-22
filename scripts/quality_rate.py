@@ -1,8 +1,10 @@
+import json
+
 import requests
 import argparse
 
 
-def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token, output_type="ALL"):
+def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token):
     """
     Fetch metrics from SonarCloud API and return metric names with their ratings.
 
@@ -28,13 +30,8 @@ def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token, output_type
         'new_uncovered_conditions', 'new_uncovered_lines'
     ]
 
-    # Determine metrics to query based on output_type
-    if output_type == "RATE":
-        selected_metrics = rate_metrics
-    elif output_type == "NON_RATE":
-        selected_metrics = non_rate_metrics
-    else:
-        selected_metrics = rate_metrics + non_rate_metrics
+
+    selected_metrics = rate_metrics + non_rate_metrics
 
     # Remove duplicates and join metrics into a comma-separated string
     metric_keys = ",".join(sorted(set(selected_metrics)))
@@ -57,7 +54,6 @@ def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token, output_type
 
     # Extract and process metrics
     component_measures = data.get("component", {}).get("measures", [])
-
     if not component_measures:
         print("No measures found for the specified PR and REPOSITORY.")
         return [], []
@@ -97,14 +93,16 @@ def main():
     parser.add_argument("--token", required=True, help="SonarCloud API token")
     parser.add_argument("--output-type", choices=["RATE", "NON_RATE", "ALL"], default="ALL",
                         help="Type of metrics to fetch")
-    args = parser.parse_args()
 
+    args = parser.parse_args()
+    global REPO, OWNER, PR_NUMBER,OUT_TYPE
+    REPO = args.repo
+    OWNER = args.owner
+    PR_NUMBER = args.pr_number
+    OUT_TYPE = args.output_type
     repository = f"{args.owner}_{args.repo}"
     try:
-        measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
-                                                                       args.output_type)
-
-
+        measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token)
         # Print rating indicator
         print("\n📈 Metrics:")
         rating_icons = {
@@ -114,9 +112,14 @@ def main():
             'D': '🔴',
             'E': '⚫'
         }
-        for measure in measure_rate_data:
-            icon = rating_icons.get(measure['rating'], '⚪')
-            print(f"{icon} {measure['metric_name']}: {measure['rating']}")
+
+        if OUT_TYPE != "NON_RATE":
+            for measure in measure_rate_data:
+                icon = rating_icons.get(measure['rating'], '⚪')
+                print(f"{icon} {measure['metric_name']}: {measure['rating']}")
+        if OUT_TYPE != "RATE":
+            for measure in measure_non_rate_data:
+                print(f"{measure['metric_name']}: {measure['value']}")
 
         # Print the Issues section
         print("\n🐛 Issues")

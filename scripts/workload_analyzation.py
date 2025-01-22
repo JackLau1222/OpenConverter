@@ -61,10 +61,9 @@ def send_request(url, headers):
     response = requests.get(url, headers=headers)
     return response
 
-
 # get basic information of PR that contains SHA in the origin branch
 def get_pr_info(owner, repo, pr_number):
-    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}"
+    url = f"{API_BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
@@ -83,7 +82,7 @@ def get_pr_info(owner, repo, pr_number):
 
 # Get changed files in PR
 def get_pr_files(owner, repo, pr_number):
-    url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
+    url = f"{API_BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}/files"
     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
@@ -99,7 +98,7 @@ def get_pr_files(owner, repo, pr_number):
 
 # Get the history records of a file
 def get_file_commits(owner, repo, sha, file_path):
-    url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
+    url = f"{API_BASE_URL}/repos/{owner}/{repo}/commits?sha={sha}&path={file_path}"
     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
     try:
         response = send_request(url, headers)
@@ -117,7 +116,7 @@ def get_file_commits(owner, repo, sha, file_path):
 
 # Get content in file
 def get_file_content(owner, repo, file_path, sha):
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
+    url = f"{API_BASE_URL}/repos/{owner}/{repo}/contents/{file_path}?ref={sha}"
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.raw+json"  # use this 'Accept' when getting origin file content
@@ -141,7 +140,8 @@ def get_original_files_from_pr(owner, repo, pr_number):
     pr_info = get_pr_info(owner, repo, pr_number)
     if not pr_info:
         return []
-
+    global PR_TITLE
+    PR_TITLE = pr_info["title"]
     # get the sha of head from PR
     head_sha = pr_info["head"]["sha"]
     head_ref = pr_info["head"]["ref"]
@@ -384,7 +384,9 @@ def main():
 
     setup_logging(args.verbose)
 
-    global  GITHUB_TOKEN, OWNER, REPO, PR_NUMBER, DEFAULT_CODE_LEVEL, DEFAULT_NOT_ANALYSE_COMPLEXITY, DEFAULT_CPP_ENDS_WITH_FILE, DEFAULT_PYTHON_ENDS_WITH_FILE, API_BASE_URL,SLEEP_TIME
+    global  GITHUB_TOKEN, OWNER, REPO, PR_NUMBER, \
+        DEFAULT_CODE_LEVEL, DEFAULT_NOT_ANALYSE_COMPLEXITY, DEFAULT_CPP_ENDS_WITH_FILE, DEFAULT_PYTHON_ENDS_WITH_FILE,\
+        API_BASE_URL,SLEEP_TIME
     GITHUB_TOKEN = args.token
     OWNER = args.owner
     REPO = args.repo

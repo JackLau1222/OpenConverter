@@ -74,79 +74,38 @@ def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token, output_type
     measure_rate_data = []
     measure_non_rate_data = []
 
+    def format_metric_name(name):
+        """Format metric name to be more readable"""
+        name = name.replace('new_', '').replace('_', ' ').title()
+        if 'Rating' in name:
+            return name
+        return f"{name} on New Code"
+
+    formatted_metrics = []
     for measure in component_measures:
-        metric_name = measure.get("metric")
+        metric_name = format_metric_name(measure.get("metric"))
         metric_value = measure.get("value")
+        
         if "periods" in measure:
             metric_value = measure.get("periods")[0].get("value")
-
-        if metric_name in rate_metrics and metric_value in rating_mapping:
-            rating = rating_mapping[metric_value]
-            measure_rate_data.append({"metric_name": metric_name, "rating": rating})
+            
+        if metric_name in rate_metrics:
+            rating = rating_mapping.get(metric_value, metric_value)
+            formatted_metrics.append(f"{metric_name}: {rating}")
         else:
-            measure_non_rate_data.append({"metric_name": metric_name, "value": metric_value})
-
-    return measure_rate_data, measure_non_rate_data
-
-def format_sonar_output(measure_rate_data, measure_non_rate_data, output_type="RATE"):
-    """
-    Format SonarQube analysis results in a more visually appealing way.
-    
-    Args:
-        measure_rate_data: List of rate metrics with their ratings
-        measure_non_rate_data: List of non-rate metrics with their values
-        output_type: Type of output format ("RATE" or "ALL")
-    """
-    output = []
-    
-    # Determine Quality Gate status based on ratings
-    all_ratings = [measure["rating"] for measure in measure_rate_data]
-    quality_gate_passed = all(rating == "A" for rating in all_ratings)
-    
-    # Add Quality Gate status
-    if quality_gate_passed:
-        output.append("✅ Quality Gate passed\n")
-    else:
-        output.append("❌ Quality Gate failed\n")
-
-    if output_type == "RATE":
-        # Add Issues section
-        output.append("Issues")
-        new_issues = next((measure["value"] for measure in measure_non_rate_data 
-                          if measure["metric_name"] == "new_violations"), "0")
-        accepted_issues = next((measure["value"] for measure in measure_non_rate_data 
-                              if measure["metric_name"] == "new_accepted_issues"), "0")
-        
-        output.append(f"✅ {new_issues} New issues")
-        output.append(f"✅ {accepted_issues} Accepted issues\n")
-
-        # Add Measures section
-        output.append("Measures")
-        security_hotspots = next((measure["value"] for measure in measure_non_rate_data 
-                                if measure["metric_name"] == "new_security_hotspots"), "0")
-        coverage = next((measure["value"] for measure in measure_non_rate_data 
-                        if measure["metric_name"] == "new_coverage"), "0.0")
-        duplication = next((measure["value"] for measure in measure_non_rate_data 
-                          if measure["metric_name"] == "new_duplicated_lines_density"), "0.0")
-        
-        output.append(f"✅ {security_hotspots} Security Hotspots")
-        output.append(f"✅ {coverage}% Coverage on New Code")
-        output.append(f"✅ {duplication}% Duplication on New Code\n")
-        
-        # Add link to SonarQube Cloud
-        output.append("See analysis details on SonarQube Cloud")
-    else:
-        # Full metrics output
-        output.append("Metrics:")
-        for measure in measure_rate_data:
-            metric_name = measure["metric_name"].replace("_", " ")
-            output.append(f"• {metric_name}: {measure['rating']}")
-        
-        for measure in measure_non_rate_data:
-            metric_name = measure["metric_name"].replace("_", " ")
-            output.append(f"• {metric_name}: {measure['value']}")
-
-    return "\n".join(output)
+            # Format numerical values
+            try:
+                value = float(metric_value)
+                if value.is_integer():
+                    formatted_value = str(int(value))
+                else:
+                    formatted_value = f"{value:.1f}%"
+            except (ValueError, TypeError):
+                formatted_value = metric_value
+                
+            formatted_metrics.append(f"{metric_name}: {formatted_value}")
+            
+    return formatted_metrics
 
 
 def main():
@@ -164,10 +123,10 @@ def main():
         measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
                                                                        args.output_type)
 
-       formatted_output = format_sonar_output(
-            measure_rate_data, measure_non_rate_data, args.output_type
-        )
-        print(formatted_output)
+        # Print metrics in a more structured format
+        print("Metrics:")
+        for metric in metrics:
+            print(f"- {metric}")
     except Exception as e:
         print(f"Error: {e}")
 

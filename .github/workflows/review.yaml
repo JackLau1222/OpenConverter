@@ -13,8 +13,10 @@ jobs:
       cancel-in-progress: true 
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout target branch code (using pull_request_target)
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
 
     - name: Checkout BMF repository (specific branch)
       run: |

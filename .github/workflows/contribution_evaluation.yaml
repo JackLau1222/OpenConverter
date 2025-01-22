@@ -16,8 +16,10 @@ jobs:
       pull-requests: write  
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout target branch code (using pull_request_target)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -86,8 +88,15 @@ jobs:
       BUILD_WRAPPER_OUT_DIR: src/build
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout target branch code (using pull_request_target)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Print current branch and commit hash
+        run: |
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Current commit hash: $(git rev-parse HEAD)"
 
       - name: Checkout BMF repository (specific branch)
         run: |
@@ -149,10 +158,6 @@ jobs:
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build src/build/ --config Release
           cat ${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
@@ -160,6 +165,9 @@ jobs:
         with:
           args: >
             --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+            --define sonar.pullrequest.key=${{ github.event.pull_request.number }}
+            --define sonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            --define sonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
             --define sonar.coverage.exclusions=**/* 
             --define sonar.coverage.reportPaths=  
 
@@ -181,6 +189,11 @@ jobs:
             --token ${{ secrets.SONAR_TOKEN }} \
             --output-type RATE > code_quality_output.txt
           cat code_quality_output.txt
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
 
       - name: Update PR comment with SonarQube result
         uses: actions/github-script@v6

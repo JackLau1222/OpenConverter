@@ -51,63 +51,29 @@ jobs:
           script: |
             const fs = require('fs');
             const output = fs.readFileSync('workload_output.txt', 'utf8');
+            // Print the output to the logs for debugging
+            console.log('Workload analysis output:', output);
             const marker = '<!-- contribution-evaluation-comment -->';
-            
-            // Extract workload and changed lines
-            const workload = output.match(/Estimated workload.*: ([\d.]+)/)[1];
-            const changedLines = output.match(/Estimated changedLine.*: ([\d.]+)/)[1];
-            
-            // Create formatted message with emojis and styling
-            const formattedMessage = `${marker}
-
-### ⚙️ Workload Analysis
-${createStatusBadge(workload < 30 ? 'success' : workload < 50 ? 'warning' : 'error')} **Complexity Score**: ${workload}
-- Changed Lines: ${changedLines}
-- Workload Rating: ${getWorkloadRating(workload)}
-
-### 🔄 Quality Analysis Status
-⏳ Code quality analysis is in progress...
-
----
-<sub>Powered by Contribution Evaluation Action</sub>`;
-
-            function createStatusBadge(status) {
-              const colors = {
-                success: '2cbe4e',
-                warning: 'f1e05a',
-                error: 'cb2431'
-              };
-              return `![${status}](https://img.shields.io/badge/status-${status}-${colors[status]})`;
-            }
-
-            function getWorkloadRating(score) {
-              if (score < 20) return '🟢 Low';
-              if (score < 40) return '🟡 Medium';
-              if (score < 60) return '🟠 High';
-              return '🔴 Very High';
-            }
-
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number
             });
-            
             const existingComment = comments.data.find(comment => comment.body.includes(marker));
-            
+            const newBody = `${marker}\n### Workload Analysis:\n${output}\n### SonarQube Analysis Status:\nCode quality analysis is still in progress...`;
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: existingComment.id,
-                body: formattedMessage
+                body: newBody
               });
             } else {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: formattedMessage
+                body: newBody
               });
             }
 
@@ -120,7 +86,7 @@ ${createStatusBadge(workload < 30 ? 'success' : workload < 50 ? 'warning' : 'err
     needs: workload-analysis  # Ensure this job runs after workload analysis
     env:
       BUILD_WRAPPER_OUT_DIR: src/build
-    
+
     steps:
       - name: Checkout target branch code (using pull_request_target)
         uses: actions/checkout@v2
@@ -224,71 +190,52 @@ ${createStatusBadge(workload < 30 ? 'success' : workload < 50 ? 'warning' : 'err
           cat code_quality_output.txt
 
       - name: Update PR comment with SonarQube result
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const sonarOutput = fs.readFileSync('code_quality_output.txt', 'utf8');
-          const marker = '<!-- contribution-evaluation-comment -->';
-          
-          function getMetricEmoji(rating) {
-            switch(rating) {
-              case 'A': return '🟢';
-              case 'B': return '🟡';
-              case 'C': return '🟠';
-              case 'D': case 'E': return '🔴';
-              default: return '⚫';
-            }
-          }
-          
-          // Parse metrics and create formatted output
-          const metrics = sonarOutput.split('\n')
-            .filter(line => line.includes(':'))
-            .map(line => {
-              const [name, value] = line.split(':').map(s => s.trim());
-              return { name: name.replace('- ', ''), value };
-            });
-            
-          const formattedMetrics = metrics
-            .map(m => `${getMetricEmoji(m.value)} **${m.name}**: ${m.value}`)
-            .join('\n');
-
-          const qualityGateStatus = metrics.every(m => m.value === 'A') ? 'passed' : 'failed';
-          
-          const comments = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.payload.pull_request.number
-          });
-          
-          const existingComment = comments.data.find(comment => comment.body.includes(marker));
-          const workload = '${{ needs.workload-analysis.outputs.workload }}';
-          const changedLines = '${{ needs.workload-analysis.outputs.changedLines }}';
-          
-          const newQualitySection = `### 🔍 Quality Gate ${qualityGateStatus === 'passed' ? '✅' : '❌'}
-          
-#### Metrics:
-${formattedMetrics}
-
-#### Details:
-- Issues: 0 New issues, 0 Accepted issues
-- Coverage: No coverage information
-- Duplications: 0.0% on New Code
-
-[View detailed analysis on SonarCloud ↗](https://sonarcloud.io)`;
-
-          if (existingComment) {
-            const updatedBody = existingComment.body.replace(
-              /### 🔄 Quality Analysis Status[\s\S]*$/m,
-              newQualitySection
-            );
-            
-            await github.rest.issues.updateComment({
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const sonarOutput = fs.readFileSync('code_quality_output.txt', 'utf8');
+            const marker = '<!-- contribution-evaluation-comment -->';
+            const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              comment_id: existingComment.id,
-              body: updatedBody
+              issue_number: context.payload.pull_request.number
             });
-          }
+            // const sonarStatus = process.env.SONAR_STATUS || "Code quality analysis is still in progress...";
+            const workload = '${{ needs.workload-analysis.outputs.workload }}';
+            const changedLines = '${{ needs.workload-analysis.outputs.changedLines }}';
+            // Print workload and changedLines for debugging
+            console.log('Sonar Output:', sonarOutput);
 
+            const existingComment = comments.data.find(comment => comment.body.includes(marker));
+            // If the comment exists, update it, otherwise create a new one
+            let combinedBody;
+            if (existingComment) {
+              // Split the existing comment body into lines
+              let lines = existingComment.body.split('\n');
+              
+              // Modify only the last line
+              const lastLine = lines[lines.length - 1];
+              
+              // Replace the last two line with the new information
+              lines[lines.length - 2] = `### SonarQube Analysis Result:`;
+              lines[lines.length - 1] = sonarOutput;
+
+              // Reassemble the comment body
+              combinedBody = lines.join('\n');
+              
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: combinedBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: combinedBody
+              });
+            }
 

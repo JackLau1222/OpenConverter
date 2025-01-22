@@ -74,38 +74,19 @@ def fetch_sonar_metrics(pr_number, repository, sonarcloud_api_token, output_type
     measure_rate_data = []
     measure_non_rate_data = []
 
-    def format_metric_name(name):
-        """Format metric name to be more readable"""
-        name = name.replace('new_', '').replace('_', ' ').title()
-        if 'Rating' in name:
-            return name
-        return f"{name} on New Code"
-
-    formatted_metrics = []
     for measure in component_measures:
-        metric_name = format_metric_name(measure.get("metric"))
+        metric_name = measure.get("metric")
         metric_value = measure.get("value")
-        
         if "periods" in measure:
             metric_value = measure.get("periods")[0].get("value")
-            
-        if metric_name in rate_metrics:
-            rating = rating_mapping.get(metric_value, metric_value)
-            formatted_metrics.append(f"{metric_name}: {rating}")
+
+        if metric_name in rate_metrics and metric_value in rating_mapping:
+            rating = rating_mapping[metric_value]
+            measure_rate_data.append({"metric_name": metric_name, "rating": rating})
         else:
-            # Format numerical values
-            try:
-                value = float(metric_value)
-                if value.is_integer():
-                    formatted_value = str(int(value))
-                else:
-                    formatted_value = f"{value:.1f}%"
-            except (ValueError, TypeError):
-                formatted_value = metric_value
-                
-            formatted_metrics.append(f"{metric_name}: {formatted_value}")
-            
-    return formatted_metrics
+            measure_non_rate_data.append({"metric_name": metric_name, "value": metric_value})
+
+    return measure_rate_data, measure_non_rate_data
 
 
 def main():
@@ -123,12 +104,57 @@ def main():
         measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
                                                                        args.output_type)
 
-        # Print metrics in a more structured format
-        print("Metrics:")
-        for metric in metrics:
-            print(f"- {metric}")
+        # 打印工作负载分析
+        print("📊 Workload Analysis:")
+        for measure in measure_non_rate_data:
+            if measure['metric_name'] == 'new_lines':
+                print(f"📝 Estimated changedLine for PR {args.pr_number}: {measure['value']}")
+                workload = float(measure['value']) * 0.02
+                print(f"⏱️ Estimated workload for PR {args.pr_number}: {workload:.2f}")
+                break
+
+        # 打印SonarQube分析结果
+        print("\n🔍 SonarQube Analysis Result:")
+        
+        # 打印评级指标
+        print("\n📈 Metrics:")
+        rating_icons = {
+            'A': '🟢',
+            'B': '🟡',
+            'C': '🟠',
+            'D': '🔴',
+            'E': '⚫'
+        }
+        for measure in measure_rate_data:
+            icon = rating_icons.get(measure['rating'], '⚪')
+            print(f"{icon} {measure['metric_name']}: {measure['rating']}")
+
+        # 打印Issues部分
+        print("\n🐛 Issues")
+        issues_found = False
+        for measure in measure_non_rate_data:
+            if measure['metric_name'] in ['new_bugs', 'new_vulnerabilities', 'new_code_smells']:
+                if float(measure['value']) > 0:
+                    issues_found = True
+                    icon = '🪲' if 'bugs' in measure['metric_name'] else '🔓' if 'vulnerabilities' in measure['metric_name'] else '💭'
+                    print(f"{icon} {measure['value']} {measure['metric_name']}")
+        
+        if not issues_found:
+            print("✅ 0 New issues")
+            print("✅ 0 Accepted issues")
+
+        # 打印Measures部分
+        print("\n📊 Measures")
+        for measure in measure_non_rate_data:
+            if measure['metric_name'] == 'new_security_hotspots':
+                print(f"🛡️ {measure['value']} Security Hotspots")
+            elif measure['metric_name'] == 'new_coverage':
+                print(f"📊 {measure['value']}% Coverage on New Code")
+            elif measure['metric_name'] == 'new_duplicated_lines_density':
+                print(f"📑 {measure['value']}% Duplication on New Code")
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
 
 
 if __name__ == "__main__":

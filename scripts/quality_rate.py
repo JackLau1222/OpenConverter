@@ -104,15 +104,56 @@ def main():
         measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
                                                                        args.output_type)
 
-        print("Metrics:")
-        # print("Rate Metrics:")
+
+        # Print rating indicator
+        print("\n📈 Metrics:")
+        rating_icons = {
+            'A': '🟢',
+            'B': '🟡',
+            'C': '🟠',
+            'D': '🔴',
+            'E': '⚫'
+        }
         for measure in measure_rate_data:
-            print(f"- {measure['metric_name']}: {measure['rating']}")
-        # print("Non-Rate Metrics:")
-        for measure in measure_non_rate_data:
-            print(f"- {measure['metric_name']}: {measure['value']}")
+            icon = rating_icons.get(measure['rating'], '⚪')
+            print(f"{icon} {measure['metric_name']}: {measure['rating']}")
+
+        # Print the Issues section
+        print("\n🐛 Issues")
+        new_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=OPEN,CONFIRMED&sinceLeakPeriod=true"
+        accepted_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=ACCEPTED"
+
+        # Get issues data
+        issues_api_url = f"https://sonarcloud.io/api/measures/component?component={repository}&metricKeys=maintainability_issues,accepted_issues&pullRequest={args.pr_number}&additionalFields=periods"
+        response = requests.get(issues_api_url, auth=(args.token, ""))
+        if response.status_code == 200:
+            data = response.json()
+            measures = data.get('component', {}).get('measures', [])
+            total_issues = 0
+            accepted_issues = 0
+
+            for measure in measures:
+                if measure.get('metric') == 'maintainability_issues':
+                    value = measure.get('value', '')
+                    if isinstance(value, str) and '{' in value:
+                        import json
+                        value_dict = json.loads(value.replace("'", '"'))
+                        total_issues = value_dict.get('total', 0)
+                elif measure.get('metric') == 'accepted_issues':
+                    accepted_issues = int(measure.get('value', 0))
+
+            print(f"<a href='{new_issues_url}'>✅ {total_issues} New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ {accepted_issues} Accepted issues</a>")
+        else:
+            print(f"<a href='{new_issues_url}'>✅ New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ Accepted issues</a>")
+
+        # Print the Measures section
+        measures_url = f"https://sonarcloud.io/component_measures?id={repository}&pullRequest={args.pr_number}"
+        print(f"\n<a href='{measures_url}'>📊 Measures</a>")
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
 
 
 if __name__ == "__main__":

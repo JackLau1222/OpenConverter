@@ -91,7 +91,13 @@ jobs:
       - name: Checkout target branch code (using pull_request_target)
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Fetch and checkout PR branch
+        run: |
+          git remote add pr_origin https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
+          git fetch pr_origin ${{ github.event.pull_request.head.ref }}:pr_branch
+          git checkout pr_branch
 
       - name: Print current branch and commit hash
         run: |

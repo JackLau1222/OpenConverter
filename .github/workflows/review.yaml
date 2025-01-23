@@ -18,6 +18,17 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.ref }}
 
+    - name: Fetch and checkout PR branch
+      run: |
+        git remote add pr_origin https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
+        git fetch pr_origin ${{ github.event.pull_request.head.ref }}:pr_branch
+        git checkout pr_branch
+
+    - name: Print current branch and commit hash
+      run: |
+        echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+        echo "Current commit hash: $(git rev-parse HEAD)"
+
     - name: Checkout BMF repository (specific branch)
       run: |
         sudo apt update

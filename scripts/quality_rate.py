@@ -124,10 +124,32 @@ def main():
         print("\n🐛 Issues")
         new_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=OPEN,CONFIRMED&sinceLeakPeriod=true"
         accepted_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=ACCEPTED"
-        print(f"<a href='{new_issues_url}'>✅ New issues</a>")
-        print(f"<a href='{accepted_issues_url}'>✅ Accepted issues</a>")
-        print(f"https://sonarcloud.io/api/measures/component?component=JackLau1222_OpenConverter&metricKeys=maintainability_issues,accepted_issues&pullRequest=46&additionalFields=periods")
-
+        
+        # 获取issues数据
+        issues_api_url = f"https://sonarcloud.io/api/measures/component?component={repository}&metricKeys=maintainability_issues,accepted_issues&pullRequest={args.pr_number}&additionalFields=periods"
+        response = requests.get(issues_api_url, auth=(args.token, ""))
+        if response.status_code == 200:
+            data = response.json()
+            measures = data.get('component', {}).get('measures', [])
+            total_issues = 0
+            accepted_issues = 0
+            
+            for measure in measures:
+                if measure.get('metric') == 'maintainability_issues':
+                    value = measure.get('value', '')
+                    if isinstance(value, str) and '{' in value:
+                        import json
+                        value_dict = json.loads(value.replace("'", '"'))
+                        total_issues = value_dict.get('total', 0)
+                elif measure.get('metric') == 'accepted_issues':
+                    accepted_issues = int(measure.get('value', 0))
+            
+            print(f"<a href='{new_issues_url}'>✅ {total_issues} New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ {accepted_issues} Accepted issues</a>")
+        else:
+            print(f"<a href='{new_issues_url}'>✅ New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ Accepted issues</a>")
+            
         # 打印Measures部分
         measures_url = f"https://sonarcloud.io/component_measures?id={repository}&pullRequest={args.pr_number}"
         print(f"\n<a href='{measures_url}'>📊 Measures</a>")

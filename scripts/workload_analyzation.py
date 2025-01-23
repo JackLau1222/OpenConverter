@@ -419,4 +419,3 @@ if __name__ == '__main__':
         logging.info(f"Script executed in {execution_time:.2f} seconds")
     except Exception as e:
         logging.error(f"Error: {e}")
-

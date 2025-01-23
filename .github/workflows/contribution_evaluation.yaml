@@ -1,7 +1,7 @@
 name: Contribution Evaluation
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch: 
 
@@ -86,7 +86,7 @@ jobs:
     needs: workload-analysis  # Ensure this job runs after workload analysis
     env:
       BUILD_WRAPPER_OUT_DIR: src/build
-    
+
     steps:
       - name: Checkout target branch code (using pull_request_target)
         uses: actions/checkout@v2
@@ -238,5 +238,4 @@ jobs:
                 body: combinedBody
               });
             }
-
 

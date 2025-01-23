@@ -104,15 +104,6 @@ def main():
         measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
                                                                        args.output_type)
 
-        # 打印工作负载分析
-        print("📊 Workload Analysis:")
-        for measure in measure_non_rate_data:
-            if measure['metric_name'] == 'new_lines':
-                print(f"📝 Estimated changedLine for PR {args.pr_number}: {measure['value']}")
-                workload = float(measure['value']) * 0.02
-                print(f"⏱️ Estimated workload for PR {args.pr_number}: {workload:.2f}")
-                break
-
         # 打印SonarQube分析结果
         print("\n🔍 SonarQube Analysis Result:")
 
@@ -131,28 +122,37 @@ def main():
 
         # 打印Issues部分
         print("\n🐛 Issues")
-        issues_found = False
-        for measure in measure_non_rate_data:
-            if measure['metric_name'] in ['new_bugs', 'new_vulnerabilities', 'new_code_smells']:
-                if float(measure['value']) > 0:
-                    issues_found = True
-                    icon = '🪲' if 'bugs' in measure['metric_name'] else '🔓' if 'vulnerabilities' in measure[
-                        'metric_name'] else '💭'
-                    print(f"{icon} {measure['value']} {measure['metric_name']}")
+        new_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=OPEN,CONFIRMED&sinceLeakPeriod=true"
+        accepted_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=ACCEPTED"
 
-        if not issues_found:
-            print("✅ 0 New issues")
-            print("✅ 0 Accepted issues")
+        # 获取issues数据
+        issues_api_url = f"https://sonarcloud.io/api/measures/component?component={repository}&metricKeys=maintainability_issues,accepted_issues&pullRequest={args.pr_number}&additionalFields=periods"
+        response = requests.get(issues_api_url, auth=(args.token, ""))
+        if response.status_code == 200:
+            data = response.json()
+            measures = data.get('component', {}).get('measures', [])
+            total_issues = 0
+            accepted_issues = 0
+
+            for measure in measures:
+                if measure.get('metric') == 'maintainability_issues':
+                    value = measure.get('value', '')
+                    if isinstance(value, str) and '{' in value:
+                        import json
+                        value_dict = json.loads(value.replace("'", '"'))
+                        total_issues = value_dict.get('total', 0)
+                elif measure.get('metric') == 'accepted_issues':
+                    accepted_issues = int(measure.get('value', 0))
+
+            print(f"<a href='{new_issues_url}'>✅ {total_issues} New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ {accepted_issues} Accepted issues</a>")
+        else:
+            print(f"<a href='{new_issues_url}'>✅ New issues</a>")
+            print(f"<a href='{accepted_issues_url}'>✅ Accepted issues</a>")
 
         # 打印Measures部分
-        print("\n📊 Measures")
-        for measure in measure_non_rate_data:
-            if measure['metric_name'] == 'new_security_hotspots':
-                print(f"🛡️ {measure['value']} Security Hotspots")
-            elif measure['metric_name'] == 'new_coverage':
-                print(f"📊 {measure['value']}% Coverage on New Code")
-            elif measure['metric_name'] == 'new_duplicated_lines_density':
-                print(f"📑 {measure['value']}% Duplication on New Code")
+        measures_url = f"https://sonarcloud.io/component_measures?id={repository}&pullRequest={args.pr_number}"
+        print(f"\n<a href='{measures_url}'>📊 Measures</a>")
 
     except Exception as e:
         print(f"❌ Error: {e}")

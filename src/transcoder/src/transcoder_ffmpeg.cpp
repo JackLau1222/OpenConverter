@@ -1,7 +1,5 @@
 #include "../include/transcoder_ffmpeg.h"
 
-int TranscoderFFmpeg::frameNumber = 0;
-
 /* Receive pointers from converter */
 TranscoderFFmpeg::TranscoderFFmpeg(ProcessParameter *processParameter,
                        EncodeParameter *encodeParameter)
@@ -219,7 +217,8 @@ bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder, 
         // encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
 
         av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
-        processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+        // processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+        send_process_parameter(frameNumber++, frameTotalNumber);
 
         output_packet->stream_index = encoder->videoStream->index;
         output_packet->duration = encoder->videoStream->time_base.den /
@@ -438,7 +437,7 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
     // encoder->videoCodec =
     // avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
     if (!encoder->videoCodec) {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: \n");
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find video codec: %s\n", codec.c_str());
         return false;
     }
 
@@ -514,11 +513,12 @@ bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
     /**
      * set the output file parameters
      */
-    //find the encodec by ID
-    encoder->audioCodec = avcodec_find_encoder(decoder->audioCodecCtx->codec_id);
+    //find the encodec by name
+    std::string codec = encodeParameter->get_Audio_Codec_Name();
+    encoder->audioCodec = avcodec_find_encoder_by_name(codec.c_str());
     if(!encoder->audioCodec)
     {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't find codec: \n");
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find audio codec: %s\n", codec.c_str());
         return -1;
     }
     //init codec context

@@ -63,10 +63,6 @@ class TranscoderFFmpeg : public Transcoder {
     // encoder's parameters
     bool copyVideo;
     bool copyAudio;
-
-    static int frameNumber;
-
-    int64_t frameTotalNumber;
 };
 
 #endif // TRANSCODERFFMPEG_H

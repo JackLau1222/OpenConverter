@@ -7,16 +7,6 @@ TranscoderBMF::TranscoderBMF(ProcessParameter *processParameter,
     frameTotalNumber = 0;
 }
 
-double TranscoderBMF::compute_smooth_duration(double new_duration) {
-    if (new_duration >= min_duration_threshold) {
-        duration_history.push_back(new_duration);
-        if (duration_history.size() > max_history_size) {
-            duration_history.erase(duration_history.begin());
-        }
-    }
-    return duration_history.empty() ? 0.0 :
-               std::accumulate(duration_history.begin(), duration_history.end(), 0.0) / duration_history.size();
-}
 
 bmf_sdk::CBytes TranscoderBMF::decoder_callback(bmf_sdk::CBytes input) {
     std::string strInfo;
@@ -28,8 +18,8 @@ bmf_sdk::CBytes TranscoderBMF::decoder_callback(bmf_sdk::CBytes input) {
     std::smatch match;
 
     if (std::regex_search(strInfo, match, frame_regex) && match.size() > 1) {
-        std::istringstream(match[1]) >> frame_number_total; // Convert to int
-        BMFLOG(BMF_DEBUG) << "Extracted Frame Number: " << frame_number_total;
+        std::istringstream(match[1]) >> frameTotalNumber; // Convert to int
+        BMFLOG(BMF_DEBUG) << "Extracted Frame Number: " << frameTotalNumber;
     } else {
         BMFLOG(BMF_WARNING) << "Failed to extract frame number";
     }
@@ -47,32 +37,12 @@ bmf_sdk::CBytes TranscoderBMF::encoder_callback(bmf_sdk::CBytes input) {
     std::smatch match;
 
     if (std::regex_search(strInfo, match, frame_regex) && match.size() > 1) {
-        std::istringstream(match[1]) >> frame_number_global; // Convert to int
-        BMFLOG(BMF_DEBUG) << "Extracted Total Frame Number: " << frame_number_global;
-        process_number = frame_number_global * 100 / frame_number_total;
+        std::istringstream(match[1]) >> frameNumber; // Convert to int
+        BMFLOG(BMF_DEBUG) << "Extracted Total Frame Number: " << frameNumber;
 
-        processParameter->set_Process_Number(process_number);
+        send_process_parameter(frameNumber, frameTotalNumber);
 
-        static auto last_encoder_call_time = std::chrono::system_clock::now();
-        auto now = std::chrono::system_clock::now();
-
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_encoder_call_time).count();
-        last_encoder_call_time = now;
-
-        double smooth_duration = compute_smooth_duration(duration);
-        if (frame_number_global > 0 && frame_number_total > 0) {
-            rest_time = smooth_duration * (frame_number_total-frame_number_global) / 1000;
-            processParameter->set_Time_Required(rest_time);
-        }
-
-        BMFLOG(BMF_INFO) << "Process Number (percentage): " << process_number << "%\t"
-                         << "Current duration (milliseconds): " << duration << "\t"
-                         << "Smoothed Duration: " << smooth_duration << " ms\t"
-                         << "Estimated Rest Time (seconds): " << rest_time;
-
-
-
-        if (frame_number_global == frame_number_total) {
+        if (frameNumber == frameTotalNumber) {
             BMFLOG(BMF_INFO) << "====Callback==== Finish";
         }
 

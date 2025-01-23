@@ -105,7 +105,7 @@ def main():
                                                                        args.output_type)
 
 
-        # 打印评级指标
+        # Print rating indicator
         print("\n📈 Metrics:")
         rating_icons = {
             'A': '🟢',
@@ -118,12 +118,12 @@ def main():
             icon = rating_icons.get(measure['rating'], '⚪')
             print(f"{icon} {measure['metric_name']}: {measure['rating']}")
 
-        # 打印Issues部分
+        # Print the Issues section
         print("\n🐛 Issues")
         new_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=OPEN,CONFIRMED&sinceLeakPeriod=true"
         accepted_issues_url = f"https://sonarcloud.io/project/issues?id={repository}&pullRequest={args.pr_number}&issueStatuses=ACCEPTED"
 
-        # 获取issues数据
+        # Get issues data
         issues_api_url = f"https://sonarcloud.io/api/measures/component?component={repository}&metricKeys=maintainability_issues,accepted_issues&pullRequest={args.pr_number}&additionalFields=periods"
         response = requests.get(issues_api_url, auth=(args.token, ""))
         if response.status_code == 200:
@@ -148,7 +148,7 @@ def main():
             print(f"<a href='{new_issues_url}'>✅ New issues</a>")
             print(f"<a href='{accepted_issues_url}'>✅ Accepted issues</a>")
 
-        # 打印Measures部分
+        # Print the Measures section
         measures_url = f"https://sonarcloud.io/component_measures?id={repository}&pullRequest={args.pr_number}"
         print(f"\n<a href='{measures_url}'>📊 Measures</a>")
 

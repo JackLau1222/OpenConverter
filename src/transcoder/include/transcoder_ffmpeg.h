@@ -39,9 +39,13 @@ class TranscoderFFmpeg : public Transcoder {
 
     bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
 
-    bool encode_Video(AVStream *inStream, StreamContext *encoder);
+    bool encode_Video(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame);
 
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
+
+    bool encode_Audio(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame);
+
+    bool transcode_Audio(StreamContext *decoder, StreamContext *encoder);
 
     bool prepare_Decoder(StreamContext *decoder);
 

@@ -104,8 +104,6 @@ def main():
         measure_rate_data, measure_non_rate_data = fetch_sonar_metrics(args.pr_number, repository, args.token,
                                                                        args.output_type)
 
-        # 打印SonarQube分析结果
-        print("\n🔍 SonarQube Analysis Result:")
 
         # 打印评级指标
         print("\n📈 Metrics:")

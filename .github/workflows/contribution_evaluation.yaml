@@ -32,7 +32,8 @@ jobs:
       - name: Run workload analysis script
         id: analyze_workload
         run: |
-          python scripts/workload_analyzation.py \
+          git clone https://github.com/TSGU-OSC/OpenRate.git
+          python OpenRate/scripts/workload_analyzation.py \
             --owner ${{ github.repository_owner }} \
             --repo ${{ github.event.repository.name }} \
             --pr-number ${{ github.event.number }} \
@@ -188,7 +189,8 @@ jobs:
       - name: Run code quality analysis script
         id: analyze_workload
         run: |
-          python scripts/quality_rate.py \
+          git clone https://github.com/TSGU-OSC/OpenRate.git
+          python OpenRate/scripts/quality_rate.py \
             --owner ${{ github.repository_owner }} \
             --repo ${{ github.event.repository.name }} \
             --pr-number ${{ github.event.number }} \

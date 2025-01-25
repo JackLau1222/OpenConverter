@@ -216,7 +216,7 @@ bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder, 
         // frameNumber =
         // encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
 
-        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %d\n", frameNumber);
+        av_log(NULL, AV_LOG_DEBUG, "calculator frame = %ld\n", frameNumber);
         // processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
         send_process_parameter(frameNumber++, frameTotalNumber);
 
@@ -268,7 +268,7 @@ bool TranscoderFFmpeg::encode_Audio(AVStream *in_stream, StreamContext *encoder,
         ret = av_interleaved_write_frame(encoder->fmtCtx, output_packet);
         if(ret < 0)
         {
-            fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
+            // fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
         }
         av_packet_unref(output_packet);
     }
@@ -545,7 +545,7 @@ bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
     ret = avcodec_open2(encoder->audioCodecCtx, encoder->audioCodec, NULL);
     if(ret < 0)
     {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+        // av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
         return -1;
     }
     encoder->audioStream = avformat_new_stream(encoder->fmtCtx, NULL);

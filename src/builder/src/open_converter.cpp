@@ -55,6 +55,9 @@ OpenConverter::OpenConverter(QWidget *parent)
     connect(ui->menuLanguage, SIGNAL(triggered(QAction *)), this,
             SLOT(slotLanguageChanged(QAction *)));
 
+    connect(ui->menuTranscoder, SIGNAL(triggered(QAction *)), this,
+            SLOT(slotTranscoderChanged(QAction *)));
+
     m_currLang = "english";
     m_langPath = ":/";
 }
@@ -70,6 +73,39 @@ void OpenConverter::dropEvent(QDropEvent *event){
         const QUrl url = event->mimeData()->urls().first();
         ui->lineEdit_inputFile->setText(url.toLocalFile());
         event->acceptProposedAction();
+    }
+}
+
+// Called every time, when a menu entry of the transcoder menu is called
+void OpenConverter::slotTranscoderChanged(QAction *action) {
+    if (0 != action) {
+        std::string transcoderName = action->objectName().toStdString();
+        bool isValid = false;
+#ifdef ENABLE_FFMPEG
+        if (transcoderName == "FFMPEG") {
+            converter->set_Transcoder(transcoderName);
+            isValid = true;
+        }
+#endif
+#ifdef ENABLE_FFTOOL
+        if (transcoderName == "FFTOOL") {
+            converter->set_Transcoder(transcoderName);
+            isValid = true;
+        }
+#endif
+#ifdef ENABLE_BMF
+        if (transcoderName == "BMF") {
+            converter->set_Transcoder(transcoderName);
+            isValid = true;
+        }
+#endif
+        // If the transcoder name is not valid, log an error
+        if (isValid) {
+            ui->statusBar->showMessage(
+                tr("Current Transcoder changed to %1").arg(QString::fromStdString(transcoderName)));
+        } else {
+            std::cout << "Error: Undefined transcoder name - %s" << transcoderName.c_str() << std::endl;
+        }
     }
 }
 

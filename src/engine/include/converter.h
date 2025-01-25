@@ -33,6 +33,8 @@ class Converter : public QObject {
               EncodeParameter *encodeParamter);
     ~Converter();
 
+    bool set_Transcoder(std::string transcoderName);
+
   private:
     Transcoder *transcoder = NULL;
 

@@ -31,6 +31,8 @@
 #include <QMimeData>
 #include <QLineEdit>
 
+#include <iostream>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class OpenConverter;
@@ -51,6 +53,7 @@ class OpenConverter : public QMainWindow {
     void activateConverterThread(QString src, QString dst);
   protected slots:
     void slotLanguageChanged(QAction *);
+    void slotTranscoderChanged(QAction *);
   public slots:
     void apply_Pushed();
 
@@ -67,7 +70,7 @@ class OpenConverter : public QMainWindow {
     void handle_Converter_Result(bool flag);
 
   public:
-    OpenConverter(QWidget *parent = nullptr);
+    explicit OpenConverter(QWidget *parent = nullptr);
     ~OpenConverter();
 
   private:

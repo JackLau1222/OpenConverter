@@ -9,8 +9,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(USE_BMF_TRANSCODER "Use BMF Transcoder" OFF)
-option(USE_FFTOOL_TRANSCODER "User FFmpeg Command Tool Transcoder" ON)
+option(BMF_TRANSCODER "enable BMF Transcoder" ON)
+option(FFTOOL_TRANSCODER "enable FFmpeg Command Tool Transcoder" ON)
+option(FFMPEG_TRANSCODER "enable FFmpeg Core Transcoder" ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
@@ -43,8 +44,7 @@ endif()
 message(STATUS "FFMPEG_INCLUDE_DIRS: ${FFMPEG_INCLUDE_DIRS}")
 message(STATUS "FFMPEG_LIBRARY_DIRS: ${FFMPEG_LIBRARY_DIRS}")
 
-# Add source files conditionally based on whether to use BMF or FFmpeg transcoder
-if (USE_BMF_TRANSCODER)
+if (BMF_TRANSCODER)
     # Check if the BMF_ROOT_PATH environment variable is set
     if (DEFINED ENV{BMF_ROOT_PATH})
         set(BMF_ROOT_PATH $ENV{BMF_ROOT_PATH})
@@ -58,25 +58,38 @@ if (USE_BMF_TRANSCODER)
     include_directories(${BMF_ROOT_PATH}/include)
     link_directories(${BMF_ROOT_PATH}/lib)
 
-    add_definitions(-DUSE_BMF)  # Define a macro for BMF transcoder
+    add_definitions(-DENABLE_BMF)  # Define a macro for BMF transcoder
+#    list(APPEND HEADERS
+#        ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_bmf.h
+#    )
     list(APPEND SOURCES
         ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_bmf.cpp
     )
-elseif (USE_FFTOOL_TRANSCODER)
+endif()
+
+if (FFTOOL_TRANSCODER)
     # Check if ffmpeg is available in the environment
     find_program(FFMPEG_EXECUTABLE NAMES ffmpeg)
     if(FFMPEG_EXECUTABLE)
         message(STATUS "FFmpeg found at: ${FFMPEG_EXECUTABLE}")
+#        list(APPEND HEADERS
+#            ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_fftool.h
+#        )
         list(APPEND SOURCES
             ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_fftool.cpp
         )
-        add_definitions(-DUSE_FFTOOL)  # Define a macro for FFmpeg Tool transcoder
+        add_definitions(-DENABLE_FFTOOL)  # Define a macro for FFmpeg Tool transcoder
         add_definitions(-DFFTOOL_PATH="${FFMPEG_EXECUTABLE}")
     else()
         message(FATAL_ERROR "FFmpeg not found in the system PATH!")
     endif()
-else()
-    add_definitions(-DUSE_FFMPEG)  # Define a macro for FFmpeg transcoder
+endif()
+
+if (FFMPEG_TRANSCODER)
+    add_definitions(-DENABLE_FFMPEG)  # Define a macro for FFmpeg transcoder
+#    list(APPEND HEADERS
+#        ${CMAKE_SOURCE_DIR}/transcoder/include/transcoder_ffmpeg.h
+#    )
     list(APPEND SOURCES
         ${CMAKE_SOURCE_DIR}/transcoder/src/transcoder_ffmpeg.cpp
     )
@@ -161,7 +174,7 @@ target_link_libraries(OpenConverter
     swresample
 )
 
-if(USE_BMF_TRANSCODER)
+if(BMF_TRANSCODER)
     target_link_libraries(OpenConverter PRIVATE
         engine
         bmf_module_sdk

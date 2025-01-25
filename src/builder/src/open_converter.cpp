@@ -104,7 +104,7 @@ void OpenConverter::slotTranscoderChanged(QAction *action) {
             ui->statusBar->showMessage(
                 tr("Current Transcoder changed to %1").arg(QString::fromStdString(transcoderName)));
         } else {
-            std::cout << "Error: Undefined transcoder name - %s" << transcoderName.c_str() << std::endl;
+            std::cout << "Error: Undefined transcoder name - " << transcoderName.c_str() << std::endl;
         }
     }
 }

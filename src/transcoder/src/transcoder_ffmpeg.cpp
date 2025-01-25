@@ -20,6 +20,18 @@ bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path
     decoder->filename = input_path.c_str();
     encoder->filename = output_path.c_str();
 
+    if (encodeParameter->get_Video_Codec_Name() == "") {
+        copyVideo = true;
+    } else {
+        copyVideo = false;
+    }
+
+    if (encodeParameter->get_Audio_Codec_Name() == "") {
+        copyAudio = true;
+    } else {
+        copyAudio = false;
+    }
+
     open_Media(decoder, encoder);
 
     if (!prepare_Decoder(decoder)) {

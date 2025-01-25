@@ -1,7 +1,7 @@
 name: Review
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
   workflow_dispatch: 
 
@@ -108,7 +108,6 @@ jobs:
 
     - name: Copy runtime
       run: |
-        # mkdir /src/build/lib
         cp $FFMPEG_ROOT_PATH/lib/libswscale.so.6 src/build/lib
         cp $FFMPEG_ROOT_PATH/lib/libavfilter.so.8 src/build/lib
         cp $FFMPEG_ROOT_PATH/lib/libpostproc.so.56 src/build/lib
@@ -136,7 +135,7 @@ jobs:
         path: OpenConverter_Linux_x86.tar.gz
 
     - name: Setup tmate session
-      # if: ${{ failure() }}
+      if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
 
     - name: Finish

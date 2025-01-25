@@ -172,6 +172,10 @@ target_link_libraries(OpenConverter
     avutil
     pthread
     swresample
+    swscale
+    avfilter
+    avdevice
+    postproc
 )
 
 if(BMF_TRANSCODER)
@@ -179,7 +183,6 @@ if(BMF_TRANSCODER)
         engine
         bmf_module_sdk
         hmp
-        builtin_modules
     )
 endif()
 

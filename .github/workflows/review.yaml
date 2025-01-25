@@ -1,7 +1,7 @@
 name: Review
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch: 
 
@@ -87,8 +87,8 @@ jobs:
 
     - name: Copy libs
       run: |
-        export LD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/
-        export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/
+        export LD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
+        export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
         # linuxdeployqt
         sudo apt-get -y install git g++ libgl1-mesa-dev
         git clone https://github.com/probonopd/linuxdeployqt.git
@@ -136,7 +136,7 @@ jobs:
         path: OpenConverter_Linux_x86.tar.gz
 
     - name: Setup tmate session
-      if: ${{ failure() }}
+      # if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
 
     - name: Finish

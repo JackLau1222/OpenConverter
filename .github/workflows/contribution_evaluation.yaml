@@ -121,7 +121,7 @@ jobs:
             ffmpeg
           key: ${{ runner.os }}-ffmpeg-${{ hashFiles('bmf/scripts/build_ffmpeg.sh') }}
           restore-keys: |
-            ${{ runner.os }}-ffmpeg-
+            ${{ runner.os }}-ffmpeg-linux-x86
 
       - name: Cache BMF build
         uses: actions/cache@v3
@@ -129,7 +129,7 @@ jobs:
           path: bmf/output/
           key: ${{ runner.os }}-bmf-${{ hashFiles('bmf/build.sh') }}
           restore-keys: |
-            ${{ runner.os }}-bmf-
+            ${{ runner.os }}-bmf-linux-x86
 
       - name: Compile FFmpeg if not cached
         run: |

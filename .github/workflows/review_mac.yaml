@@ -1,7 +1,7 @@
 name: macOS Review
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
@@ -173,16 +173,16 @@ jobs:
         (cd src/build && 
         cp $BMF_ROOT_PATH/BUILTIN_CONFIG.json OpenConverter.app/Contents/Frameworks && 
         mkdir OpenConverter.app/Contents/Frameworks/lib && cp $BMF_ROOT_PATH/lib/libbuiltin_modules.dylib OpenConverter.app/Contents/Frameworks/lib && 
-        macdeployqt OpenConverter.app && codesign --force --deep --sign - OpenConverter.app)
+        macdeployqt OpenConverter.app -dmg)
         
-        mv src/build/OpenConverter.app OpenConverter_macOS_aarch64.app
+        mv src/build/OpenConverter.dmg OpenConverter_macOS_aarch64.dmg
 
     # Step to upload the dmg package as an artifact
     - name: Upload build artifact
       uses: actions/upload-artifact@v3
       with:
         name: OpenConverter_macOS_aarch64
-        path: OpenConverter_macOS_aarch64.app
+        path: OpenConverter_macOS_aarch64.dmg
 
     - name: Setup tmate session
       if: ${{ failure() }}

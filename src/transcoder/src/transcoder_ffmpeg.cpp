@@ -178,31 +178,6 @@ bool TranscoderFFmpeg::open_Media(StreamContext *decoder, StreamContext *encoder
     return true;
 }
 
-bool TranscoderFFmpeg::copyFrame(AVFrame *oldFrame, AVFrame *newFrame) {
-    int response;
-    newFrame->pts = oldFrame->pts;
-    newFrame->format = oldFrame->format;
-    newFrame->width = oldFrame->width;
-    newFrame->height = oldFrame->height;
-    // newFrame->channels = oldFrame->channels;
-    // newFrame->channel_layout = oldFrame->channel_layout;
-    newFrame->ch_layout = oldFrame->ch_layout;
-    newFrame->nb_samples = oldFrame->nb_samples;
-    response = av_frame_get_buffer(newFrame, 32);
-    if (response != 0) {
-        return false;
-    }
-    response = av_frame_copy(newFrame, oldFrame);
-    if (response >= 0) {
-        return false;
-    }
-    response = av_frame_copy_props(newFrame, oldFrame);
-    if (response == 0) {
-        return false;
-    }
-    return true;
-}
-
 bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame) {
     int ret = -1;
     AVPacket *output_packet = av_packet_alloc();
@@ -309,8 +284,6 @@ bool TranscoderFFmpeg::transcode_Video(StreamContext *decoder,
             return -1;
         }
 
-        // copyFrame(decoder->frame, encoder->frame);
-
         encode_Video(decoder->videoStream, encoder, decoder->frame);
 
         if (decoder->pkt) {
@@ -340,7 +313,7 @@ bool TranscoderFFmpeg::transcode_Audio(StreamContext *decoder, StreamContext *en
             av_log(NULL, AV_LOG_ERROR, "Failed to receive frame from decoder!\n");
             return ret;
         }
-        // copyFrame(decoder->frame, encoder->frame);
+
         encode_Audio(decoder->audioStream, encoder, decoder->frame);
         
         if (decoder->pkt)
@@ -544,8 +517,14 @@ bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
     {
 //        int OUTPUT_CHANNELS = 2;
         int OUTPUT_BIT_RATE = 196000;
+#ifdef OC_FFMPEG_VERSION
+    #if OC_FFMPEG_VERSION < 50
+        encoder->audioCodecCtx->channel_layout = AV_CH_LAYOUT_STEREO;
+    #else
         AVChannelLayout stereoLayout = AV_CHANNEL_LAYOUT_STEREO;
         av_channel_layout_copy(&encoder->audioCodecCtx->ch_layout, &stereoLayout);
+    #endif
+#endif
         encoder->audioCodecCtx->sample_rate    = decoder->audioCodecCtx->sample_rate;
         encoder->audioCodecCtx->sample_fmt     = encoder->audioCodec->sample_fmts[0];
         encoder->audioCodecCtx->bit_rate       = OUTPUT_BIT_RATE;

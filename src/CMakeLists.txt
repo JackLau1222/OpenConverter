@@ -16,6 +16,72 @@ option(FFMPEG_TRANSCODER "enable FFmpeg Core Transcoder" ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+function(find_ffmpeg_version FFMPEG_VERSION_INCLUDE_DIR FFMPEG_LIB_DIR VERSION_VAR)
+    # First, attempt to find the version from ffversion.h
+    find_file(FFMPEG_VERSION_FILE
+            NAMES ffversion.h
+            PATHS ${FFMPEG_VERSION_INCLUDE_DIR}
+            PATH_SUFFIXES ffmpeg
+            NO_DEFAULT_PATH)
+
+    if(NOT FFMPEG_VERSION_FILE)
+        message(WARNING "Unable to find FFmpeg version file in ${FFMPEG_VERSION_INCLUDE_DIR}. Attempting to get version from library files.")
+    endif()
+
+    if(FFMPEG_VERSION_FILE)
+        # If we find ffversion.h, extract the version from it
+        file(STRINGS ${FFMPEG_VERSION_FILE} FFMPEG_VERSION_DEFINE
+            REGEX "#define FFMPEG_VERSION ")
+
+        string(REGEX MATCH "FFMPEG_VERSION \"([^\"]+)\"" FFMPEG_VERSION_STRING ${FFMPEG_VERSION_DEFINE})
+        set(FFMPEG_VERSION_MATCHED ${CMAKE_MATCH_1})
+
+        if(FFMPEG_VERSION_MATCHED AND NOT FFMPEG_VERSION_MATCHED MATCHES "N-")  
+            string(REGEX MATCHALL "([0-9]+)" VERSION_PARTS ${FFMPEG_VERSION_MATCHED})
+            list(GET VERSION_PARTS 0 VERSION_MAJOR)
+            list(GET VERSION_PARTS 1 VERSION_MINOR)
+            set(FFMPEG_VERSION_CLEAN "${VERSION_MAJOR}${VERSION_MINOR}")
+            set(${VERSION_VAR} ${FFMPEG_VERSION_CLEAN} PARENT_SCOPE)
+            message(STATUS "Detected FFmpeg version from ffversion.h: ${FFMPEG_VERSION_CLEAN}")
+            return()
+        else()
+            message(WARNING "Unable to parse FFmpeg version from ${FFMPEG_VERSION_FILE}. Try the next step...")
+        endif()
+    endif()
+
+    # If the version from ffversion.h is not found or is a dev version, fallback to libraries
+    # Search for FFmpeg libraries to detect version
+    file(GLOB FFMPEG_LIBRARIES "${FFMPEG_LIB_DIR}/libavcodec.*.*")
+
+    if(FFMPEG_LIBRARIES)
+        foreach(lib ${FFMPEG_LIBRARIES})
+            string(REGEX MATCH "libavcodec\\.([0-9]+)" FFMPEG_VERSION_MATCH ${lib})
+            if(FFMPEG_VERSION_MATCH)
+                string(REGEX REPLACE "libavcodec\\.([0-9]+)" "\\1" FFMPEG_VERSION ${FFMPEG_VERSION_MATCH})
+                
+                # Map library version to FFmpeg version
+                if(FFMPEG_VERSION STREQUAL "58")
+                    set(FFMPEG_VERSION_CLEAN "40")  # FFmpeg v4.x
+                elseif(FFMPEG_VERSION STREQUAL "59")
+                    set(FFMPEG_VERSION_CLEAN "50")  # FFmpeg v5.x
+                elseif(FFMPEG_VERSION STREQUAL "60")
+                    set(FFMPEG_VERSION_CLEAN "60")  # FFmpeg v6.x
+                elseif(FFMPEG_VERSION STREQUAL "61")
+                    set(FFMPEG_VERSION_CLEAN "70")  # FFmpeg v7.x (dev)
+                else()
+                    message(FATAL_ERROR "Unsupported FFmpeg library version: ${FFMPEG_VERSION}")
+                endif()
+
+                set(${VERSION_VAR} ${FFMPEG_VERSION_CLEAN} PARENT_SCOPE)
+                message(STATUS "Detected FFmpeg version from libraries: ${FFMPEG_VERSION_CLEAN}")
+                return()
+            endif()
+        endforeach()
+    endif()
+
+    message(FATAL_ERROR "Unable to determine FFmpeg version from both ffversion.h and libraries.")
+endfunction()
+
 if(DEFINED ENV{FFMPEG_ROOT_PATH})
     set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
     message(STATUS "Using FFMPEG_ROOT_PATH: ${FFMPEG_ROOT_PATH}")
@@ -43,6 +109,9 @@ endif()
 
 message(STATUS "FFMPEG_INCLUDE_DIRS: ${FFMPEG_INCLUDE_DIRS}")
 message(STATUS "FFMPEG_LIBRARY_DIRS: ${FFMPEG_LIBRARY_DIRS}")
+
+find_ffmpeg_version(${FFMPEG_INCLUDE_DIRS}/libavutil ${FFMPEG_LIBRARY_DIRS} OC_FFMPEG_VERSION)
+add_definitions(-DOC_FFMPEG_VERSION=${OC_FFMPEG_VERSION})
 
 if (BMF_TRANSCODER)
     # Check if the BMF_ROOT_PATH environment variable is set

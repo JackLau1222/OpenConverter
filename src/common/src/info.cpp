@@ -141,8 +141,15 @@ void Info::send_Info(char *src) {
         enum_To_String(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
     quickInfo->audioBitRate =
         avCtx->streams[quickInfo->audioIdx]->codecpar->bit_rate;
+#ifdef OC_FFMPEG_VERSION
+    #if OC_FFMPEG_VERSION < 60
     quickInfo->channels =
         avCtx->streams[quickInfo->audioIdx]->codecpar->channels;
+    #else
+    quickInfo->channels =
+        avCtx->streams[quickInfo->audioIdx]->codecpar->ch_layout.nb_channels;
+    #endif
+#endif
     quickInfo->sampleFmt = enum_To_String(audioCtx->sample_fmt);
     quickInfo->sampleRate =
         avCtx->streams[quickInfo->audioIdx]->codecpar->sample_rate;

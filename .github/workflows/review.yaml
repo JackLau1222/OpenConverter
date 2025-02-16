@@ -129,7 +129,7 @@ jobs:
 
     # Step to upload the tar.gz package as an artifact
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: OpenConverter_Linux_x86
         path: OpenConverter_Linux_x86.tar.gz

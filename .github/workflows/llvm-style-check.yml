@@ -1,0 +1,98 @@
+name: LLVM Style Check
+
+on:
+  pull_request_target:
+    branches: [main]
+
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install clang-format-18
+        run: |
+          echo "::group::🔧 Installing LLVM 18"
+          wget -q https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18 > /dev/null 2>&1
+          sudo apt-get install -y clang-format-18
+          sudo ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
+          echo "::endgroup::"
+
+      - name: Verify environment
+        run: |
+          echo "::group::🔍 Environment Verification"
+          echo "Clang-Format Path: $(which clang-format)"
+          clang-format --version
+          echo "Current directory: $(pwd)"
+          echo "Directory structure:"
+          tree -L 2 -I '.git|.github'
+          echo "::endgroup::"
+
+      - name: Check .clang-format configuration
+        run: |
+          echo "::group::📝 Checking .clang-format file"
+          if [ ! -f .clang-format ]; then
+            echo "⚠️ Warning: No .clang-format file found, using LLVM default style"
+            echo "BasedOnStyle: LLVM" > .clang-format
+          fi
+          echo "Current .clang-format content:"
+          cat .clang-format
+          echo "::endgroup::"
+
+      - name: Run enhanced clang-format check
+        run: |
+          echo "::group::🔎 Changed Files Detection"
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          echo "Comparing $BASE_SHA..$HEAD_SHA"
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA $HEAD_SHA)
+          printf "Changed files:\n%s\n" "$CHANGED_FILES"
+          echo "::endgroup::"
+
+          echo "::group::🚦 Formatting Check Process"
+          ERROR_FOUND=0
+          IFS=$'\n'  # Handle filenames with spaces
+
+          for FILE in $CHANGED_FILES; do
+            if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
+              echo "📄 Processing: $FILE"
+              
+              # Generate formatted temp file
+              TEMP_FILE="${FILE}.formatted"
+              clang-format -style=file --assume-filename="$FILE" "$FILE" > "$TEMP_FILE"
+
+              # Show detailed diff
+              if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
+                echo "::error file=$FILE,title=Style Issue::Code style violation detected in $FILE"
+                echo "❌ Error: Format issues found in $FILE"
+                echo "💡 Suggested fix:"
+                echo "======================================"
+                clang-format -style=file "$FILE" | diff -u --color=always "$FILE" - || true
+                echo "======================================"
+                ERROR_FOUND=1
+              else
+                echo "✅ No issues in $FILE"
+              fi
+
+              # Cleanup
+              rm -f "$TEMP_FILE"
+              echo "----------------------------------------"
+            else
+              echo "⏩ Skipping non-C++ file: $FILE"
+            fi
+          done
+
+          if [ $ERROR_FOUND -eq 1 ]; then
+            echo "❌❌❌ Formatting check failed! ❌❌❌"
+            echo "Some files require formatting. Please run:"
+            echo "clang-format -style=file -i <file>"
+            exit 1
+          else
+            echo "🎉🎉🎉 All files are properly formatted! 🎉🎉🎉"
+          fi
+          echo "::endgroup::"

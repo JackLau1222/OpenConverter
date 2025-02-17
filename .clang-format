@@ -1,5 +1,2 @@
 BasedOnStyle: LLVM
 AccessModifierOffset: -2
-AlignAfterOpenBracket: Align
-AllowShortFunctionsOnASingleLine: Empty
-BreakBeforeBraces: Allman

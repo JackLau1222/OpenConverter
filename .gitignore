@@ -4,6 +4,7 @@ build-*
 .DS_Store
 ./src/.DS_Store
 src/CMakeLists.txt.user
+src/build
 src/build-*
 .idea
 workload_output.txt

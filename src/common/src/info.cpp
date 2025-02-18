@@ -91,20 +91,13 @@ void Info::send_Info(char *src) {
         av_log(avCtx, AV_LOG_ERROR, "open failed");
         goto end;
     }
-    for (int i = 0; i < avCtx->nb_streams; i++) {
-        if (avCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            quickInfo->audioIdx = i;
-            av_log(NULL, AV_LOG_INFO, "Audio stream found at index: %d\n", i);
-        }
-        if (avCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            quickInfo->videoIdx = i;
-            av_log(NULL, AV_LOG_INFO, "Audio stream found at index: %d\n", i);
-        }
-    }
     ret = avformat_find_stream_info(avCtx, NULL);
     if (ret < 0) {
-        av_log(NULL, AV_LOG_ERROR, "%s: %s\n", src, av_err2str(ret));
+        CHECK_ERROR(ret);
     }
+    // find the video and audio stream from container
+    quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    quickInfo->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 
     if (quickInfo->videoIdx >= 0) {
         quickInfo->height =

@@ -8,10 +8,10 @@ jobs:
   clang-format-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout head branch code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
 
       - name: Install clang-format-18
         run: |

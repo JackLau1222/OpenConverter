@@ -1,60 +1,42 @@
 #!/bin/bash
 TOP_DIR=$PWD
 
-# Define file extensions to process
-EXTENSIONS=(".cpp" ".c" ".h" ".cc" ".hpp")
+# Define the directories to process
+DIRECTORIES=("$TOP_DIR/src")
 
-# Define clang-format default style (using JSON format)
-STYLE="{\"BasedOnStyle\": \"llvm\", \"IndentWidth\": 4, \"AccessModifierOffset\": -2}"
-
-# Check if clang-format is installed
-if ! command -v clang-format &> /dev/null; then
-    echo "Error: clang-format is not installed. Please install it and make sure it's in your PATH." >&2
-    exit 1
+# Check if a .clang-format file exists in the current directory. If not, create one.
+if [ ! -f "$TOP_DIR/.clang-format" ]; then
+    echo "No .clang-format file found in $TOP_DIR. Creating a temporary one..."
+    echo "BasedOnStyle: LLVM" > "$TOP_DIR/.clang-format"
+    echo "IndentWidth: 4" >> "$TOP_DIR/.clang-format"
+    echo "AccessModifierOffset: -2" >> "$TOP_DIR/.clang-format"
 fi
 
-# Check clang-format version for JSON style support, fallback to YAML if unsupported
-CLANG_VERSION=$(clang-format --version)
-if ! printf "%s\n" "$CLANG_VERSION" | grep -q "based on LLVM"; then
-    echo "Warning: clang-format version does not support JSON style. Falling back to YAML style."
-    STYLE="BasedOnStyle: LLVM\nIndentWidth: 4"
-fi
+# Iterate through the specified directories and format the files
+for dir in "${DIRECTORIES[@]}"; do
+    echo "Formatting directory: $dir"
+    FORMATTED_FILES=()
 
-echo "Scanning directory: $TOP_DIR"
+    # Find all .cpp, .c, .h files in the directory
+    FILES=$(find "$dir" -type f \( -name "*.cpp" -o -name "*.c" -o -name "*.h" \) -print0)
 
-# Build find command query for file extensions
-FIND_QUERY=""
-for ext in "${EXTENSIONS[@]}"; do
-    FIND_QUERY+=" -o -name *$ext"
-done
-FIND_QUERY=${FIND_QUERY:4}  # Remove leading "-o"
-
-# Find all matching files (use null delimiter to handle spaces in filenames)
-FILES=$(find "$TOP_DIR" -type f \( $FIND_QUERY \) -print0)
-
-# Check if any files were found
-if [ -z "$FILES" ]; then
-    echo "No files found with supported extensions."
-    exit 0
-fi
-
-echo "Formatting files..."
-
-FORMATTED_FILES=""
-
-# Process files using while loop with null delimiter
-while IFS= read -r -d '' file; do
-    # Get file directory
-    DIR=$(dirname "$file")
-    # Use -style=file if .clang-format exists in directory
-    if [ -f "$DIR/.clang-format" ]; then
-        clang-format -style=file -i "$file"
-    else
-        clang-format -style="$STYLE" -i "$file"
+    # Check if any files were found
+    if [ -z "$FILES" ]; then
+        echo "No files found with supported extensions in $dir."
+        continue
     fi
-    FORMATTED_FILES+="$file"$'\n'
-done < <(find "$TOP_DIR" -type f \( $FIND_QUERY \) -print0)
 
-printf "Formatted files:\n%s\n" "$FORMATTED_FILES"
+    # Use a while loop to process each file (using null characters as separators)
+    while IFS= read -r -d '' file; do
+        clang-format -style=file -i "$file"
+        FORMATTED_FILES+=("$file")
+    done < <(find "$dir" -type f \( -name "*.cpp" -o -name "*.c" -o -name "*.h" \) -print0)
+
+    # Output the list of formatted files
+    if [ ${#FORMATTED_FILES[@]} -gt 0 ]; then
+        printf "\nFormatted files in %s:\n" "$dir"
+        printf "%s\n" "${FORMATTED_FILES[@]}"
+    fi
+done
 
 echo "Formatting completed."

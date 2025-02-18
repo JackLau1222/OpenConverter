@@ -7,7 +7,7 @@ Info::Info() {
 
 void Info::init() {
     // Init QuickInfo
-    quickInfo->videoIdx = 0;
+    quickInfo->videoIdx = -1;
     quickInfo->width = 0;
     quickInfo->height = 0;
     quickInfo->colorSpace = "";
@@ -15,7 +15,7 @@ void Info::init() {
     quickInfo->videoBitRate = 0;
     quickInfo->frameRate = 0;
 
-    quickInfo->audioIdx = 0;
+    quickInfo->audioIdx = -1;
     quickInfo->audioCodec = "";
     quickInfo->audioBitRate = 0;
     quickInfo->channels = 0;
@@ -91,10 +91,22 @@ void Info::send_Info(char *src) {
         av_log(avCtx, AV_LOG_ERROR, "open failed");
         goto end;
     }
+    for (int i = 0; i < avCtx->nb_streams; i++) {
+        if (avCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            quickInfo->audioIdx = i;
+            av_log(NULL, AV_LOG_INFO, "Audio stream found at index: %d\n", i);
+        }
+        if (avCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            quickInfo->videoIdx = i;
+            av_log(NULL, AV_LOG_INFO, "Audio stream found at index: %d\n", i);
+        }
+    }
+    ret = avformat_find_stream_info(avCtx, NULL);
+    if (ret < 0) {
+        av_log(NULL, AV_LOG_ERROR, "%s: %s\n", src, av_err2str(ret));
+    }
 
-    // find the video stream from container
-    if ((quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO,
-                                                   -1, -1, NULL, 0)) >= 0) {
+    if (quickInfo->videoIdx >= 0) {
         quickInfo->height =
             avCtx->streams[quickInfo->videoIdx]->codecpar->height;
         quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
@@ -113,32 +125,25 @@ void Info::send_Info(char *src) {
         // goto end;
     }
 
-    // find the audio stream from container
-    if ((quickInfo->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO,
-                                                   -1, -1, NULL, 0)) < 0) {
+    if (quickInfo->audioIdx < 0) {
         av_log(avCtx, AV_LOG_ERROR, "There is no audio stream!\n");
         goto end;
     }
-    audioCodec = avcodec_find_decoder(
-        avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
-    if (!audioCodec) {
-        av_log(NULL, AV_LOG_ERROR, "Codec not found\n");
-        goto end;
-    }
-    audioCtx = avcodec_alloc_context3(audioCodec);
+
+    audioCtx = avcodec_alloc_context3(NULL);
     if (!audioCtx) {
         av_log(audioCtx, AV_LOG_ERROR,
                "Could not allocate audio codec context\n");
         goto end;
     }
-    /* open it */
-    if (avcodec_open2(audioCtx, audioCodec, NULL) < 0) {
-        av_log(audioCtx, AV_LOG_ERROR, "Could not open codec\n");
+    // Open the audio codec
+    if (avcodec_parameters_to_context(audioCtx, avCtx->streams[quickInfo->audioIdx]->codecpar) < 0) {
+        av_log(avCtx, AV_LOG_ERROR, "Failed to initialize codec context\n");
         goto end;
     }
 
     quickInfo->audioCodec =
-        enum_To_String(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
+        avcodec_get_name(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
     quickInfo->audioBitRate =
         avCtx->streams[quickInfo->audioIdx]->codecpar->bit_rate;
 #ifdef OC_FFMPEG_VERSION
@@ -150,7 +155,7 @@ void Info::send_Info(char *src) {
         avCtx->streams[quickInfo->audioIdx]->codecpar->ch_layout.nb_channels;
     #endif
 #endif
-    quickInfo->sampleFmt = enum_To_String(audioCtx->sample_fmt);
+    quickInfo->sampleFmt = av_get_sample_fmt_name(audioCtx->sample_fmt);
     quickInfo->sampleRate =
         avCtx->streams[quickInfo->audioIdx]->codecpar->sample_rate;
 

@@ -5,7 +5,7 @@ TOP_DIR=$PWD
 EXTENSIONS=(".cpp" ".c" ".h" ".cc" ".hpp")
 
 # Define clang-format default style (using JSON format)
-STYLE="{\"BasedOnStyle\": \"llvm\", \"IndentWidth\": -2}"
+STYLE="{\"BasedOnStyle\": \"llvm\", \"IndentWidth\": 4, \"AccessModifierOffset\": -2}"
 
 # Check if clang-format is installed
 if ! command -v clang-format &> /dev/null; then

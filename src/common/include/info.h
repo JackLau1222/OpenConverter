@@ -16,6 +16,7 @@
 #ifndef INFO_H
 #define INFO_H
 
+#include "common.h"
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>

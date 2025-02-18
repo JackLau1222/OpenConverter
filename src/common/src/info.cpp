@@ -103,7 +103,7 @@ void Info::send_Info(char *src) {
     }
     ret = avformat_find_stream_info(avCtx, NULL);
     if (ret < 0) {
-        av_log(NULL, AV_LOG_ERROR, "%s: %s\n", src, av_err2str(ret));
+        CHECK_ERROR(ret);
     }
 
     if (quickInfo->videoIdx >= 0) {

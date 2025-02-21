@@ -11,7 +11,7 @@ jobs:
       - name: Checkout head branch code
         uses: actions/checkout@v4
         with:
-          ref: ${{github.event.pull_request.head.ref}}
+          fetch-depth: 0  # 拉取完整历史记录
 
       - name: Install clang-format-18
         run: |

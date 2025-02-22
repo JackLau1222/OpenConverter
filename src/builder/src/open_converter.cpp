@@ -223,11 +223,12 @@ void OpenConverter::convert_Pushed() {
     // if the output file path is empty, generate a default output filename
     if (outputFilePath.isEmpty()) {
         QFileInfo fileInfo(inputFilePath);
-        QString baseName = fileInfo.completeBaseName();
-        QString suffix = fileInfo.suffix();
-        outputFilePath = fileInfo.absolutePath() + "/" + baseName + "-oc-output." + suffix;
+        outputFilePath = fileInfo.absolutePath() + "/"
+                         + fileInfo.completeBaseName() + "-oc-output."
+                         + fileInfo.suffix();
         ui->lineEdit_outputFile->setText(outputFilePath);
     }
+
     // Check if the input file and output file are the same
     if (inputFilePath == outputFilePath) {
         displayResult->setText("The input file can't be the same as the output file!");

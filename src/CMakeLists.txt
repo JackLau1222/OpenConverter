@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BMF_TRANSCODER "enable BMF Transcoder" OFF)
+option(BMF_TRANSCODER "enable BMF Transcoder" ON)
 option(FFTOOL_TRANSCODER "enable FFmpeg Command Tool Transcoder" ON)
 option(FFMPEG_TRANSCODER "enable FFmpeg Core Transcoder" ON)
 
@@ -92,7 +92,7 @@ if(DEFINED ENV{FFMPEG_ROOT_PATH})
 elseif(WIN32)
     message(STATUS "This is a Windows platform.")
     message(STATUS "FFMPEG_ROOT_PATH environment variable is not set, using default path.")
-    set(FFMPEG_ROOT_PATH "C:/Program Files/ffmpeg-n5.1.6-18-g1bcb1be4a2-win64-gpl-shared-5.1")
+    set(FFMPEG_ROOT_PATH "D:/ffmpeg/ffmpeg-n5.1.6-16-g6e63e49496-win64-gpl-shared-5.1")
     
     set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
     set(FFMPEG_LIBRARY_DIRS ${FFMPEG_ROOT_PATH}/lib)

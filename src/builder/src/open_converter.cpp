@@ -209,14 +209,35 @@ void OpenConverter::apply_Pushed() {
 }
 
 void OpenConverter::convert_Pushed() {
-    if (encodeSetting->get_Available()) {
-        encodeSetting->get_Encode_Parameter(converter->encodeParameter);
-    }
 
-    if (ui->lineEdit_inputFile->text() == ui->lineEdit_outputFile->text()) {
-        displayResult->setText("The input file can't same as ouput file!");
+    // get the input file path
+    QString inputFilePath = ui->lineEdit_inputFile->text();
+    // check the input file path
+    if (inputFilePath.isEmpty()) {
+        displayResult->setText("Please select an input file.");
         displayResult->exec();
         return;
+    }
+    // get the output file path
+    QString outputFilePath = ui->lineEdit_outputFile->text();
+    // if the output file path is empty, generate a default output filename
+    if (outputFilePath.isEmpty()) {
+        QFileInfo fileInfo(inputFilePath);
+        outputFilePath = fileInfo.absolutePath() + "/"
+                         + fileInfo.completeBaseName() + "-oc-output."
+                         + fileInfo.suffix();
+        ui->lineEdit_outputFile->setText(outputFilePath);
+    }
+
+    // Check if the input file and output file are the same
+    if (inputFilePath == outputFilePath) {
+        displayResult->setText("The input file can't be the same as the output file!");
+        displayResult->exec();
+        return;
+    }
+
+    if (encodeSetting->get_Available()) {
+        encodeSetting->get_Encode_Parameter(converter->encodeParameter);
     }
 
     emit activateConverterThread(ui->lineEdit_inputFile->text(),

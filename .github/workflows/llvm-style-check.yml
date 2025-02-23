@@ -1,8 +1,8 @@
 name: LLVM Style Check
 
 on:
-  pull_request:
-    branches: [main,test]
+  pull_request_target:
+    branches: [main]
 
 jobs:
   clang-format-check:
@@ -12,7 +12,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Install clang-format-18
         run: |
           echo "::group::🔧 Installing LLVM 18"
@@ -22,7 +21,6 @@ jobs:
           sudo apt-get install -y clang-format-18
           sudo ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
           echo "::endgroup::"
-
       - name: Verify environment
         run: |
           echo "::group::🔍 Environment Verification"
@@ -32,7 +30,6 @@ jobs:
           echo "Directory structure:"
           tree -L 2 -I '.git|.github'
           echo "::endgroup::"
-
       - name: Check .clang-format configuration
         run: |
           echo "::group::📝 Checking .clang-format file"
@@ -43,7 +40,6 @@ jobs:
           echo "Current .clang-format content:"
           cat .clang-format
           echo "::endgroup::"
-
       - name: Run enhanced clang-format check
         run: |
           echo "::group::🔎 Changed Files Detection"
@@ -53,11 +49,9 @@ jobs:
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA $HEAD_SHA)
           printf "Changed files:\n%s\n" "$CHANGED_FILES"
           echo "::endgroup::"
-
           echo "::group::🚦 Formatting Check Process"
           ERROR_FOUND=0
           IFS=$'\n'  # Handle filenames with spaces
-
           for FILE in $CHANGED_FILES; do
             if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
               echo "📄 Processing: $FILE"
@@ -65,7 +59,6 @@ jobs:
               # Generate formatted temp file
               TEMP_FILE="${FILE}.formatted"
               clang-format -style=file --assume-filename="$FILE" "$FILE" > "$TEMP_FILE"
-
               # Show detailed diff
               if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
                 echo "::error file=$FILE,title=Style Issue::Code style violation detected in $FILE"
@@ -78,7 +71,6 @@ jobs:
               else
                 echo "✅ No issues in $FILE"
               fi
-
               # Cleanup
               rm -f "$TEMP_FILE"
               echo "----------------------------------------"
@@ -86,7 +78,6 @@ jobs:
               echo "⏩ Skipping non-C++ file: $FILE"
             fi
           done
-
           if [ $ERROR_FOUND -eq 1 ]; then
             echo "❌❌❌ Formatting check failed! ❌❌❌"
             echo "Some files require formatting. Please run:"

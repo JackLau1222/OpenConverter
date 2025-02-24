@@ -17,7 +17,7 @@ jobs:
       - name: Install clang-format-18
         run: |
           echo "::group::🔧 Installing LLVM 18"
-          wget -q https://apt.llvm.org/llvm.sh
+          wget -q <url id="cuu0si6ruqkn2ks8hrd0" type="url" status="failed" title="" wc="0">https://apt.llvm.org/llvm.sh</url> 
           chmod +x llvm.sh
           sudo ./llvm.sh 18 > /dev/null 2>&1
           sudo apt-get install -y clang-format-18
@@ -46,18 +46,18 @@ jobs:
       - name: Run enhanced clang-format check
         run: |
           echo "::group::🔎 Changed Files Detection"
-          # 获取准确的对比范围
-          BASE_REF=${{ github.event.pull_request.base.ref }}  # 目标分支（如main）
-          HEAD_REF=${{ github.event.pull_request.head.ref }}  # 源分支
+          # Get the accurate comparison range
+          BASE_REF=${{ github.event.pull_request.base.ref }}  # Target branch (e.g., main)
+          HEAD_REF=${{ github.event.pull_request.head.ref }}  # Source branch
 
-          # 拉取目标分支代码
+          # Fetch the target branch code
           git fetch origin $BASE_REF
           git checkout -b base_branch FETCH_HEAD
 
-          # 切换回PR分支
+          # Switch back to the PR branch
           git checkout $HEAD_REF
 
-          # 生成变更文件列表
+          # Generate the list of changed files
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB base_branch...HEAD)
           printf "Changed files:\n%s\n" "$CHANGED_FILES"
           echo "::endgroup::"
@@ -70,7 +70,7 @@ jobs:
             if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
               echo "📄 Processing: $FILE"
               
-              # 验证文件是否存在
+              # Verify if the file exists
               if [ ! -f "$FILE" ]; then
                 echo "::error file=$FILE::File not found!"
                 ERROR_FOUND=1
@@ -80,7 +80,7 @@ jobs:
               TEMP_FILE="${FILE}.formatted"
               clang-format -style=file --assume-filename="$FILE" "$FILE" > "$TEMP_FILE"
 
-              # 显示完整路径差异
+              # Display full path differences
               if ! diff -u --color=always "$(pwd)/$FILE" "$TEMP_FILE"; then
                 echo "::error file=$FILE,title=Style Issue::Code style violation detected"
                 echo "❌ Error in $FILE"

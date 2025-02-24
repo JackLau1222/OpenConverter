@@ -8,19 +8,22 @@ jobs:
   clang-format-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
       - name: Install clang-format-18
         run: |
           echo "::group::🔧 Installing LLVM 18"
-          wget -q https://apt.llvm.org/llvm.sh
+          wget -q https://apt.llvm.org/llvm.sh  
           chmod +x llvm.sh
           sudo ./llvm.sh 18 > /dev/null 2>&1
           sudo apt-get install -y clang-format-18
           sudo ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
           echo "::endgroup::"
+
       - name: Verify environment
         run: |
           echo "::group::🔍 Environment Verification"
@@ -30,60 +33,75 @@ jobs:
           echo "Directory structure:"
           tree -L 2 -I '.git|.github'
           echo "::endgroup::"
+
       - name: Check .clang-format configuration
         run: |
           echo "::group::📝 Checking .clang-format file"
           if [ ! -f .clang-format ]; then
-            echo "⚠️ Warning: No .clang-format file found, using LLVM default style"
             echo "BasedOnStyle: LLVM" > .clang-format
           fi
-          echo "Current .clang-format content:"
           cat .clang-format
           echo "::endgroup::"
+
       - name: Run enhanced clang-format check
         run: |
           echo "::group::🔎 Changed Files Detection"
-          BASE_SHA=${{ github.event.pull_request.base.sha }}
-          HEAD_SHA=${{ github.event.pull_request.head.sha }}
-          echo "Comparing $BASE_SHA..$HEAD_SHA"
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA $HEAD_SHA)
+          # Get the accurate comparison range
+          BASE_REF=${{ github.event.pull_request.base.ref }}  # Target branch (e.g., main)
+          HEAD_REF=${{ github.event.pull_request.head.ref }}  # Source branch
+
+          # Fetch the target branch code
+          git fetch origin $BASE_REF
+          git checkout -b base_branch FETCH_HEAD
+
+          # Switch back to the PR branch
+          git checkout $HEAD_REF
+
+          # Generate the list of changed files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB base_branch...HEAD)
           printf "Changed files:\n%s\n" "$CHANGED_FILES"
           echo "::endgroup::"
+
           echo "::group::🚦 Formatting Check Process"
           ERROR_FOUND=0
-          IFS=$'\n'  # Handle filenames with spaces
+          IFS=$'\n'
+
           for FILE in $CHANGED_FILES; do
             if [[ "$FILE" =~ \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$ ]]; then
               echo "📄 Processing: $FILE"
               
-              # Generate formatted temp file
+              # Verify if the file exists
+              if [ ! -f "$FILE" ]; then
+                echo "::error file=$FILE::File not found!"
+                ERROR_FOUND=1
+                continue
+              fi
+
               TEMP_FILE="${FILE}.formatted"
               clang-format -style=file --assume-filename="$FILE" "$FILE" > "$TEMP_FILE"
-              # Show detailed diff
-              if ! diff -u --color=always "$FILE" "$TEMP_FILE"; then
-                echo "::error file=$FILE,title=Style Issue::Code style violation detected in $FILE"
-                echo "❌ Error: Format issues found in $FILE"
+
+              # Show full path differences
+              if ! diff -u --color=always "$(pwd)/$FILE" "$TEMP_FILE"; then
+                echo "::error file=$FILE,title=Style Issue::Code style violation detected"
+                echo "❌ Error in $FILE"
                 echo "💡 Suggested fix:"
                 echo "======================================"
                 clang-format -style=file "$FILE" | diff -u --color=always "$FILE" - || true
                 echo "======================================"
                 ERROR_FOUND=1
-              else
-                echo "✅ No issues in $FILE"
               fi
-              # Cleanup
+
               rm -f "$TEMP_FILE"
               echo "----------------------------------------"
             else
               echo "⏩ Skipping non-C++ file: $FILE"
             fi
           done
+
           if [ $ERROR_FOUND -eq 1 ]; then
-            echo "❌❌❌ Formatting check failed! ❌❌❌"
-            echo "Some files require formatting. Please run:"
-            echo "clang-format -style=file -i <file>"
+            echo "❌ Check failed: Found $ERROR_FOUND files with style issues"
             exit 1
           else
-            echo "🎉🎉🎉 All files are properly formatted! 🎉🎉🎉"
+            echo "✅ All files passed style check"
           fi
           echo "::endgroup::"

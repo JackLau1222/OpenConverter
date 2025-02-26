@@ -19,7 +19,7 @@
 TranscoderFFTool::TranscoderFFTool(ProcessParameter *processParameter,
                                    EncodeParameter *encodeParameter)
     : Transcoder(processParameter, encodeParameter),
-      copyVideo(false), 
+      copyVideo(false),
       copyAudio(false),
       frameTotalNumber(0) {}
 
@@ -79,7 +79,7 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 
 // Check if FFMPEG_PATH is defined (ensure it's set by CMake)
 #ifdef FFTOOL_PATH
-    cmd << FFTOOL_PATH << " -i \"" << input_path << "\"";
+    cmd << "\"" << FFTOOL_PATH << "\" -i \"" << input_path << "\"";
 #else
     std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH." << std::endl;
     return false;
@@ -128,7 +128,7 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 
 #ifdef _WIN32
     // Windows-specific command execution (use cmd /c for shell commands)
-    std::string fullCmd = "cmd /c " + cmd.str();
+    std::string fullCmd = "cmd /c \"" + cmd.str() + "\"";
     ret = system(fullCmd.c_str());
 #else
     // Unix-like systems (Linux/macOS) can directly use system()

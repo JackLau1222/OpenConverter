@@ -52,13 +52,10 @@ jobs:
 
           # Fetch the target branch code
           git fetch origin $BASE_REF
-          git checkout -b base_branch FETCH_HEAD
-
-          # Switch back to the PR branch
-          git checkout $HEAD_REF
+          git fetch origin $HEAD_REF
 
           # Generate the list of changed files
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB base_branch...HEAD)
+          CHANGED_FILES=$(git diff --name-only origin/$BASE_REF...origin/$HEAD_REF)
           printf "Changed files:\n%s\n" "$CHANGED_FILES"
           echo "::endgroup::"
 

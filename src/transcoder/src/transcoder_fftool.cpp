@@ -19,9 +19,9 @@
 TranscoderFFTool::TranscoderFFTool(ProcessParameter *processParameter,
                                    EncodeParameter *encodeParameter)
     : Transcoder(processParameter, encodeParameter),
-      copyVideo(false),
-      copyAudio(false),
-      frameTotalNumber(0) {}
+    copyVideo(false),
+    copyAudio(false),
+    frameTotalNumber(0) {}
 
 TranscoderFFTool::~TranscoderFFTool() {
     // Destructor implementation
@@ -68,25 +68,24 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
         return false;
     }
 
-    // Convert paths for Windows (escape backslashes)
-#ifdef _WIN32
-    input_path = escapeWindowsPath(input_path);
-    output_path = escapeWindowsPath(output_path);
-#endif
+    // all platforms wrap paths in double quotes
+    auto quotePath = [](const std::string& path) {
+        return "\"" + path + "\"";
+    };
 
     // Build the FFmpeg command
     std::stringstream cmd;
 
 // Check if FFMPEG_PATH is defined (ensure it's set by CMake)
 #ifdef FFTOOL_PATH
-    cmd << "\"" << FFTOOL_PATH << "\" -i \"" << input_path << "\"";
+    cmd << quotePath(FFTOOL_PATH);
 #else
     std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH." << std::endl;
     return false;
 #endif
 
     // Add the -y flag to overwrite output file without prompting
-    cmd << " -y";
+     cmd << " -i " << quotePath(input_path) << " -y";
 
     // Video codec options
     if (copyVideo) {
@@ -119,7 +118,7 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
     }
 
     // Output file path
-    cmd << " \"" << output_path << "\"";
+    cmd << " " << quotePath(output_path);
 
     // Execute the command
     std::cout << "Executing: " << cmd.str() << std::endl;
@@ -128,7 +127,7 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 
 #ifdef _WIN32
     // Windows-specific command execution (use cmd /c for shell commands)
-    std::string fullCmd = "cmd /c \"" + cmd.str() + "\"";
+    std::string fullCmd = "cmd /c " + quotePath(cmd.str());;
     ret = system(fullCmd.c_str());
 #else
     // Unix-like systems (Linux/macOS) can directly use system()

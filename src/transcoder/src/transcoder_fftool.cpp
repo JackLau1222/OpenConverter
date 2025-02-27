@@ -18,22 +18,13 @@
 
 TranscoderFFTool::TranscoderFFTool(ProcessParameter *processParameter,
                                    EncodeParameter *encodeParameter)
-    : Transcoder(processParameter, encodeParameter), copyVideo(false),
-      copyAudio(false), frameTotalNumber(0) {}
+    : Transcoder(processParameter, encodeParameter),
+      copyVideo(false),
+      copyAudio(false),
+      frameTotalNumber(0) {}
 
 TranscoderFFTool::~TranscoderFFTool() {
     // Destructor implementation
-}
-
-// Helper function to escape file paths for Windows
-std::string escapeWindowsPath(const std::string &path) {
-    std::string escaped = path;
-    size_t pos = 0;
-    while ((pos = escaped.find("\\", pos)) != std::string::npos) {
-        escaped.replace(pos, 1, "\\\\");
-        pos += 2;
-    }
-    return escaped;
 }
 
 bool TranscoderFFTool::prepared_opt() {
@@ -60,66 +51,63 @@ bool TranscoderFFTool::prepared_opt() {
     return true;
 }
 
-bool TranscoderFFTool::transcode(std::string input_path,
-                                 std::string output_path) {
+bool TranscoderFFTool::transcode(std::string input_path, std::string output_path) {
     if (!prepared_opt()) {
         std::cerr << "Failed to prepare options for transcoding." << std::endl;
         return false;
     }
 
-    // Convert paths for Windows (escape backslashes)
-#ifdef _WIN32
-    input_path = escapeWindowsPath(input_path);
-    output_path = escapeWindowsPath(output_path);
-#endif
+    // Unified Path Processing Function
+    auto quotePath = [](const std::string& path) {
+        return "\"" + path + "\"";
+    };
 
     // Build the FFmpeg command
     std::stringstream cmd;
 
 // Check if FFMPEG_PATH is defined (ensure it's set by CMake)
 #ifdef FFTOOL_PATH
-    cmd << FFTOOL_PATH << " -i \"" << input_path << "\"";
+    cmd << quotePath(FFTOOL_PATH);
 #else
-    std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH."
-              << std::endl;
+    std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH." << std::endl;
     return false;
 #endif
 
     // Add the -y flag to overwrite output file without prompting
-    cmd << " -y";
+     cmd << " -i " << quotePath(input_path) << " -y";
 
     // Video codec options
     if (copyVideo) {
-        cmd << " -c:v copy"; // Copy video stream without re-encoding
+        cmd << " -c:v copy";  // Copy video stream without re-encoding
     } else {
         if (!videoCodec.empty()) {
-            cmd << " -c:v " << videoCodec; // Use specified video codec
+            cmd << " -c:v " << videoCodec;  // Use specified video codec
         } else {
             std::cerr << "Video codec is not specified!" << std::endl;
             return false;
         }
         if (videoBitRate > 0) {
-            cmd << " -b:v " << videoBitRate; // Set video bitrate if specified
+            cmd << " -b:v " << videoBitRate;  // Set video bitrate if specified
         }
     }
 
     // Audio codec options
     if (copyAudio) {
-        cmd << " -c:a copy"; // Copy audio stream without re-encoding
+        cmd << " -c:a copy";  // Copy audio stream without re-encoding
     } else {
         if (!audioCodec.empty()) {
-            cmd << " -c:a " << audioCodec; // Use specified audio codec
+            cmd << " -c:a " << audioCodec;  // Use specified audio codec
         } else {
             std::cerr << "Audio codec is not specified!" << std::endl;
             return false;
         }
         if (audioBitRate > 0) {
-            cmd << " -b:a " << audioBitRate; // Set audio bitrate if specified
+            cmd << " -b:a " << audioBitRate;  // Set audio bitrate if specified
         }
     }
 
     // Output file path
-    cmd << " \"" << output_path << "\"";
+    cmd << " " << quotePath(output_path);
 
     // Execute the command
     std::cout << "Executing: " << cmd.str() << std::endl;
@@ -128,7 +116,7 @@ bool TranscoderFFTool::transcode(std::string input_path,
 
 #ifdef _WIN32
     // Windows-specific command execution (use cmd /c for shell commands)
-    std::string fullCmd = "cmd /c " + cmd.str();
+    std::string fullCmd = "cmd /c " + quotePath(cmd.str());
     ret = system(fullCmd.c_str());
 #else
     // Unix-like systems (Linux/macOS) can directly use system()
@@ -136,8 +124,7 @@ bool TranscoderFFTool::transcode(std::string input_path,
 #endif
 
     if (ret != 0) {
-        std::cerr << "FFmpeg transcoding failed with exit code: " << ret
-                  << std::endl;
+        std::cerr << "FFmpeg transcoding failed with exit code: " << ret << std::endl;
         return false;
     }
 

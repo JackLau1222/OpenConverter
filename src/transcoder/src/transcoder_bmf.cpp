@@ -2,17 +2,15 @@
 
 /* Receive pointers from converter */
 TranscoderBMF::TranscoderBMF(ProcessParameter *processParameter,
-                       EncodeParameter *encodeParameter)
+                             EncodeParameter *encodeParameter)
     : Transcoder(processParameter, encodeParameter) {
     frameTotalNumber = 0;
 }
 
-
 bmf_sdk::CBytes TranscoderBMF::decoder_callback(bmf_sdk::CBytes input) {
     std::string strInfo;
-    strInfo.assign(reinterpret_cast<const char*>(input.buffer), input.size);
+    strInfo.assign(reinterpret_cast<const char *>(input.buffer), input.size);
     // BMFLOG(BMF_INFO) << "====Callback==== " << strInfo;
-
 
     std::regex frame_regex(R"(\btotal frame number:\s*(\d+))");
     std::smatch match;
@@ -30,7 +28,7 @@ bmf_sdk::CBytes TranscoderBMF::decoder_callback(bmf_sdk::CBytes input) {
 
 bmf_sdk::CBytes TranscoderBMF::encoder_callback(bmf_sdk::CBytes input) {
     std::string strInfo;
-    strInfo.assign(reinterpret_cast<const char*>(input.buffer), input.size);
+    strInfo.assign(reinterpret_cast<const char *>(input.buffer), input.size);
     // BMFLOG(BMF_INFO) << "====Callback==== " << strInfo;
 
     std::regex frame_regex(R"(\bframe number:\s*(\d+))");
@@ -54,8 +52,8 @@ bmf_sdk::CBytes TranscoderBMF::encoder_callback(bmf_sdk::CBytes input) {
     return bmf_sdk::CBytes{bytes, 6};
 }
 
-
-bool TranscoderBMF::prepare_info(std::string input_path, std::string output_path) {
+bool TranscoderBMF::prepare_info(std::string input_path,
+                                 std::string output_path) {
     // decoder init
     if (encodeParameter->get_Video_Codec_Name() == "") {
         copyVideo = true;
@@ -69,22 +67,14 @@ bool TranscoderBMF::prepare_info(std::string input_path, std::string output_path
         copyAudio = false;
     }
 
-    nlohmann::json de_video_codec = {
-        "video_codec", ""
-    };
-    nlohmann::json de_audio_codec = {
-        "audio_codec", ""
-    };
+    nlohmann::json de_video_codec = {"video_codec", ""};
+    nlohmann::json de_audio_codec = {"audio_codec", ""};
 
     if (copyVideo) {
-        de_video_codec = {
-            "video_codec", "copy"
-        };
+        de_video_codec = {"video_codec", "copy"};
     }
     if (copyAudio) {
-        de_audio_codec = {
-            "audio_codec", "copy"
-        };
+        de_audio_codec = {"audio_codec", "copy"};
     }
 
     decoder_para = {
@@ -94,34 +84,18 @@ bool TranscoderBMF::prepare_info(std::string input_path, std::string output_path
     };
 
     // encoder init
-    nlohmann::json en_video_codec = {
-        "codec", encodeParameter->get_Video_Codec_Name()
-    };
-    nlohmann::json en_audio_codec = {
-        "codec", encodeParameter->get_Audio_Codec_Name()
-    };
-    nlohmann::json en_video_bitrate = {
-        "bit_rate", encodeParameter->get_Video_Bit_Rate()
-    };
-    nlohmann::json en_audio_bitrate = {
-        "bit_rate", encodeParameter->get_Audio_Bit_Rate()
-    };
+    nlohmann::json en_video_codec = {"codec",
+                                     encodeParameter->get_Video_Codec_Name()};
+    nlohmann::json en_audio_codec = {"codec",
+                                     encodeParameter->get_Audio_Codec_Name()};
+    nlohmann::json en_video_bitrate = {"bit_rate",
+                                       encodeParameter->get_Video_Bit_Rate()};
+    nlohmann::json en_audio_bitrate = {"bit_rate",
+                                       encodeParameter->get_Audio_Bit_Rate()};
 
-    encoder_para = {
-        {"output_path", output_path},
-        {
-            "video_params", {
-                en_video_codec,
-                en_video_bitrate
-            }
-        },
-        {
-             "audio_params", {
-                 en_audio_codec,
-                 en_audio_bitrate
-             }
-        }
-    };
+    encoder_para = {{"output_path", output_path},
+                    {"video_params", {en_video_codec, en_video_bitrate}},
+                    {"audio_params", {en_audio_codec, en_audio_bitrate}}};
     return true;
 }
 
@@ -132,15 +106,22 @@ bool TranscoderBMF::transcode(std::string input_path, std::string output_path) {
 
     auto graph = bmf::builder::Graph(bmf::builder::NormalMode);
 
-    auto decoder = graph.Decode(bmf_sdk::JsonParam(decoder_para), "", scheduler_cnt++);
+    auto decoder =
+        graph.Decode(bmf_sdk::JsonParam(decoder_para), "", scheduler_cnt++);
 
-    auto encoder = graph.Encode(decoder["video"], decoder["audio"], bmf_sdk::JsonParam(encoder_para), "", scheduler_cnt++);
+    auto encoder =
+        graph.Encode(decoder["video"], decoder["audio"],
+                     bmf_sdk::JsonParam(encoder_para), "", scheduler_cnt++);
 
-    auto de_callback = std::bind(&TranscoderBMF::decoder_callback, this, std::placeholders::_1);
-    auto en_callback = std::bind(&TranscoderBMF::encoder_callback, this, std::placeholders::_1);
+    auto de_callback = std::bind(&TranscoderBMF::decoder_callback, this,
+                                 std::placeholders::_1);
+    auto en_callback = std::bind(&TranscoderBMF::encoder_callback, this,
+                                 std::placeholders::_1);
 
-    decoder.AddCallback(0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(de_callback));
-    encoder.AddCallback(0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(en_callback));
+    decoder.AddCallback(
+        0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(de_callback));
+    encoder.AddCallback(
+        0, std::function<bmf_sdk::CBytes(bmf_sdk::CBytes)>(en_callback));
 
     nlohmann::json graph_para = {{"dump_graph", 1}};
     graph.SetOption(bmf_sdk::JsonParam(graph_para));
@@ -150,5 +131,4 @@ bool TranscoderBMF::transcode(std::string input_path, std::string output_path) {
     } else {
         return false;
     }
-
 }

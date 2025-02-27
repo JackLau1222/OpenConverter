@@ -18,7 +18,6 @@
 
 #include "transcoder.h"
 
-
 class TranscoderFFTool : public Transcoder {
   public:
     TranscoderFFTool(ProcessParameter *processParameter,

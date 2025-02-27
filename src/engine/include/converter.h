@@ -18,11 +18,11 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#include "../../transcoder/include/transcoder.h"  // Include the base class header
+#include "../../transcoder/include/transcoder.h" // Include the base class header
 
 #include "../../common/include/encode_parameter.h"
-#include <QString>
 #include <QObject>
+#include <QString>
 
 class Converter : public QObject {
     Q_OBJECT;

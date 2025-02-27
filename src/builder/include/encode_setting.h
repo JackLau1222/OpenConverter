@@ -18,8 +18,8 @@
 #ifndef ENCODE_SETTING_H
 #define ENCODE_SETTING_H
 
-#include <QMainWindow>
 #include "../../common/include/encode_parameter.h"
+#include <QMainWindow>
 
 namespace Ui {
 class EncodeSetting;

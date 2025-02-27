@@ -18,18 +18,18 @@
 #ifndef OPEN_CONVERTER_H
 #define OPEN_CONVERTER_H
 
-#include <QMainWindow>
 #include "../../common/include/info.h"
 #include "../../engine/include/converter.h"
 #include "encode_setting.h"
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QThread>
-#include <QTranslator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-#include <QMimeData>
+#include <QFileDialog>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QThread>
+#include <QTranslator>
 
 #include <iostream>
 

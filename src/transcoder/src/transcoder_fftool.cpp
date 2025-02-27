@@ -1,34 +1,32 @@
-#include <iostream>
-#include <stdexcept>
-#include <sstream>
 #include <cstdlib>
-#include <string>
-#include <vector>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <regex>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #else
-#include <unistd.h>
+    #include <unistd.h>
 #endif
 
 #include "../include/transcoder_fftool.h"
 
 TranscoderFFTool::TranscoderFFTool(ProcessParameter *processParameter,
                                    EncodeParameter *encodeParameter)
-    : Transcoder(processParameter, encodeParameter),
-      copyVideo(false), 
-      copyAudio(false),
-      frameTotalNumber(0) {}
+    : Transcoder(processParameter, encodeParameter), copyVideo(false),
+      copyAudio(false), frameTotalNumber(0) {}
 
 TranscoderFFTool::~TranscoderFFTool() {
     // Destructor implementation
 }
 
 // Helper function to escape file paths for Windows
-std::string escapeWindowsPath(const std::string& path) {
+std::string escapeWindowsPath(const std::string &path) {
     std::string escaped = path;
     size_t pos = 0;
     while ((pos = escaped.find("\\", pos)) != std::string::npos) {
@@ -62,7 +60,8 @@ bool TranscoderFFTool::prepared_opt() {
     return true;
 }
 
-bool TranscoderFFTool::transcode(std::string input_path, std::string output_path) {
+bool TranscoderFFTool::transcode(std::string input_path,
+                                 std::string output_path) {
     if (!prepared_opt()) {
         std::cerr << "Failed to prepare options for transcoding." << std::endl;
         return false;
@@ -81,7 +80,8 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 #ifdef FFTOOL_PATH
     cmd << FFTOOL_PATH << " -i \"" << input_path << "\"";
 #else
-    std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH." << std::endl;
+    std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH."
+              << std::endl;
     return false;
 #endif
 
@@ -90,31 +90,31 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 
     // Video codec options
     if (copyVideo) {
-        cmd << " -c:v copy";  // Copy video stream without re-encoding
+        cmd << " -c:v copy"; // Copy video stream without re-encoding
     } else {
         if (!videoCodec.empty()) {
-            cmd << " -c:v " << videoCodec;  // Use specified video codec
+            cmd << " -c:v " << videoCodec; // Use specified video codec
         } else {
             std::cerr << "Video codec is not specified!" << std::endl;
             return false;
         }
         if (videoBitRate > 0) {
-            cmd << " -b:v " << videoBitRate;  // Set video bitrate if specified
+            cmd << " -b:v " << videoBitRate; // Set video bitrate if specified
         }
     }
 
     // Audio codec options
     if (copyAudio) {
-        cmd << " -c:a copy";  // Copy audio stream without re-encoding
+        cmd << " -c:a copy"; // Copy audio stream without re-encoding
     } else {
         if (!audioCodec.empty()) {
-            cmd << " -c:a " << audioCodec;  // Use specified audio codec
+            cmd << " -c:a " << audioCodec; // Use specified audio codec
         } else {
             std::cerr << "Audio codec is not specified!" << std::endl;
             return false;
         }
         if (audioBitRate > 0) {
-            cmd << " -b:a " << audioBitRate;  // Set audio bitrate if specified
+            cmd << " -b:a " << audioBitRate; // Set audio bitrate if specified
         }
     }
 
@@ -136,7 +136,8 @@ bool TranscoderFFTool::transcode(std::string input_path, std::string output_path
 #endif
 
     if (ret != 0) {
-        std::cerr << "FFmpeg transcoding failed with exit code: " << ret << std::endl;
+        std::cerr << "FFmpeg transcoding failed with exit code: " << ret
+                  << std::endl;
         return false;
     }
 

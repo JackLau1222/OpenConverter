@@ -18,11 +18,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define CHECK_ERROR(err) \
-    if ((err) < 0) { \
-        char errbuf[128]; \
-        av_strerror((err), errbuf, sizeof(errbuf)); \
-        fprintf(stderr, "Error: %s\n", errbuf); \
+#define CHECK_ERROR(err)                                                       \
+    if ((err) < 0) {                                                           \
+        char errbuf[128];                                                      \
+        av_strerror((err), errbuf, sizeof(errbuf));                            \
+        fprintf(stderr, "Error: %s\n", errbuf);                                \
     }
 
 #endif // COMMON_H

@@ -16,16 +16,20 @@ Converter::Converter(ProcessParameter *processParamter,
                      EncodeParameter *encodeParamter)
     : processParameter(processParamter), encodeParameter(encodeParamter) {
     // #if defined(USE_BMF)
-    //     transcoder = new TranscoderBMF(this->processParameter, this->encodeParameter);
+    //     transcoder = new TranscoderBMF(this->processParameter,
+    //     this->encodeParameter);
     // #elif defined(USE_FFMPEG)
-    //     transcoder = new TranscoderFFmpeg(this->processParameter, this->encodeParameter);
+    //     transcoder = new TranscoderFFmpeg(this->processParameter,
+    //     this->encodeParameter);
     // #elif defined(USE_FFTOOL)
-    //     transcoder = new TranscoderFFTool(this->processParameter, this->encodeParameter);
+    //     transcoder = new TranscoderFFTool(this->processParameter,
+    //     this->encodeParameter);
     // #endif
 
     // Default transcoder
 #if defined(ENABLE_FFMPEG)
-    transcoder = new TranscoderFFmpeg(this->processParameter, this->encodeParameter);
+    transcoder =
+        new TranscoderFFmpeg(this->processParameter, this->encodeParameter);
 #endif
 
     this->encodeParameter = encodeParamter;
@@ -33,23 +37,26 @@ Converter::Converter(ProcessParameter *processParamter,
 
 bool Converter::set_Transcoder(std::string transcoderName) {
     if (transcoder) {
-        delete(transcoder);
+        delete (transcoder);
         transcoder = NULL;
     }
     if (transcoder == NULL) {
         if (transcoderName == "FFMPEG") {
 #if defined(ENABLE_FFMPEG)
-            transcoder = new TranscoderFFmpeg(this->processParameter, this->encodeParameter);
+            transcoder = new TranscoderFFmpeg(this->processParameter,
+                                              this->encodeParameter);
 #endif
             std::cout << "Set FFmpeg Transcoder!" << std::endl;
         } else if (transcoderName == "BMF") {
 #if defined(ENABLE_BMF)
-            transcoder = new TranscoderBMF(this->processParameter, this->encodeParameter);
+            transcoder = new TranscoderBMF(this->processParameter,
+                                           this->encodeParameter);
             std::cout << "Set BMF Transcoder!" << std::endl;
 #endif
         } else if (transcoderName == "FFTOOL") {
 #if defined(ENABLE_FFTOOL)
-            transcoder = new TranscoderFFTool(this->processParameter, this->encodeParameter);
+            transcoder = new TranscoderFFTool(this->processParameter,
+                                              this->encodeParameter);
             std::cout << "Set FFTool Transcoder!" << std::endl;
 #endif
         } else {
@@ -80,8 +87,10 @@ void Converter::convert_Format(QString src, QString dst) {
 
     QByteArray bb = dst.toLocal8Bit();
     char *destinationFileName = bb.data();
-    //emit return_Value_Converter(transcode(sourceFileName, destinationFileName));
-    emit return_Value_Converter(transcoder->transcode(src.toStdString(), dst.toStdString()));
+    // emit return_Value_Converter(transcode(sourceFileName,
+    // destinationFileName));
+    emit return_Value_Converter(
+        transcoder->transcode(src.toStdString(), dst.toStdString()));
 }
 
 Converter::~Converter() {}

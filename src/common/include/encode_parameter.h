@@ -18,8 +18,8 @@
 #ifndef ENCODEPARAMETER_H
 #define ENCODEPARAMETER_H
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 class EncodeParameter {
   private:

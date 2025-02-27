@@ -62,14 +62,14 @@ OpenConverter::OpenConverter(QWidget *parent)
     m_langPath = ":/";
 }
 
-void OpenConverter::dragEnterEvent(QDragEnterEvent *event){
-    if(event->mimeData()->hasUrls()){
+void OpenConverter::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
 }
 
-void OpenConverter::dropEvent(QDropEvent *event){
-    if(event->mimeData()->hasUrls()){
+void OpenConverter::dropEvent(QDropEvent *event) {
+    if (event->mimeData()->hasUrls()) {
         const QUrl url = event->mimeData()->urls().first();
         ui->lineEdit_inputFile->setText(url.toLocalFile());
         event->acceptProposedAction();
@@ -102,13 +102,14 @@ void OpenConverter::slotTranscoderChanged(QAction *action) {
         // If the transcoder name is not valid, log an error
         if (isValid) {
             ui->statusBar->showMessage(
-                tr("Current Transcoder changed to %1").arg(QString::fromStdString(transcoderName)));
+                tr("Current Transcoder changed to %1")
+                    .arg(QString::fromStdString(transcoderName)));
         } else {
-            std::cout << "Error: Undefined transcoder name - " << transcoderName.c_str() << std::endl;
+            std::cout << "Error: Undefined transcoder name - "
+                      << transcoderName.c_str() << std::endl;
         }
     }
 }
-
 
 // Called every time, when a menu entry of the language menu is called
 void OpenConverter::slotLanguageChanged(QAction *action) {
@@ -192,7 +193,8 @@ void OpenConverter::update_Process_Bar(double result) {
 }
 
 void OpenConverter::update_Time_Required(double result) {
-    ui->label_timeRequiredResult->setText(QString("%1s").arg(QString::number(result, 'f', 2)));
+    ui->label_timeRequiredResult->setText(
+        QString("%1s").arg(QString::number(result, 'f', 2)));
 }
 
 void OpenConverter::encode_Setting_Pushed() { encodeSetting->show(); }
@@ -223,15 +225,16 @@ void OpenConverter::convert_Pushed() {
     // if the output file path is empty, generate a default output filename
     if (outputFilePath.isEmpty()) {
         QFileInfo fileInfo(inputFilePath);
-        outputFilePath = fileInfo.absolutePath() + "/"
-                         + fileInfo.completeBaseName() + "-oc-output."
-                         + fileInfo.suffix();
+        outputFilePath = fileInfo.absolutePath() + "/" +
+                         fileInfo.completeBaseName() + "-oc-output." +
+                         fileInfo.suffix();
         ui->lineEdit_outputFile->setText(outputFilePath);
     }
 
     // Check if the input file and output file are the same
     if (inputFilePath == outputFilePath) {
-        displayResult->setText("The input file can't be the same as the output file!");
+        displayResult->setText(
+            "The input file can't be the same as the output file!");
         displayResult->exec();
         return;
     }

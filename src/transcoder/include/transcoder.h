@@ -18,16 +18,18 @@
 
 #include <iostream>
 
-#include "../../common/include/process_parameter.h"
 #include "../../common/include/encode_parameter.h"
+#include "../../common/include/process_parameter.h"
 #include "../../common/include/stream_context.h"
 
 class Transcoder {
-public:
-    Transcoder(ProcessParameter *processParameter, EncodeParameter *encodeParameter)
-                : processParameter(processParameter), encodeParameter(encodeParameter) {}
-    
-    virtual ~Transcoder() = default; 
+  public:
+    Transcoder(ProcessParameter *processParameter,
+               EncodeParameter *encodeParameter)
+        : processParameter(processParameter), encodeParameter(encodeParameter) {
+    }
+
+    virtual ~Transcoder() = default;
 
     virtual bool transcode(std::string input_path, std::string output_path) = 0;
 
@@ -38,8 +40,11 @@ public:
                 duration_history.erase(duration_history.begin());
             }
         }
-        return duration_history.empty() ? 0.0 :
-                std::accumulate(duration_history.begin(), duration_history.end(), 0.0) / duration_history.size();
+        return duration_history.empty()
+                   ? 0.0
+                   : std::accumulate(duration_history.begin(),
+                                     duration_history.end(), 0.0) /
+                         duration_history.size();
     }
 
     void send_process_parameter(int64_t frameNumber, int64_t frameTotalNumber) {
@@ -50,19 +55,23 @@ public:
         static auto last_encoder_call_time = std::chrono::system_clock::now();
         auto now = std::chrono::system_clock::now();
 
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_encoder_call_time).count();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            now - last_encoder_call_time)
+                            .count();
         last_encoder_call_time = now;
 
         double smooth_duration = compute_smooth_duration(duration);
         if (frameNumber > 0 && frameTotalNumber > 0) {
-            remainTime = smooth_duration * (frameTotalNumber-frameNumber) / 1000;
+            remainTime =
+                smooth_duration * (frameTotalNumber - frameNumber) / 1000;
             processParameter->set_Time_Required(remainTime);
         }
 
         std::cout << "Process Number (percentage): " << processNumber << "%\t"
-                    << "Current duration (milliseconds): " << duration << "\t"
-                    << "Smoothed Duration: " << smooth_duration << " ms\t"
-                    << "Estimated Rest Time (seconds): " << remainTime << std::endl;
+                  << "Current duration (milliseconds): " << duration << "\t"
+                  << "Smoothed Duration: " << smooth_duration << " ms\t"
+                  << "Estimated Rest Time (seconds): " << remainTime
+                  << std::endl;
     }
 
     ProcessParameter *processParameter = NULL;
@@ -76,11 +85,15 @@ public:
     int processNumber = 0;
     double remainTime = 0;
 
-    std::chrono::system_clock::time_point last_encoder_call; // Track last call time
+    std::chrono::system_clock::time_point
+        last_encoder_call; // Track last call time
 
-    std::vector<double> duration_history;  // Store recent durations for averaging
-    static constexpr size_t max_history_size = 20;  // Limit for the number of durations tracked
-    static constexpr double min_duration_threshold = 10.0;  // Ignore durations < 10 ms
+    std::vector<double>
+        duration_history; // Store recent durations for averaging
+    static constexpr size_t max_history_size =
+        20; // Limit for the number of durations tracked
+    static constexpr double min_duration_threshold =
+        10.0; // Ignore durations < 10 ms
 };
 
 #endif

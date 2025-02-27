@@ -2,12 +2,13 @@
 
 /* Receive pointers from converter */
 TranscoderFFmpeg::TranscoderFFmpeg(ProcessParameter *processParameter,
-                       EncodeParameter *encodeParameter)
+                                   EncodeParameter *encodeParameter)
     : Transcoder(processParameter, encodeParameter) {
     frameTotalNumber = 0;
 }
 
-bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path) {
+bool TranscoderFFmpeg::transcode(std::string input_path,
+                                 std::string output_path) {
     bool flag = true;
     int ret = -1;
     // deal with arguments
@@ -40,33 +41,29 @@ bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path
     }
 
     for (int i = 0; i < decoder->fmtCtx->nb_streams; i++) {
-        if (decoder->fmtCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) 
-        {
-            if(!copyVideo)
-            {
+        if (decoder->fmtCtx->streams[i]->codecpar->codec_type ==
+            AVMEDIA_TYPE_VIDEO) {
+            if (!copyVideo) {
                 ret = prepare_Encoder_Video(decoder, encoder);
-                if(ret < 0)
-                {
+                if (ret < 0) {
                     goto end;
                 }
-            }else
-            {
-                prepare_Copy(encoder->fmtCtx, &encoder->videoStream, decoder->videoStream->codecpar);
+            } else {
+                prepare_Copy(encoder->fmtCtx, &encoder->videoStream,
+                             decoder->videoStream->codecpar);
             }
-        } else if (decoder->fmtCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) 
-        {
-            if(!copyAudio)
-            {
+        } else if (decoder->fmtCtx->streams[i]->codecpar->codec_type ==
+                   AVMEDIA_TYPE_AUDIO) {
+            if (!copyAudio) {
                 ret = prepare_Encoder_Audio(decoder, encoder);
-                if(ret < 0)
-                {
+                if (ret < 0) {
                     goto end;
                 }
-            }else
-            {
-                prepare_Copy(encoder->fmtCtx, &encoder->audioStream, decoder->audioStream->codecpar);
+            } else {
+                prepare_Copy(encoder->fmtCtx, &encoder->audioStream,
+                             decoder->audioStream->codecpar);
             }
-        }  
+        }
     }
     // binding
     ret = avio_open2(&encoder->fmtCtx->pb, encoder->filename, AVIO_FLAG_WRITE,
@@ -79,8 +76,9 @@ bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path
     /* Write the stream header, if any. */
     ret = avformat_write_header(encoder->fmtCtx, NULL);
     if (ret < 0) {
-//        fprintf(stderr, "Error occurred when opening output file: %s\n",
-//                av_err2str(ret));
+        //        fprintf(stderr, "Error occurred when opening output file:
+        //        %s\n",
+        //                av_err2str(ret));
         flag = false;
         goto end;
     }
@@ -91,8 +89,8 @@ bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path
             if (!copyVideo) {
                 transcode_Video(decoder, encoder);
             } else {
-                remux(decoder->pkt, encoder->fmtCtx,
-                                  decoder->videoStream, encoder->videoStream);
+                remux(decoder->pkt, encoder->fmtCtx, decoder->videoStream,
+                      encoder->videoStream);
             }
 
             // encode(oFmtCtx, outCodecCtx, outFrame, outPkt, inStream,
@@ -101,8 +99,8 @@ bool TranscoderFFmpeg::transcode(std::string input_path, std::string output_path
             if (!copyAudio) {
                 transcode_Audio(decoder, encoder);
             } else {
-                remux(decoder->pkt, encoder->fmtCtx,
-                                  decoder->audioStream, encoder->audioStream);
+                remux(decoder->pkt, encoder->fmtCtx, decoder->audioStream,
+                      encoder->audioStream);
             }
         }
     }
@@ -157,7 +155,8 @@ end:
     return flag;
 }
 
-bool TranscoderFFmpeg::open_Media(StreamContext *decoder, StreamContext *encoder) {
+bool TranscoderFFmpeg::open_Media(StreamContext *decoder,
+                                  StreamContext *encoder) {
     int ret = -1;
     /* set the frameNumber to zero to avoid some bugs */
     frameNumber = 0;
@@ -178,7 +177,8 @@ bool TranscoderFFmpeg::open_Media(StreamContext *decoder, StreamContext *encoder
     return true;
 }
 
-bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame) {
+bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder,
+                                    AVFrame *inputFrame) {
     int ret = -1;
     AVPacket *output_packet = av_packet_alloc();
     // send frame to encoder
@@ -204,14 +204,15 @@ bool TranscoderFFmpeg::encode_Video(AVStream *inStream, StreamContext *encoder, 
         // encoder->frame->pts/(inStream->time_base.den/inStream->r_frame_rate.num);
 
         av_log(NULL, AV_LOG_DEBUG, "calculator frame = %ld\n", frameNumber);
-        // processParameter->set_Process_Number(frameNumber++, frameTotalNumber);
+        // processParameter->set_Process_Number(frameNumber++,
+        // frameTotalNumber);
         send_process_parameter(frameNumber++, frameTotalNumber);
 
         output_packet->stream_index = encoder->videoStream->index;
         output_packet->duration = encoder->videoStream->time_base.den /
-                                 encoder->videoStream->time_base.num /
-                                 inStream->avg_frame_rate.num *
-                                 inStream->avg_frame_rate.den;
+                                  encoder->videoStream->time_base.num /
+                                  inStream->avg_frame_rate.num *
+                                  inStream->avg_frame_rate.den;
 
         av_packet_rescale_ts(output_packet, inStream->time_base,
                              encoder->videoStream->time_base);
@@ -229,43 +230,43 @@ end:
     return true;
 }
 
-bool TranscoderFFmpeg::encode_Audio(AVStream *in_stream, StreamContext *encoder, AVFrame *input_frame)
-{
+bool TranscoderFFmpeg::encode_Audio(AVStream *in_stream, StreamContext *encoder,
+                                    AVFrame *input_frame) {
     int ret = -1;
     AVPacket *output_packet = av_packet_alloc();
-    //send frame to encoder
+    // send frame to encoder
     ret = avcodec_send_frame(encoder->audioCodecCtx, input_frame);
-    if(ret < 0)
-    {
+    if (ret < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         ret = av_strerror(ret, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        av_log(NULL, AV_LOG_ERROR, "Failed to send frame to encoder! %s\n", errbuf);
+        av_log(NULL, AV_LOG_ERROR, "Failed to send frame to encoder! %s\n",
+               errbuf);
         goto end;
     }
-    while (ret >= 0)
-    {
+    while (ret >= 0) {
         ret = avcodec_receive_packet(encoder->audioCodecCtx, output_packet);
-        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             return 0;
-        }else if(ret < 0){
+        } else if (ret < 0) {
             return -1;
         }
         output_packet->stream_index = encoder->audioStream->index;
-        av_packet_rescale_ts(output_packet, in_stream->time_base, encoder->audioStream->time_base);
+        av_packet_rescale_ts(output_packet, in_stream->time_base,
+                             encoder->audioStream->time_base);
         ret = av_interleaved_write_frame(encoder->fmtCtx, output_packet);
-        if(ret < 0)
-        {
-            // fprintf(stderr, "Error while writing output packet: %s\n", av_err2str(ret));
+        if (ret < 0) {
+            // fprintf(stderr, "Error while writing output packet: %s\n",
+            // av_err2str(ret));
         }
         av_packet_unref(output_packet);
     }
-    
+
 end:
     return 0;
 }
 
 bool TranscoderFFmpeg::transcode_Video(StreamContext *decoder,
-                                 StreamContext *encoder) {
+                                       StreamContext *encoder) {
     int ret = -1;
 
     // send packet to decoder
@@ -297,27 +298,26 @@ end:
     return 0;
 }
 
-bool TranscoderFFmpeg::transcode_Audio(StreamContext *decoder, StreamContext *encoder)
-{
+bool TranscoderFFmpeg::transcode_Audio(StreamContext *decoder,
+                                       StreamContext *encoder) {
     int ret = avcodec_send_packet(decoder->audioCodecCtx, decoder->pkt);
-    if (ret < 0) 
-    {
+    if (ret < 0) {
         av_log(NULL, AV_LOG_ERROR, "Failed to send packet to decoder!\n");
     }
-    
+
     while (ret >= 0) {
         ret = avcodec_receive_frame(decoder->audioCodecCtx, decoder->frame);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
         } else if (ret < 0) {
-            av_log(NULL, AV_LOG_ERROR, "Failed to receive frame from decoder!\n");
+            av_log(NULL, AV_LOG_ERROR,
+                   "Failed to receive frame from decoder!\n");
             return ret;
         }
 
         encode_Audio(decoder->audioStream, encoder, decoder->frame);
-        
-        if (decoder->pkt)
-        {
+
+        if (decoder->pkt) {
             av_packet_unref(decoder->pkt);
         }
         av_frame_unref(decoder->frame);
@@ -405,7 +405,7 @@ bool TranscoderFFmpeg::prepare_Decoder(StreamContext *decoder) {
 }
 
 bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
-                                       StreamContext *encoder) {
+                                             StreamContext *encoder) {
     int ret = -1;
 
     /* set the total numbers of frame */
@@ -422,7 +422,8 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
     // encoder->videoCodec =
     // avcodec_find_encoder(decoder->videoCodecCtx->codec_id);
     if (!encoder->videoCodec) {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't find video codec: %s\n", codec.c_str());
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find video codec: %s\n",
+               codec.c_str());
         return false;
     }
 
@@ -493,77 +494,79 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
 }
 
 bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
-                                       StreamContext *encoder) {
+                                             StreamContext *encoder) {
     int ret = -1;
     /**
      * set the output file parameters
      */
-    //find the encodec by name
+    // find the encodec by name
     std::string codec = encodeParameter->get_Audio_Codec_Name();
     encoder->audioCodec = avcodec_find_encoder_by_name(codec.c_str());
-    if(!encoder->audioCodec)
-    {
-        av_log(NULL, AV_LOG_ERROR, "Couldn't find audio codec: %s\n", codec.c_str());
+    if (!encoder->audioCodec) {
+        av_log(NULL, AV_LOG_ERROR, "Couldn't find audio codec: %s\n",
+               codec.c_str());
         return -1;
     }
-    //init codec context
+    // init codec context
     encoder->audioCodecCtx = avcodec_alloc_context3(encoder->audioCodec);
-    if(!encoder->audioCodecCtx)
-    {
+    if (!encoder->audioCodecCtx) {
         av_log(NULL, AV_LOG_ERROR, "No memory!\n");
         return -1;
     }
-    if(decoder->audioCodecCtx->codec_type == AVMEDIA_TYPE_AUDIO)
-    {
-//        int OUTPUT_CHANNELS = 2;
+    if (decoder->audioCodecCtx->codec_type == AVMEDIA_TYPE_AUDIO) {
+        //        int OUTPUT_CHANNELS = 2;
         int OUTPUT_BIT_RATE = 196000;
 #ifdef OC_FFMPEG_VERSION
     #if OC_FFMPEG_VERSION < 50
         encoder->audioCodecCtx->channel_layout = AV_CH_LAYOUT_STEREO;
     #else
         AVChannelLayout stereoLayout = AV_CHANNEL_LAYOUT_STEREO;
-        av_channel_layout_copy(&encoder->audioCodecCtx->ch_layout, &stereoLayout);
+        av_channel_layout_copy(&encoder->audioCodecCtx->ch_layout,
+                               &stereoLayout);
     #endif
 #endif
-        encoder->audioCodecCtx->sample_rate    = decoder->audioCodecCtx->sample_rate;
-        encoder->audioCodecCtx->sample_fmt     = encoder->audioCodec->sample_fmts[0];
-        encoder->audioCodecCtx->bit_rate       = OUTPUT_BIT_RATE;
-        encoder->audioCodecCtx->time_base      = (AVRational){1, decoder->audioCodecCtx->sample_rate};
-        encoder->audioCodecCtx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
-        
+        encoder->audioCodecCtx->sample_rate =
+            decoder->audioCodecCtx->sample_rate;
+        encoder->audioCodecCtx->sample_fmt =
+            encoder->audioCodec->sample_fmts[0];
+        encoder->audioCodecCtx->bit_rate = OUTPUT_BIT_RATE;
+        encoder->audioCodecCtx->time_base =
+            (AVRational){1, decoder->audioCodecCtx->sample_rate};
+        encoder->audioCodecCtx->strict_std_compliance =
+            FF_COMPLIANCE_EXPERIMENTAL;
     }
-    //bind codec and codec context
+    // bind codec and codec context
     ret = avcodec_open2(encoder->audioCodecCtx, encoder->audioCodec, NULL);
-    if(ret < 0)
-    {
-        // av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n", av_err2str(ret));
+    if (ret < 0) {
+        // av_log(NULL, AV_LOG_ERROR, "Couldn't open the codec: %s\n",
+        // av_err2str(ret));
         return -1;
     }
     encoder->audioStream = avformat_new_stream(encoder->fmtCtx, NULL);
-    if (!encoder->audioStream) 
-    {
+    if (!encoder->audioStream) {
         av_log(NULL, AV_LOG_ERROR, "Failed allocating output stream\n");
         return -1;
     }
     encoder->audioStream->time_base = encoder->audioCodecCtx->time_base;
-    ret = avcodec_parameters_from_context(encoder->audioStream->codecpar, encoder->audioCodecCtx);
-    if (ret < 0) 
-    {
-        av_log(NULL, AV_LOG_ERROR, "Failed to copy encoder parameters to output stream #\n");
+    ret = avcodec_parameters_from_context(encoder->audioStream->codecpar,
+                                          encoder->audioCodecCtx);
+    if (ret < 0) {
+        av_log(NULL, AV_LOG_ERROR,
+               "Failed to copy encoder parameters to output stream #\n");
         return -1;
     }
     return true;
 }
 
 bool TranscoderFFmpeg::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
-                              AVCodecParameters *codecParam) {
+                                    AVCodecParameters *codecParam) {
     *stream = avformat_new_stream(avCtx, NULL);
     avcodec_parameters_copy((*stream)->codecpar, codecParam);
     return true;
 }
 
 bool TranscoderFFmpeg::remux(AVPacket *pkt, AVFormatContext *avCtx,
-                       AVStream *inStream, AVStream *outStream) {
+                             AVStream *inStream, AVStream *outStream) {
     av_packet_rescale_ts(pkt, inStream->time_base, outStream->time_base);
     if (av_interleaved_write_frame(avCtx, pkt) < 0) {
         av_log(NULL, AV_LOG_ERROR, "write frame error!\n");

@@ -96,8 +96,10 @@ void Info::send_Info(char *src) {
         CHECK_ERROR(ret);
     }
     // find the video and audio stream from container
-    quickInfo->videoIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-    quickInfo->audioIdx = av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
+    quickInfo->videoIdx =
+        av_find_best_stream(avCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    quickInfo->audioIdx =
+        av_find_best_stream(avCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 
     if (quickInfo->videoIdx >= 0) {
         quickInfo->height =
@@ -130,13 +132,14 @@ void Info::send_Info(char *src) {
         goto end;
     }
     // Open the audio codec
-    if (avcodec_parameters_to_context(audioCtx, avCtx->streams[quickInfo->audioIdx]->codecpar) < 0) {
+    if (avcodec_parameters_to_context(
+            audioCtx, avCtx->streams[quickInfo->audioIdx]->codecpar) < 0) {
         av_log(avCtx, AV_LOG_ERROR, "Failed to initialize codec context\n");
         goto end;
     }
 
-    quickInfo->audioCodec =
-        avcodec_get_name(avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
+    quickInfo->audioCodec = avcodec_get_name(
+        avCtx->streams[quickInfo->audioIdx]->codecpar->codec_id);
     quickInfo->audioBitRate =
         avCtx->streams[quickInfo->audioIdx]->codecpar->bit_rate;
 #ifdef OC_FFMPEG_VERSION

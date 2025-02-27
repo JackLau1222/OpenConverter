@@ -19,11 +19,10 @@
 #include "transcoder.h"
 
 extern "C" {
-#include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 };
-
 
 #define ENCODE_BIT_RATE 5000000
 
@@ -39,11 +38,13 @@ class TranscoderFFmpeg : public Transcoder {
 
     bool copyFrame(AVFrame *oldFrame, AVFrame *newFrame);
 
-    bool encode_Video(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame);
+    bool encode_Video(AVStream *inStream, StreamContext *encoder,
+                      AVFrame *inputFrame);
 
     bool transcode_Video(StreamContext *decoder, StreamContext *encoder);
 
-    bool encode_Audio(AVStream *inStream, StreamContext *encoder, AVFrame *inputFrame);
+    bool encode_Audio(AVStream *inStream, StreamContext *encoder,
+                      AVFrame *inputFrame);
 
     bool transcode_Audio(StreamContext *decoder, StreamContext *encoder);
 

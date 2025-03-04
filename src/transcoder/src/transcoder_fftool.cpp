@@ -29,16 +29,10 @@ TranscoderFFTool::~TranscoderFFTool() {
 std::string escapeWindowsPath(const std::string &path) {
     std::string escaped = path;
     size_t pos = 0;
-    while ((pos = escaped.find('\\', pos)) != std::string::npos) {
-        escaped.replace(pos, 1, "/");
+    while ((pos = escaped.find("\\", pos)) != std::string::npos) {
+        escaped.replace(pos, 1, "\\\\");
+        pos += 2;
     }
-
-    pos = 0;
-    while ((pos = escaped.find('"', pos)) != std::string::npos) {
-        escaped.replace(pos, 1, "\\\\\\\"");
-        pos += 4;
-    }
-
     return escaped;
 }
 
@@ -84,11 +78,7 @@ bool TranscoderFFTool::transcode(std::string input_path,
 
 // Check if FFMPEG_PATH is defined (ensure it's set by CMake)
 #ifdef FFTOOL_PATH
-<<<<<<< Updated upstream
-    cmd << FFTOOL_PATH << " -i \"" << input_path << "\"";
-=======
     cmd << "\"" << FFTOOL_PATH << "\" -i \"" << input_path << "\"";
->>>>>>> Stashed changes
 #else
     std::cerr << "FFmpeg path is not defined! Ensure CMake sets FFMPEG_PATH."
               << std::endl;
@@ -141,15 +131,11 @@ bool TranscoderFFTool::transcode(std::string input_path,
 
 #ifdef _WIN32
     // Windows-specific command execution (use cmd /c for shell commands)
-<<<<<<< Updated upstream
-    std::string fullCmd = "cmd /c " + cmd.str();
-=======
     std::string fullCmd = "cmd /c " + final_cmd;
->>>>>>> Stashed changes
     ret = system(fullCmd.c_str());
 #else
     // Unix-like systems (Linux/macOS) can directly use system()
-    ret = system(final_cmd.c_str());
+    ret = system(cmd.str().c_str());
 #endif
 
     if (ret != 0) {

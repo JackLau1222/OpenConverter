@@ -8,11 +8,18 @@ jobs:
   clang-format-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
+      - name: Checkout target branch code (using pull_request_target)
+        uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      
+      - name: Fetch and checkout PR branch
+        run: |
+          git remote add pr_origin https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
+          git fetch pr_origin ${{ github.event.pull_request.head.ref }}:pr_branch
+          git checkout pr_branch
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Current commit hash: $(git rev-parse HEAD)"
 
       - name: Install clang-format-18
         run: |
@@ -52,13 +59,10 @@ jobs:
 
           # Fetch the target branch code
           git fetch origin $BASE_REF
-          git checkout -b base_branch FETCH_HEAD
-
-          # Switch back to the PR branch
-          git checkout $HEAD_REF
+          git fetch origin $HEAD_REF
 
           # Generate the list of changed files
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB base_branch...HEAD)
+          CHANGED_FILES=$(git diff --name-only origin/$BASE_REF...origin/$HEAD_REF)
           printf "Changed files:\n%s\n" "$CHANGED_FILES"
           echo "::endgroup::"
 
@@ -105,3 +109,8 @@ jobs:
             echo "✅ All files passed style check"
           fi
           echo "::endgroup::"
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+

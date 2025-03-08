@@ -122,7 +122,7 @@ bool TranscoderFFTool::transcode(std::string input_path,
     cmd << " \"" << output_path << "\"";
 
     std::string raw_cmd = cmd.str();
-    std::string final_cmd = "\"" + raw_cmd;
+    std::string final_cmd = "\"" + raw_cmd + "\"";
 
     // Execute the command
     std::cout << "Executing: " << final_cmd << std::endl;

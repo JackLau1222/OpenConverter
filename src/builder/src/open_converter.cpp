@@ -267,12 +267,6 @@ QString OpenConverter::formatFrequency(int64_t hertz) {
     return QString("%1 Hz").arg(hertz);
 }
 
-    // number of channels in singular or plural form
-QString OpenConverter::formatChannels(int channels) {
-    return QString("%1 %2").arg(channels).arg(
-        (channels == 1) ? tr("channel") : tr("channels"));
-}
-
 void OpenConverter::info_Display(QuickInfo *quickInfo) {
     // video
     ui->label_videoStreamResult->setText(
@@ -297,7 +291,7 @@ void OpenConverter::info_Display(QuickInfo *quickInfo) {
     ui->label_audioBitRateResult->setText(
         formatBitrate(quickInfo->audioBitRate));
     ui->label_channelsResult->setText(
-        formatChannels(quickInfo->channels));
+        QString("%1").arg(quickInfo->channels));
     ui->label_sampleFmtResult->setText(
         QString("%1").arg(QString::fromStdString(quickInfo->sampleFmt)));
     ui->label_sampleRateResult->setText(

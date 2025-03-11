@@ -77,7 +77,6 @@ class OpenConverter : public QMainWindow {
     // nuit formatting functions
     QString formatBitrate(int64_t bitsPerSec);
     QString formatFrequency(int64_t hertz);
-    QString formatChannels(int channels);
 
     // loads a language by the given language shortcur (e.g. de, en)
     void loadLanguage(const QString &rLanguage);

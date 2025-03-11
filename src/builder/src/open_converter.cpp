@@ -247,31 +247,61 @@ void OpenConverter::convert_Pushed() {
                                  ui->lineEdit_outputFile->text());
 }
 
+    // automatically select kbps/Mbps
+QString OpenConverter::formatBitrate(int64_t bitsPerSec) {
+    const double kbps = bitsPerSec / 1000.0;
+    if (kbps >= 1000.0) {
+        return QString("%1 Mbps").arg(kbps / 1000.0, 0, 'f', 1);
+    }
+    return QString("%1 kbps").arg(kbps, 0, 'f', 1);
+}
+
+    // automatically select Hz/kHz/MHz
+QString OpenConverter::formatFrequency(int64_t hertz) {
+    const double kHz = hertz / 1000.0;
+    if (kHz >= 1000.0) {
+        return QString("%1 MHz").arg(kHz / 1000.0, 0, 'f', 2);
+    } else if (kHz >= 1.0) {
+        return QString("%1 kHz").arg(kHz, 0, 'f', 1);
+    }
+    return QString("%1 Hz").arg(hertz);
+}
+
+    // number of channels in singular or plural form
+QString OpenConverter::formatChannels(int channels) {
+    return QString("%1 %2").arg(channels).arg(
+        (channels == 1) ? tr("channel") : tr("channels"));
+}
+
 void OpenConverter::info_Display(QuickInfo *quickInfo) {
     // video
     ui->label_videoStreamResult->setText(
         QString("%1").arg(quickInfo->videoIdx));
-    ui->label_widthResult->setText(QString("%1").arg(quickInfo->width));
-    ui->label_heightResult->setText(QString("%1").arg(quickInfo->height));
+    ui->label_widthResult->setText(
+        QString("%1 px").arg(quickInfo->width));
+    ui->label_heightResult->setText(
+        QString("%1 px").arg(quickInfo->height));
     ui->label_colorSpaceResult->setText(
         QString("%1").arg(QString::fromStdString(quickInfo->colorSpace)));
     ui->label_videoCodecResult->setText(
         QString("%1").arg(QString::fromStdString(quickInfo->videoCodec)));
     ui->label_videoBitRateResult->setText(
-        QString("%1").arg(quickInfo->videoBitRate));
-    ui->label_frameRateResult->setText(QString("%1").arg(quickInfo->frameRate));
+        formatBitrate(quickInfo->videoBitRate));
+    ui->label_frameRateResult->setText(
+        QString("%1 fps").arg(quickInfo->frameRate,0,'f',2));
     // audio
     ui->label_audioStreamResult->setText(
         QString("%1").arg(quickInfo->audioIdx));
     ui->label_audioCodecResult->setText(
         QString("%1").arg(QString::fromStdString(quickInfo->audioCodec)));
     ui->label_audioBitRateResult->setText(
-        QString("%1").arg(quickInfo->audioBitRate));
-    ui->label_channelsResult->setText(QString("%1").arg(quickInfo->channels));
+        formatBitrate(quickInfo->audioBitRate));
+    ui->label_channelsResult->setText(
+        formatChannels(quickInfo->channels));
     ui->label_sampleFmtResult->setText(
         QString("%1").arg(QString::fromStdString(quickInfo->sampleFmt)));
     ui->label_sampleRateResult->setText(
-        QString("%1").arg(quickInfo->sampleRate));
+        formatFrequency(quickInfo->sampleRate));
 }
 
 OpenConverter::~OpenConverter() {

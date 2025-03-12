@@ -74,8 +74,10 @@ class OpenConverter : public QMainWindow {
     ~OpenConverter();
 
   private:
-    // nuit formatting functions
+    // intelligent conversion of bit rate units
     QString formatBitrate(int64_t bitsPerSec);
+
+    // intelligent conversion of frequency units
     QString formatFrequency(int64_t hertz);
 
     // loads a language by the given language shortcur (e.g. de, en)

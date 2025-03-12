@@ -247,7 +247,7 @@ void OpenConverter::convert_Pushed() {
                                  ui->lineEdit_outputFile->text());
 }
 
-    // automatically select kbps/Mbps
+// automatically select kbps/Mbps
 QString OpenConverter::formatBitrate(int64_t bitsPerSec) {
     const double kbps = bitsPerSec / 1000.0;
     if (kbps >= 1000.0) {
@@ -256,7 +256,7 @@ QString OpenConverter::formatBitrate(int64_t bitsPerSec) {
     return QString("%1 kbps").arg(kbps, 0, 'f', 1);
 }
 
-    // automatically select Hz/kHz/MHz
+// automatically select Hz/kHz/MHz
 QString OpenConverter::formatFrequency(int64_t hertz) {
     const double kHz = hertz / 1000.0;
     if (kHz >= 1000.0) {

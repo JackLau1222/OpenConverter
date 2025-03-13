@@ -168,7 +168,19 @@ void OpenConverter::changeEvent(QEvent *event) {
     //        }
     //    }
     if (event->type() == QEvent::LanguageChange) {
+        // save the current input and output folders
+        currentInputPath = ui->lineEdit_inputFile->text();
+        currentOutputPath = ui->lineEdit_outputFile->text();
+
         ui->retranslateUi(this);
+
+        // restore the input and output folders
+        ui->lineEdit_inputFile->setText(currentInputPath);
+        ui->lineEdit_outputFile->setText(currentOutputPath);
+
+        if (currentQuickInfo != nullptr) {
+            info_Display(currentQuickInfo);
+        }
     }
     QMainWindow::changeEvent(event);
 }
@@ -206,8 +218,9 @@ void OpenConverter::apply_Pushed() {
     // get info by Decapsulation
     info->send_Info(src);
 
+    currentQuickInfo = info->get_Quick_Info();
     // display info on window
-    info_Display(info->get_Quick_Info());
+    info_Display(currentQuickInfo);
 }
 
 void OpenConverter::convert_Pushed() {

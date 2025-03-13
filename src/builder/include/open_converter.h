@@ -106,5 +106,11 @@ class OpenConverter : public QMainWindow {
     QMessageBox *displayResult = NULL;
 
     QThread converterThread;
+
+    QuickInfo* currentQuickInfo = nullptr;
+
+    QString currentInputPath;
+
+    QString currentOutputPath;
 };
 #endif // OPEN_CONVERTER_H

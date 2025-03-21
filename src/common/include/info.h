@@ -23,6 +23,7 @@ extern "C" {
 };
 #include <map>
 #include <string>
+#include <stdint.h>
 
 // store some info of video and audio
 typedef struct QuickInfo {

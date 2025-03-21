@@ -434,6 +434,12 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
         return false;
     }
 
+    av_opt_set(encoder->videoCodecCtx->priv_data, "preset", "medium", 0);
+    if (encoder->videoCodecCtx->codec_id == AV_CODEC_ID_H264)
+        av_opt_set(encoder->videoCodecCtx->priv_data, "x264-params", "keyint=60:min-keyint=60:scenecut=0:force-cfr=1", 0);
+    else if (encoder->videoCodecCtx->codec_id == AV_CODEC_ID_HEVC)
+        av_opt_set(encoder->videoCodecCtx->priv_data, "x265-params", "keyint=60:min-keyint=60:scenecut=0", 0);
+        
     if (decoder->videoCodecCtx->codec_type == AVMEDIA_TYPE_VIDEO) {
         encoder->videoCodecCtx->height = decoder->videoCodecCtx->height;
         encoder->videoCodecCtx->width = decoder->videoCodecCtx->width;

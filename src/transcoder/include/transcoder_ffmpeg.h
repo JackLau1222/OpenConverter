@@ -22,6 +22,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavutil/opt.h>
 };
 
 #define ENCODE_BIT_RATE 5000000

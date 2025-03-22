@@ -1,0 +1,44 @@
+name: Windows Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Check out the repository code.
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up the Qt environment.
+      - name: Setup Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.15.2'  # Change to your required Qt version.
+          host: windows
+          arch: desktop
+
+      # Install FFmpeg version 5.1.6 using Chocolatey.
+      - name: Install FFmpeg 5.1.6
+        run: |
+          choco install ffmpeg --version=5.1.6 --confirm
+
+      # Create a build directory, run qmake, and build the project.
+      - name: Build Qt project
+        run: |
+          (cd src && cmake -B build && cd build && make -j$(nproc))
+
+      # (Optional) Archive the build artifacts.
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: qt-build-artifacts
+          path: build/Release/
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3

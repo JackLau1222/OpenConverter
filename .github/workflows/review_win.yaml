@@ -39,7 +39,7 @@ jobs:
       - name: Download FFmpeg
         shell: powershell
         run: |
-          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-02-02-12-58/ffmpeg-n5.1.6-16-g6e63e49496-win64-lgpl-shared-5.1.zip"
+          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-03-31-17-28/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4.zip"
           $outputZip = "ffmpeg.zip"
           Invoke-WebRequest -Uri $ffmpegUrl -OutFile $outputZip
           Expand-Archive -Path $outputZip -DestinationPath ffmpeg

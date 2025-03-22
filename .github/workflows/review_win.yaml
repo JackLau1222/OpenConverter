@@ -43,11 +43,12 @@ jobs:
           $outputZip = "ffmpeg.zip"
           Invoke-WebRequest -Uri $ffmpegUrl -OutFile $outputZip
           Expand-Archive -Path $outputZip -DestinationPath ffmpeg
+          echo "FFMPEG_ROOT_PATH=$(pwd)/ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4" >> $GITHUB_ENV
 
       # Create a build directory, run qmake, and build the project.
       - name: Build Qt project
         run: |
-          (cd src && cmake -DFFMPEG_ROOT_PATH=%CD%\..\ffmpeg -B build && cd build && make -j$(nproc))
+          (cd src && cmake -B build && cd build && make -j$(nproc))
 
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts

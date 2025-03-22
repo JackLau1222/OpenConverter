@@ -14,6 +14,9 @@ option(BMF_TRANSCODER "enable BMF Transcoder" OFF)
 option(FFTOOL_TRANSCODER "enable FFmpeg Command Tool Transcoder" ON)
 option(FFMPEG_TRANSCODER "enable FFmpeg Core Transcoder" ON)
 
+# declare a cache variable, default empty
+set(FFMPEG_ROOT_PATH "" CACHE PATH "Path to your FFmpeg installation")
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
@@ -85,7 +88,9 @@ function(find_ffmpeg_version FFMPEG_VERSION_INCLUDE_DIR FFMPEG_LIB_DIR VERSION_V
     message(FATAL_ERROR "Unable to determine FFmpeg version from both ffversion.h and libraries.")
 endfunction()
 
-if(DEFINED ENV{FFMPEG_ROOT_PATH})
+if(FFMPEG_ROOT_PATH)               # user passed -DFFMPEG_ROOT_PATH=…
+  message(STATUS "Using FFMPEG_ROOT_PATH from CMake param: ${FFMPEG_ROOT_PATH}")
+elseif(DEFINED ENV{FFMPEG_ROOT_PATH})
     set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
     message(STATUS "Using FFMPEG_ROOT_PATH: ${FFMPEG_ROOT_PATH}")
     

@@ -1,0 +1,65 @@
+name: Windows Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: 
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: ..
+  QT_VERSION:   6.4.3
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    concurrency:
+      group: "review-win-${{ github.event.pull_request.number }}"
+      cancel-in-progress: true 
+
+    steps:
+      # Check out the repository code.
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up the Qt environment.
+      - name: (2) Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         windows
+          target:       desktop
+          arch:         win64_msvc2019_64
+          dir:          ${{ runner.temp }}
+          setup-python: false 
+
+      # Download FFmpeg from the specified release URL.
+      - name: Download FFmpeg
+        shell: powershell
+        run: |
+          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-03-31-17-28/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4.zip"
+          $outputZip = "ffmpeg.zip"
+          Invoke-WebRequest -Uri $ffmpegUrl -OutFile $outputZip
+          Expand-Archive -Path $outputZip -DestinationPath ffmpeg
+          echo "FFMPEG_ROOT_PATH=$(pwd)/ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4" >> $GITHUB_ENV
+
+      # Create a build directory, run qmake, and build the project.
+      - name: Build Qt project
+        run: |
+          (cd src && cmake -B build -DFFMPEG_ROOT_PATH=../ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4 && cd build && make -j$(nproc))
+
+      # (Optional) Archive the build artifacts.
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-build-artifacts
+          path: build/Release/
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3

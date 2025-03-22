@@ -35,15 +35,19 @@ jobs:
           dir:          ${{ runner.temp }}
           setup-python: false 
 
-      # Install FFmpeg version 5.1.6 using Chocolatey.
-      - name: Install FFmpeg 5.1.6
+      # Download FFmpeg from the specified release URL.
+      - name: Download FFmpeg
+        shell: powershell
         run: |
-          choco install ffmpeg --version=5.1.6 --confirm
+          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-02-02-12-58/ffmpeg-n5.1.6-16-g6e63e49496-win64-lgpl-shared-5.1.zip"
+          $outputZip = "ffmpeg.zip"
+          Invoke-WebRequest -Uri $ffmpegUrl -OutFile $outputZip
+          Expand-Archive -Path $outputZip -DestinationPath ffmpeg
 
       # Create a build directory, run qmake, and build the project.
       - name: Build Qt project
         run: |
-          (cd src && cmake -B build && cd build && make -j$(nproc))
+          (cd src && cmake -DFFMPEG_ROOT_PATH=%CD%\..\ffmpeg -B build && cd build && make -j$(nproc))
 
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts

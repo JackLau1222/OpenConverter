@@ -178,8 +178,8 @@ void OpenConverter::changeEvent(QEvent *event) {
         ui->lineEdit_inputFile->setText(currentInputPath);
         ui->lineEdit_outputFile->setText(currentOutputPath);
 
-        if (currentQuickInfo != nullptr) {
-            info_Display(currentQuickInfo);
+        if (info && info->get_Quick_Info()) {
+            info_Display(info->get_Quick_Info());
         }
     }
     QMainWindow::changeEvent(event);
@@ -218,9 +218,8 @@ void OpenConverter::apply_Pushed() {
     // get info by Decapsulation
     info->send_Info(src);
 
-    currentQuickInfo = info->get_Quick_Info();
     // display info on window
-    info_Display(currentQuickInfo);
+    info_Display(info->get_Quick_Info());
 }
 
 void OpenConverter::convert_Pushed() {

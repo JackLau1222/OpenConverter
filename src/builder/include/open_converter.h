@@ -107,8 +107,6 @@ class OpenConverter : public QMainWindow {
 
     QThread converterThread;
 
-    QuickInfo* currentQuickInfo = nullptr;
-
     QString currentInputPath;
 
     QString currentOutputPath;

@@ -18,6 +18,9 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    concurrency:
+      group: "review-win-${{ github.event.pull_request.number }}"
+      cancel-in-progress: true 
 
     steps:
       # Check out the repository code.

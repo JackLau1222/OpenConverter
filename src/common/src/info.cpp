@@ -46,21 +46,20 @@ std::string Info::enum_To_String(AVColorSpace e) {
     }
 }
 
-std::string Info::enum_To_String(AVCodecID e) {
-    static std::map<AVCodecID, std::string> colorSpaceMap;
+// std::string Info::enum_To_String(AVCodecID e) {
+//     static std::map<AVCodecID, std::string> colorSpaceMap;
+//     if (colorSpaceMap.empty()) {
+//         colorSpaceMap[AV_CODEC_ID_AAC] = "AAC";
+//         colorSpaceMap[AV_CODEC_ID_H264] = "H264";
+//     }
 
-    if (colorSpaceMap.empty()) {
-        colorSpaceMap[AV_CODEC_ID_AAC] = "AAC";
-        colorSpaceMap[AV_CODEC_ID_H264] = "H264";
-    }
-
-    auto it = colorSpaceMap.find(e);
-    if (it != colorSpaceMap.end()) {
-        return it->second;
-    } else {
-        return "Unknown";
-    }
-}
+//     auto it = colorSpaceMap.find(e);
+//     if (it != colorSpaceMap.end()) {
+//         return it->second;
+//     } else {
+//         return "Unknown";
+//     }
+// }
 
 std::string Info::enum_To_String(AVSampleFormat e) {
     static std::map<AVSampleFormat, std::string> colorSpaceMap;
@@ -107,7 +106,7 @@ void Info::send_Info(char *src) {
         quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
         quickInfo->colorSpace = enum_To_String(
             avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
-        quickInfo->videoCodec = enum_To_String(
+        quickInfo->videoCodec = avcodec_get_name(
             avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
         quickInfo->videoBitRate =
             avCtx->streams[quickInfo->videoIdx]->codecpar->bit_rate;

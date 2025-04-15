@@ -30,8 +30,6 @@ QuickInfo *Info::get_Quick_Info() { return quickInfo; }
 void Info::send_Info(char *src) {
     init();
     int ret = 0;
-    avCtx = nullptr;
-    audioCtx = nullptr;
     av_log_set_level(AV_LOG_DEBUG);
     ret = avformat_open_input(&avCtx, src, NULL, NULL);
     if (ret < 0) {

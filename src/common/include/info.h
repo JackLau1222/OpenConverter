@@ -78,15 +78,6 @@ class Info {
     QuickInfo *get_Quick_Info();
     // send the info to front-end
     void send_Info(char *src);
-
-    // convert video color space into string
-    std::string enum_To_String(AVColorSpace e);
-
-    // convert audio and video codec enum into string
-    std::string enum_To_String(AVCodecID e);
-
-    // convert audio sample format enum into string
-    std::string enum_To_String(AVSampleFormat sample_fmt);
 };
 
 #endif // INFO_H

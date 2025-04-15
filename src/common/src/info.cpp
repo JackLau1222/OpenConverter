@@ -27,63 +27,11 @@ void Info::init() {
 
 QuickInfo *Info::get_Quick_Info() { return quickInfo; }
 
-std::string Info::enum_To_String(AVColorSpace e) {
-    static std::map<AVColorSpace, std::string> colorSpaceMap;
-
-    // Initialize the map on first call
-    if (colorSpaceMap.empty()) {
-        colorSpaceMap[AVCOL_SPC_BT709] = "AVCOL_SPC_BT709";
-        colorSpaceMap[AVCOL_SPC_UNSPECIFIED] = "AVCOL_SPC_UNSPECIFIED";
-        colorSpaceMap[AVCOL_SPC_RESERVED] = "AVCOL_SPC_RESERVED";
-        // Add more enum-value pairs as needed
-    }
-
-    auto it = colorSpaceMap.find(e);
-    if (it != colorSpaceMap.end()) {
-        return it->second;
-    } else {
-        return "Unknown";
-    }
-}
-
-// std::string Info::enum_To_String(AVCodecID e) {
-//     static std::map<AVCodecID, std::string> colorSpaceMap;
-//     if (colorSpaceMap.empty()) {
-//         colorSpaceMap[AV_CODEC_ID_AAC] = "AAC";
-//         colorSpaceMap[AV_CODEC_ID_H264] = "H264";
-//     }
-
-//     auto it = colorSpaceMap.find(e);
-//     if (it != colorSpaceMap.end()) {
-//         return it->second;
-//     } else {
-//         return "Unknown";
-//     }
-// }
-
-std::string Info::enum_To_String(AVSampleFormat e) {
-    static std::map<AVSampleFormat, std::string> colorSpaceMap;
-
-    if (colorSpaceMap.empty()) {
-        colorSpaceMap[AV_SAMPLE_FMT_U8] = "u8";
-        colorSpaceMap[AV_SAMPLE_FMT_S16] = "s16be";
-        colorSpaceMap[AV_SAMPLE_FMT_S32] = "s32be";
-        colorSpaceMap[AV_SAMPLE_FMT_FLT] = "f32be";
-        colorSpaceMap[AV_SAMPLE_FMT_DBL] = "f64be";
-        colorSpaceMap[AV_SAMPLE_FMT_FLTP] = "fltp";
-    }
-
-    auto it = colorSpaceMap.find(e);
-    if (it != colorSpaceMap.end()) {
-        return it->second;
-    } else {
-        return "Unknown";
-    }
-}
-
 void Info::send_Info(char *src) {
     init();
     int ret = 0;
+    avCtx = nullptr;
+    audioCtx = nullptr;
     av_log_set_level(AV_LOG_DEBUG);
     ret = avformat_open_input(&avCtx, src, NULL, NULL);
     if (ret < 0) {
@@ -104,7 +52,7 @@ void Info::send_Info(char *src) {
         quickInfo->height =
             avCtx->streams[quickInfo->videoIdx]->codecpar->height;
         quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
-        quickInfo->colorSpace = enum_To_String(
+        quickInfo->colorSpace = av_get_colorspace_name(
             avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
         quickInfo->videoCodec = avcodec_get_name(
             avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);

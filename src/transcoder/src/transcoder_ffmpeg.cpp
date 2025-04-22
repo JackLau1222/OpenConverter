@@ -568,6 +568,9 @@ bool TranscoderFFmpeg::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
                                     AVCodecParameters *codecParam) {
     *stream = avformat_new_stream(avCtx, NULL);
     avcodec_parameters_copy((*stream)->codecpar, codecParam);
+    if (codecParam->codec_type == AVMEDIA_TYPE_AUDIO) {
+        (*stream)->codecpar->codec_tag = 0;
+    }
     return true;
 }
 

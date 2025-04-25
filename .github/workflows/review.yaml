@@ -7,7 +7,7 @@ on:
 
 jobs:
   review-linux-x86:
-    runs-on: ubuntu-20.04  
+    runs-on: ubuntu-22.04  
     concurrency:
       group: "review-linux-${{ github.event.pull_request.number }}"
       cancel-in-progress: true 
@@ -140,16 +140,8 @@ jobs:
       cancel-in-progress: true
 
     steps:
-    - name: Checkout target branch code (using pull_request_target)
+    - name: Checkout target branch code (using pull_request)
       uses: actions/checkout@v2
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
-
-    - name: Fetch and checkout PR branch
-      run: |
-        git remote add pr_origin https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
-        git fetch pr_origin ${{ github.event.pull_request.head.ref }}:pr_branch
-        git checkout pr_branch
 
     - name: Print current branch and commit hash
       run: |

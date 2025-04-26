@@ -245,8 +245,8 @@ jobs:
         export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
         (cd src && cmake -B build -DBMF_TRANSCODER=OFF && cd build && make -j$(sysctl -n hw.ncpu))
 
-        # export DYLD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
-        # export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
+        export DYLD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/
+        export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/
 
         # fix link libraries path mistake
         cd src/build

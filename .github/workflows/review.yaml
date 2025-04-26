@@ -292,7 +292,7 @@ jobs:
 
         (cd src/build && 
         # cp $BMF_ROOT_PATH/BUILTIN_CONFIG.json OpenConverter.app/Contents/Frameworks && 
-        mkdir OpenConverter.app/Contents/Frameworks/lib && cp $BMF_ROOT_PATH/lib/libbuiltin_modules.dylib OpenConverter.app/Contents/Frameworks/lib && 
+        # mkdir OpenConverter.app/Contents/Frameworks/lib && cp $BMF_ROOT_PATH/lib/libbuiltin_modules.dylib OpenConverter.app/Contents/Frameworks/lib && 
         macdeployqt OpenConverter.app -dmg)
         
         mv src/build/OpenConverter.dmg OpenConverter_macOS_aarch64.dmg

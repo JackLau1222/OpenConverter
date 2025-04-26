@@ -25,7 +25,7 @@ jobs:
       run: |
         # sudo apt update
         # sudo apt install -y make git pkg-config libssl-dev cmake binutils-dev libgoogle-glog-dev gcc g++ golang wget libgl1
-        # sudo apt install -y nasm yasm libx264-dev libx265-dev libnuma-dev
+        sudo apt install -y nasm yasm libx264-dev libx265-dev libnuma-dev
         # sudo apt install -y python3.9 python3-dev python3-pip libsndfile1 libsndfile1-dev
         
         git clone https://github.com/JackLau1222/bmf.git
@@ -126,9 +126,9 @@ jobs:
         name: OpenConverter_Linux_x86
         path: OpenConverter_Linux_x86.tar.gz
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
+    # - name: Setup tmate session
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
 
     - name: Finish
       run: echo "Release upload complete"
@@ -212,6 +212,7 @@ jobs:
       run: |
         if [ ! -d "$(pwd)/ffmpeg" ]; then
           echo "FFmpeg not found, starting build..."
+          brew install make pkg-config openssl cmake x264 x265
           wget https://ffmpeg.org/releases/ffmpeg-5.1.6.tar.bz2 && tar xjvf ffmpeg-5.1.6.tar.bz2
           (cd ffmpeg-5.1.6 && ./configure --pkg-config-flags=--static --enable-shared --disable-static --extra-libs=-lpthread --extra-libs=-lm --enable-gpl --enable-nonfree --enable-libx264 --enable-libx265 --prefix=../ffmpeg)
           (cd ffmpeg-5.1.6 && make -j$(sysctl -n hw.ncpu) && make install)
@@ -303,9 +304,9 @@ jobs:
         name: OpenConverter_macOS_aarch64
         path: OpenConverter_macOS_aarch64.dmg
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
+    # - name: Setup tmate session
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
 
     - name: Finish
       run: echo "Release upload complete"

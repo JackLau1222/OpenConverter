@@ -151,8 +151,8 @@ jobs:
       - name: Run Build Wrapper
         run: |
           export PATH=$PATH:$FFMPEG_ROOT_PATH/bin
-          (cd src && mkdir build && cmake -S . -B build)
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build src/build/ -DBMF_TRANSCODER=OFF --config Release
+          (cd src && mkdir build && cmake -S . -B build -DBMF_TRANSCODER=OFF)
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build src/build/ --config Release
           cat ${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
 
       - name: SonarQube Scan
@@ -188,9 +188,9 @@ jobs:
             --output-type RATE > code_quality_output.txt
           cat code_quality_output.txt
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
 
 
       - name: Update PR comment with SonarQube result

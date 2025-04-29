@@ -568,6 +568,13 @@ bool TranscoderFFmpeg::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
                                     AVCodecParameters *codecParam) {
     *stream = avformat_new_stream(avCtx, NULL);
     avcodec_parameters_copy((*stream)->codecpar, codecParam);
+
+    // the "mp4a" tag in MP4 is incompatible with MKV.
+    // so set the codec_tag of the audio stream to 0 to avoid compatibility issues.
+    // we will improve this method in the future.
+    if (codecParam->codec_type == AVMEDIA_TYPE_AUDIO) {
+        (*stream)->codecpar->codec_tag = 0;
+    }
     return true;
 }
 

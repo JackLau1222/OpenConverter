@@ -16,14 +16,18 @@
 #ifndef INFO_H
 #define INFO_H
 
+#include <stdint.h>
+#include <map>
+#include <string>
+
 #include "common.h"
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+#include <libavutil/pixdesc.h>
 };
-#include <map>
-#include <string>
-#include <stdint.h>
+
 
 // store some info of video and audio
 typedef struct QuickInfo {

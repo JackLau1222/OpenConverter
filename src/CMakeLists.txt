@@ -9,7 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BMF_TRANSCODER "enable BMF Transcoder" ON)
+# BMF is experimental feature, so we can't enable it by default
+option(BMF_TRANSCODER "enable BMF Transcoder" OFF)
 option(FFTOOL_TRANSCODER "enable FFmpeg Command Tool Transcoder" ON)
 option(FFMPEG_TRANSCODER "enable FFmpeg Core Transcoder" ON)
 
@@ -68,6 +69,8 @@ function(find_ffmpeg_version FFMPEG_VERSION_INCLUDE_DIR FFMPEG_LIB_DIR VERSION_V
                     set(FFMPEG_VERSION_CLEAN "60")  # FFmpeg v6.x
                 elseif(FFMPEG_VERSION STREQUAL "61")
                     set(FFMPEG_VERSION_CLEAN "70")  # FFmpeg v7.x (dev)
+                elseif(FFMPEG_VERSION STREQUAL "62")
+                    set(FFMPEG_VERSION_CLEAN "71")
                 else()
                     message(FATAL_ERROR "Unsupported FFmpeg library version: ${FFMPEG_VERSION}")
                 endif()

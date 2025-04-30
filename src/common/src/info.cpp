@@ -50,8 +50,16 @@ void Info::send_Info(char *src) {
         quickInfo->height =
             avCtx->streams[quickInfo->videoIdx]->codecpar->height;
         quickInfo->width = avCtx->streams[quickInfo->videoIdx]->codecpar->width;
+
+#ifdef OC_FFMPEG_VERSION
+    #if OC_FFMPEG_VERSION > 51
+        quickInfo->colorSpace = av_color_space_name(
+            avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
+    #else
         quickInfo->colorSpace = av_get_colorspace_name(
             avCtx->streams[quickInfo->videoIdx]->codecpar->color_space);
+    #endif
+#endif
         quickInfo->videoCodec = avcodec_get_name(
             avCtx->streams[quickInfo->videoIdx]->codecpar->codec_id);
         quickInfo->videoBitRate =

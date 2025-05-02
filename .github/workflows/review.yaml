@@ -352,20 +352,31 @@ jobs:
 
       - name : Deploy project
         run: |
-          mkdir D:\deploy\OpenConverter
-          cd D:\deploy\OpenConverter
-          cp D:\a\OpenConverter\OpenConverter\src\build\Release\OpenConverter.exe .
-          D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe .\OpenConverter.exe
-          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll .\
-          cd D:\deploy
-          powershell Compress-Archive -Path OpenConverter -DestinationPath OpenConverter_win64.zip
+          # 1) Create the deploy folder under the repo workspace
+          New-Item -ItemType Directory -Force -Path OpenConverter_win64
+
+          # 2) Copy your built exe into OpenConverter_win64/
+          Copy-Item -Path "src\build\Release\OpenConverter.exe" -Destination "OpenConverter_win64"
+
+          # 3) Bundle Qt runtime into OpenConverter_win64/
+          & "D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe" `
+            "--qmldir=src" `
+            "OpenConverter_win64\OpenConverter.exe"
+
+          # 4) Copy FFmpeg DLLs into OpenConverter_win64/
+          Copy-Item `
+            -Path "ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll" `
+            -Destination "OpenConverter_win64"
+
+          # 5) Zip the OpenConverter_win64 folder into the workspace root
+          Compress-Archive -Path "OpenConverter_win64" -DestinationPath "OpenConverter_win64.zip"
 
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: OpenConverter_win64
-          path: D:\deploy\OpenConverter_win64.zip
+          path: OpenConverter_win64.zip
 
       # - name: Setup tmate session
       #   if: ${{ failure() }}

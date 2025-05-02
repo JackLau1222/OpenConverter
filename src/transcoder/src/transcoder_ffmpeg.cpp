@@ -458,8 +458,8 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
             encoder->videoCodecCtx->pix_fmt = decoder->videoCodecCtx->pix_fmt;
 
         // encoder->videoCodecCtx->max_b_frames = 0;
-        encoder->videoCodecCtx->time_base = (AVRational){1, 60};
-        encoder->videoCodecCtx->framerate = (AVRational){60, 1};
+        encoder->videoCodecCtx->time_base = av_make_q(1, 60);
+        encoder->videoCodecCtx->framerate = av_make_q(60, 1);
     }
 
     // bind codec and codec context
@@ -476,9 +476,9 @@ bool TranscoderFFmpeg::prepare_Encoder_Video(StreamContext *decoder,
         return false;
     }
     encoder->videoStream->r_frame_rate =
-        (AVRational){60, 1}; // For setting real frame rate
+        av_make_q(60, 1); // For setting real frame rate
     encoder->videoStream->avg_frame_rate =
-        (AVRational){60, 1}; // For setting average frame rate
+        av_make_q(60, 1); // For setting average frame rate
     // the input file's time_base is wrong
     encoder->videoStream->time_base = encoder->videoCodecCtx->time_base;
 
@@ -537,7 +537,7 @@ bool TranscoderFFmpeg::prepare_Encoder_Audio(StreamContext *decoder,
             encoder->audioCodec->sample_fmts[0];
         encoder->audioCodecCtx->bit_rate = OUTPUT_BIT_RATE;
         encoder->audioCodecCtx->time_base =
-            (AVRational){1, decoder->audioCodecCtx->sample_rate};
+            av_make_q(1, decoder->audioCodecCtx->sample_rate);
         encoder->audioCodecCtx->strict_std_compliance =
             FF_COMPLIANCE_EXPERIMENTAL;
     }

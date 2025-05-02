@@ -250,7 +250,6 @@ target_link_libraries(OpenConverter
     avformat
     avcodec
     avutil
-    pthread
     swresample
     swscale
     avfilter

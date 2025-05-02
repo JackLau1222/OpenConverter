@@ -226,20 +226,21 @@ jobs:
 
       - name : Deploy project
         run: |
-          mkdir -p deploy
-          cd src/build/Release
-          cp OpenConverter.exe ../../../../deploy/
-          D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe .\OpenConverter.exe
-          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll ../../../../deploy/
-          cd ${{ github.workspace }}
-          powershell Compress-Archive -Path deploy -DestinationPath deploy/OpenConverter_win64.zip
+          (mkdir D:\deploy\OpenConverter &&
+          cd D:\deploy\OpenConverter &&
+          cp D:\a\OpenConverter\OpenConverter\src\build\Release\OpenConverter.exe . &&
+          D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe .\OpenConverter.exe &&
+          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll .\ &&
+          cd D:\deploy &&
+          powershell Compress-Archive -Path OpenConverter -DestinationPath OpenConverter_win64.zip)
+          cp D:\deploy\OpenConverter_win64.zip .\
       
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: OpenConverter_win64
-          path: deploy\OpenConverter_win64.zip
+          path: OpenConverter_win64.zip
 
       - name: Get GitHub Release information
         id: release_info
@@ -249,7 +250,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: deploy\OpenConverter_win64.zip
+          files: OpenConverter_win64.zip
 
       - name: Finish
         run: echo "win64 Release upload complete"

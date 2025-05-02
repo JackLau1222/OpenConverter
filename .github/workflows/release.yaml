@@ -53,6 +53,8 @@ jobs:
 
     - name: Copy libs
       run: |
+        export LD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
+        export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
         # linuxdeployqt
         sudo apt-get -y install git g++ libgl1-mesa-dev
         git clone https://github.com/probonopd/linuxdeployqt.git
@@ -122,6 +124,7 @@ jobs:
       run: |
         if [ ! -d "$(pwd)/ffmpeg" ]; then
           echo "FFmpeg not found, starting build..."
+          brew install make pkg-config openssl cmake x264 x265
           wget https://ffmpeg.org/releases/ffmpeg-5.1.6.tar.bz2 && tar xjvf ffmpeg-5.1.6.tar.bz2
           (cd ffmpeg-5.1.6 && ./configure --pkg-config-flags=--static --enable-shared --disable-static --extra-libs=-lpthread --extra-libs=-lm --enable-gpl --enable-nonfree --enable-libx264 --enable-libx265 --prefix=../ffmpeg)
           (cd ffmpeg-5.1.6 && make -j$(sysctl -n hw.ncpu) && make install)
@@ -178,9 +181,9 @@ jobs:
     - name: Finish
       run: echo "macOS aarch64 Release upload complete"
 
-    - name: Setup tmate session
-      if: ${{ failure() }}
-      uses: mxschmitt/action-tmate@v3
+    # - name: Setup tmate session
+    #   if: ${{ failure() }}
+    #   uses: mxschmitt/action-tmate@v3
 
     - name: Finish
       run: echo "Release upload complete"
@@ -223,20 +226,20 @@ jobs:
 
       - name : Deploy project
         run: |
-          mkdir D:\deploy\OpenConverter
-          cd D:\deploy\OpenConverter
-          cp D:\a\OpenConverter\OpenConverter\src\build\Release\OpenConverter.exe .
+          mkdir -p deploy
+          cd src/build/Release
+          cp OpenConverter.exe ../../../../deploy/
           D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe .\OpenConverter.exe
-          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll .\
-          cd D:\deploy
-          powershell Compress-Archive -Path OpenConverter -DestinationPath OpenConverter_win64.zip
-
+          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll ../../../../deploy/
+          cd ${{ github.workspace }}
+          powershell Compress-Archive -Path deploy -DestinationPath deploy/OpenConverter_win64.zip
+      
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: OpenConverter_win64
-          path: D:\deploy\OpenConverter_win64.zip
+          path: deploy\OpenConverter_win64.zip
 
       - name: Get GitHub Release information
         id: release_info
@@ -246,14 +249,14 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: D:\deploy\OpenConverter_win64.zip
+          files: deploy\OpenConverter_win64.zip
 
       - name: Finish
-        run: echo "macOS aarch64 Release upload complete"
+        run: echo "win64 Release upload complete"
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Finish
         run: echo "Release upload complete"

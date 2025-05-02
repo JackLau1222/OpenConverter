@@ -79,8 +79,8 @@ jobs:
 
     - name: Copy libs
       run: |
-        # export LD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
-        # export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
+        export LD_LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
+        export LIBRARY_PATH=$FFMPEG_ROOT_PATH/lib/:$BMF_ROOT_PATH/lib
         # linuxdeployqt
         sudo apt-get -y install git g++ libgl1-mesa-dev
         git clone https://github.com/probonopd/linuxdeployqt.git

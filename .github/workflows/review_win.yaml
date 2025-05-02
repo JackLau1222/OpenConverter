@@ -51,7 +51,9 @@ jobs:
       # Create a build directory, run qmake, and build the project.
       - name: Build Qt project
         run: |
-          (cd src && cmake -B build -DFFMPEG_ROOT_PATH=../ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4 && cd build && make -j$(nproc))
+          (cd src && 
+          cmake -S . -B build "-DFFMPEG_ROOT_PATH=../ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4" -DFFTOOL_TRANSCODER=OFF && 
+          cmake --build build --config Release --parallel)
 
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts

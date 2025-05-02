@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10...3.24)
 
 project(OpenConverter VERSION 1.2 LANGUAGES CXX)
 
@@ -89,7 +89,9 @@ function(find_ffmpeg_version FFMPEG_VERSION_INCLUDE_DIR FFMPEG_LIB_DIR VERSION_V
 endfunction()
 
 if(FFMPEG_ROOT_PATH)               # user passed -DFFMPEG_ROOT_PATH=…
-  message(STATUS "Using FFMPEG_ROOT_PATH from CMake param: ${FFMPEG_ROOT_PATH}")
+    message(STATUS "Using FFMPEG_ROOT_PATH from CMake param: ${FFMPEG_ROOT_PATH}")
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_ROOT_PATH}/include)
+    set(FFMPEG_LIBRARY_DIRS ${FFMPEG_ROOT_PATH}/lib)
 elseif(DEFINED ENV{FFMPEG_ROOT_PATH})
     set(FFMPEG_ROOT_PATH $ENV{FFMPEG_ROOT_PATH})
     message(STATUS "Using FFMPEG_ROOT_PATH: ${FFMPEG_ROOT_PATH}")

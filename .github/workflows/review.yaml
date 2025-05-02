@@ -6,7 +6,7 @@ on:
   workflow_dispatch: 
 
 jobs:
-  review-linux-x86:
+  build-linux-x86:
     runs-on: ubuntu-22.04  
     concurrency:
       group: "review-linux-${{ github.event.pull_request.number }}"
@@ -133,7 +133,7 @@ jobs:
     - name: Finish
       run: echo "Release upload complete"
 
-  review-macos-arm:
+  build-macos-arm:
     runs-on: macos-latest
     concurrency:
       group: "review-macos-${{ github.event.pull_request.number }}"

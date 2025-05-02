@@ -16,7 +16,7 @@ env:
   BUILD_CONFIGURATION: Release
 
 jobs:
-  build:
+  build-windows-x64:
     runs-on: windows-latest
     concurrency:
       group: "review-win-${{ github.event.pull_request.number }}"
@@ -55,13 +55,23 @@ jobs:
           cmake -S . -B build "-DFFMPEG_ROOT_PATH=../ffmpeg/ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4" -DFFTOOL_TRANSCODER=OFF && 
           cmake --build build --config Release --parallel)
 
+      - name : Deploy project
+        run: |
+          mkdir D:\deploy\OpenConverter
+          cd D:\deploy\OpenConverter
+          cp D:\a\OpenConverter\OpenConverter\src\build\Release\OpenConverter.exe .
+          D:\a\_temp\Qt\6.4.3\msvc2019_64\bin\windeployqt.exe .\OpenConverter.exe
+          cp D:\a\OpenConverter\OpenConverter\ffmpeg\ffmpeg-n4.4.4-94-g5d07afd482-win64-gpl-shared-4.4\bin\*.dll .\
+          cd D:\deploy
+          powershell Compress-Archive -Path OpenConverter -DestinationPath OpenConverter_win64.zip
+
       # (Optional) Archive the build artifacts.
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: qt-build-artifacts
-          path: build/Release/
+          name: OpenConverter_win64
+          path: D:\deploy\OpenConverter_win64.zip
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3

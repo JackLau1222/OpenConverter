@@ -33,7 +33,10 @@ bool TranscoderFFmpeg::transcode(std::string input_path,
         copyAudio = false;
     }
 
-    open_Media(decoder, encoder);
+    if(!open_Media(decoder, encoder)){
+        flag = false;
+        goto end;
+    }
 
     if (!prepare_Decoder(decoder)) {
         flag = false;
@@ -43,6 +46,10 @@ bool TranscoderFFmpeg::transcode(std::string input_path,
     for (int i = 0; i < decoder->fmtCtx->nb_streams; i++) {
         if (decoder->fmtCtx->streams[i]->codecpar->codec_type ==
             AVMEDIA_TYPE_VIDEO) {
+            // skip video streams
+            if (encoder->fmtCtx->oformat->video_codec == AV_CODEC_ID_NONE) {
+                continue;
+            }
             if (!copyVideo) {
                 ret = prepare_Encoder_Video(decoder, encoder);
                 if (ret < 0) {
@@ -54,6 +61,10 @@ bool TranscoderFFmpeg::transcode(std::string input_path,
             }
         } else if (decoder->fmtCtx->streams[i]->codecpar->codec_type ==
                    AVMEDIA_TYPE_AUDIO) {
+            // skip audio streams
+            if (encoder->fmtCtx->oformat->audio_codec == AV_CODEC_ID_NONE) {
+                continue;
+            }
             if (!copyAudio) {
                 ret = prepare_Encoder_Audio(decoder, encoder);
                 if (ret < 0) {
@@ -86,6 +97,9 @@ bool TranscoderFFmpeg::transcode(std::string input_path,
     // read video data from multimedia files to write into destination file
     while (av_read_frame(decoder->fmtCtx, decoder->pkt) >= 0) {
         if (decoder->pkt->stream_index == decoder->videoIdx) {
+            if(encoder->fmtCtx->oformat->video_codec == AV_CODEC_ID_NONE) {
+                continue;
+            }
             if (!copyVideo) {
                 transcode_Video(decoder, encoder);
             } else {
@@ -96,6 +110,9 @@ bool TranscoderFFmpeg::transcode(std::string input_path,
             // encode(oFmtCtx, outCodecCtx, outFrame, outPkt, inStream,
             // outStream);
         } else if (decoder->pkt->stream_index == decoder->audioIdx) {
+            if(encoder->fmtCtx->oformat->audio_codec == AV_CODEC_ID_NONE) {
+                continue;
+            }
             if (!copyAudio) {
                 transcode_Audio(decoder, encoder);
             } else {
@@ -580,6 +597,8 @@ bool TranscoderFFmpeg::prepare_Copy(AVFormatContext *avCtx, AVStream **stream,
 
 bool TranscoderFFmpeg::remux(AVPacket *pkt, AVFormatContext *avCtx,
                              AVStream *inStream, AVStream *outStream) {
+    // associate the avpacket with the target output avstream
+    pkt->stream_index = outStream->index;
     av_packet_rescale_ts(pkt, inStream->time_base, outStream->time_base);
     if (av_interleaved_write_frame(avCtx, pkt) < 0) {
         av_log(NULL, AV_LOG_ERROR, "write frame error!\n");

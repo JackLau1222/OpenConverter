@@ -344,14 +344,6 @@ bool TranscoderFFmpeg::transcode_Audio(StreamContext *decoder,
 
 bool TranscoderFFmpeg::prepare_Decoder(StreamContext *decoder) {
     int ret = -1;
-    char errbuf[AV_ERROR_MAX_STRING_SIZE] = {0};
-
-    ret = avformat_find_stream_info(decoder->fmtCtx, NULL);
-    if (ret < 0) {
-        av_strerror(ret, errbuf, sizeof(errbuf));
-        av_log(NULL, AV_LOG_ERROR, "avformat_find_info failed: %s\n", errbuf);
-        return false;
-    }
 
     for (int i = 0; i < decoder->fmtCtx->nb_streams; i++) {
         if (decoder->fmtCtx->streams[i]->codecpar->codec_type ==

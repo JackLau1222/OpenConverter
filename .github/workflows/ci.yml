@@ -25,7 +25,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential cmake pkg-config
         sudo apt-get install -y nasm yasm libx264-dev libx265-dev libnuma-dev
-        git submodule update --init --recursive
+        git clone https://github.com/google/googletest.git 3rd_party/gtest
 
     - name: Build FFmpeg
       run: |
@@ -67,7 +67,7 @@ jobs:
       run: |
         brew install cmake pkg-config
         brew install nasm yasm x264 x265
-        git submodule update --init --recursive
+        git clone https://github.com/google/googletest.git 3rd_party/gtest
 
     - name: Build FFmpeg
       run: |

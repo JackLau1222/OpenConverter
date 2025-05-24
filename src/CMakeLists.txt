@@ -5,6 +5,9 @@ project(OpenConverter VERSION 1.3 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add position independent code flag
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 option(ENABLE_GUI "enable GUI" ON)
 # BMF is experimental feature, so we can't enable it by default
 option(BMF_TRANSCODER "enable BMF Transcoder" OFF)

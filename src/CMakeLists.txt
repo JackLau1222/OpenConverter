@@ -8,9 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add position independent code flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Add MSVC-specific compiler flag for C++17
+# Add MSVC-specific compiler flags
 if(MSVC)
-    add_compile_options(/Zc:__cplusplus)
+    add_compile_options(/Zc:__cplusplus /permissive-)
 endif()
 
 option(ENABLE_GUI "enable GUI" ON)
@@ -321,7 +321,7 @@ if(ENABLE_TESTS)
     # Use system GTest if available, otherwise use submodule
     find_package(GTest QUIET)
     if(NOT GTest_FOUND)
-        add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/googletest ${CMAKE_BINARY_DIR}/googletest)
+        add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
     endif()
 
     # Add test directory

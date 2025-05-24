@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 # Enable testing
 enable_testing()
 
+# Add GTest from 3rd_party
+add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
+
 # Add test executable
 add_executable(transcoder_test transcoder_test.cpp)
 
@@ -39,16 +42,4 @@ add_custom_command(TARGET transcoder_test POST_BUILD
 )
 
 # Add test to CTest
-add_test(NAME transcoder_test COMMAND transcoder_test)
-
-# Add fuzzing test if requested
-if(ENABLE_FUZZING)
-    # Check for libFuzzer
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(FUZZER_FLAGS "-fsanitize=fuzzer")
-        target_compile_options(transcoder_test PRIVATE ${FUZZER_FLAGS})
-        target_link_options(transcoder_test PRIVATE ${FUZZER_FLAGS})
-    else()
-        message(WARNING "Fuzzing is only supported with Clang compiler")
-    endif()
-endif() 
+add_test(NAME transcoder_test COMMAND transcoder_test) 

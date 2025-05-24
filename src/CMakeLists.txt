@@ -321,7 +321,7 @@ if(ENABLE_TESTS)
     # Use system GTest if available, otherwise use submodule
     find_package(GTest QUIET)
     if(NOT GTest_FOUND)
-        add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
+        # add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
     endif()
 
     # Add test directory

@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  ci-linux:
     runs-on: ubuntu-22.04
     concurrency:
       group: "build-linux-${{ github.event.pull_request.number }}"
@@ -41,7 +41,7 @@ jobs:
     - name: Build with CMake
       run: |
         export PATH=$PATH:$FFMPEG_ROOT_PATH/bin
-        (cd src && cmake -B build -DENABLE_TESTS=ON -DBUILD_GUI=OFF && cd build && make -j$(nproc))
+        (cd src && cmake -B build -DENABLE_TESTS=ON -DENABLE_GUI=OFF && cd build && make -j$(nproc))
 
     - name: Run tests
       run: |
@@ -50,7 +50,7 @@ jobs:
         unzip test.zip -d src/build/tests/media
         cd src/build/tests && ./transcoder_test
 
-  build-macos:
+  ci-macos:
     runs-on: macos-latest
     concurrency:
       group: "build-macos-${{ github.event.pull_request.number }}"
@@ -82,7 +82,7 @@ jobs:
     - name: Build with CMake
       run: |
         export PATH=$PATH:$FFMPEG_ROOT_PATH/bin
-        (cd src && cmake -B build -DENABLE_TESTS=ON -DBUILD_GUI=OFF && cd build && make -j$(sysctl -n hw.ncpu))
+        (cd src && cmake -B build -DENABLE_TESTS=ON -DENABLE_GUI=OFF && cd build && make -j$(sysctl -n hw.ncpu))
 
     - name: Run tests
       run: |

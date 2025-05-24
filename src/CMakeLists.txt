@@ -8,6 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add position independent code flag
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Add MSVC-specific compiler flag for C++17
+if(MSVC)
+    add_compile_options(/Zc:__cplusplus)
+endif()
+
 option(ENABLE_GUI "enable GUI" ON)
 # BMF is experimental feature, so we can't enable it by default
 option(BMF_TRANSCODER "enable BMF Transcoder" OFF)

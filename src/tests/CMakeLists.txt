@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 enable_testing()
 
 # Add GTest from 3rd_party
-add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/tests/gtest)
 
 # Add test executable
 add_executable(transcoder_test transcoder_test.cpp)

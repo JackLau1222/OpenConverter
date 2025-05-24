@@ -5,6 +5,14 @@ project(OpenConverter VERSION 1.3 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add position independent code flag
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Add MSVC-specific compiler flags
+if(MSVC)
+    add_compile_options(/Zc:__cplusplus /permissive-)
+endif()
+
 option(ENABLE_GUI "enable GUI" ON)
 # BMF is experimental feature, so we can't enable it by default
 option(BMF_TRANSCODER "enable BMF Transcoder" OFF)
@@ -184,6 +192,39 @@ link_directories(
     ${FFMPEG_LIBRARY_DIRS}
 )
 
+# Create library target for core functionality
+add_library(OpenConverterCore STATIC
+    ${COMMON_SOURCES}
+    ${COMMON_HEADERS}
+)
+
+# Common library dependencies
+target_link_libraries(OpenConverterCore PRIVATE
+    avcodec
+    avformat
+    avfilter
+    avutil
+    swresample
+    swscale
+)
+
+if(BMF_TRANSCODER)
+    target_link_libraries(OpenConverterCore PRIVATE
+        engine
+        bmf_module_sdk
+        hmp
+    )
+endif()
+
+# Add include directories
+target_include_directories(OpenConverterCore PUBLIC
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/common/include
+    ${CMAKE_SOURCE_DIR}/engine/include
+    ${CMAKE_SOURCE_DIR}/transcoder/include
+    ${FFMPEG_INCLUDE_DIRS}
+)
+
 # Handle GUI mode
 if(ENABLE_GUI)
     add_definitions(-DENABLE_GUI)
@@ -228,19 +269,20 @@ if(ENABLE_GUI)
     if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         qt_add_executable(OpenConverter
             MANUAL_FINALIZATION
-            ${COMMON_SOURCES} ${GUI_SOURCES}
-            ${COMMON_HEADERS} ${GUI_HEADERS}
+            ${GUI_SOURCES}
+            ${GUI_HEADERS}
             ${UI_FILES} ${RESOURCE_FILES}
         )
     else()
         add_executable(OpenConverter
-            ${COMMON_SOURCES} ${GUI_SOURCES}
-            ${COMMON_HEADERS} ${GUI_HEADERS}
+            ${GUI_SOURCES}
+            ${GUI_HEADERS}
             ${UI_FILES} ${RESOURCE_FILES}
         )
     endif()
     
     target_link_libraries(OpenConverter PRIVATE
+        OpenConverterCore
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets
@@ -252,27 +294,9 @@ if(ENABLE_GUI)
 else()
     # Non-GUI mode
     add_executable(OpenConverter
-        ${COMMON_SOURCES}
-        ${COMMON_HEADERS}
+        ${CMAKE_SOURCE_DIR}/main.cpp
     )
-endif()
-
-# Common library dependencies
-target_link_libraries(OpenConverter PRIVATE
-    avcodec
-    avformat
-    avfilter
-    avutil
-    swresample
-    swscale
-)
-
-if(BMF_TRANSCODER)
-    target_link_libraries(OpenConverter PRIVATE
-        engine
-        bmf_module_sdk
-        hmp
-    )
+    target_link_libraries(OpenConverter PRIVATE OpenConverterCore)
 endif()
 
 # Set translation files
@@ -291,3 +315,15 @@ install(TARGETS OpenConverter
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Test dependencies
+if(ENABLE_TESTS)
+    # Use system GTest if available, otherwise use submodule
+    find_package(GTest QUIET)
+    if(NOT GTest_FOUND)
+        # add_subdirectory(${CMAKE_SOURCE_DIR}/../3rd_party/gtest ${CMAKE_BINARY_DIR}/gtest)
+    endif()
+
+    # Add test directory
+    add_subdirectory(tests)
+endif()

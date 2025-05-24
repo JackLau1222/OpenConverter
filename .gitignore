@@ -6,5 +6,6 @@ build-*
 src/CMakeLists.txt.user
 src/build
 src/build-*
+build
 .idea
 workload_output.txt

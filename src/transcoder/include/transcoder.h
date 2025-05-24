@@ -17,6 +17,7 @@
 #define TRANSCODER_H
 
 #include <iostream>
+#include <numeric>
 
 #include "../../common/include/encode_parameter.h"
 #include "../../common/include/process_parameter.h"

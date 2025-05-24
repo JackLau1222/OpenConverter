@@ -18,38 +18,33 @@
 #ifndef PROCESSPARAMETER_H
 #define PROCESSPARAMETER_H
 
-#include <QObject>
+#include <vector>
+#include <memory>
+#include "process_observer.h"
 
-/* inherit the QObject to use slot and signals */
-class ProcessParameter : public QObject {
-  private:
-    Q_OBJECT
-
-  public:
-    explicit ProcessParameter(QObject *parent = nullptr);
+class ProcessParameter {
+public:
+    ProcessParameter();
     ~ProcessParameter();
 
     void set_Process_Number(int64_t frameNumber, int64_t frameTotalNumnber);
-
     void set_Process_Number(int64_t processNumber);
-
     double get_Process_Number();
-
     void set_Time_Required(double timeRequired);
-
     double get_Time_Required();
-
     ProcessParameter get_Process_Parmeter();
 
-  signals:
-    void update_Process_Number(double result);
+    // Observer management
+    void addObserver(std::shared_ptr<ProcessObserver> observer);
+    void removeObserver(std::shared_ptr<ProcessObserver> observer);
 
-    void update_Time_Required(double result);
-
-  private:
+private:
     int64_t processNumber;
-
     double timeRequired;
+    std::vector<std::shared_ptr<ProcessObserver> > observers;
+    
+    void notifyProcessUpdate(double progress);
+    void notifyTimeUpdate(double timeRequired);
 };
 
 #endif // PROCESSPARAMETER_H

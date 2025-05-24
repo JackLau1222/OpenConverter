@@ -1,39 +1,60 @@
 #include "../include/process_parameter.h"
 
-ProcessParameter::ProcessParameter(QObject *parent) : QObject(parent) {
-    processNumber = 0;
+ProcessParameter::ProcessParameter() : processNumber(0), timeRequired(0.0) {}
 
-    timeRequired = 0;
-}
+ProcessParameter::~ProcessParameter() = default;
 
-void ProcessParameter::set_Process_Number(int64_t frameNumber,
-                                          int64_t frameTotalNumnber) {
-    int64_t result = (double)frameNumber / (double)frameTotalNumnber * 100;
-    if (processNumber != result) {
-        processNumber = result;
-        emit update_Process_Number(result);
+void ProcessParameter::set_Process_Number(int64_t frameNumber, int64_t frameTotalNumnber) {
+    if (frameTotalNumnber > 0) {
+        double progress = static_cast<double>(frameNumber) / frameTotalNumnber * 100.0;
+        processNumber = frameNumber;
+        notifyProcessUpdate(progress);
     }
 }
 
 void ProcessParameter::set_Process_Number(int64_t processNumber) {
-    if (processNumber > 0)
-        this->processNumber = processNumber;
-    emit update_Process_Number(processNumber);
+    this->processNumber = processNumber;
+    notifyProcessUpdate(static_cast<double>(processNumber));
 }
 
-double ProcessParameter::get_Process_Number() { return processNumber; }
+double ProcessParameter::get_Process_Number() {
+    return static_cast<double>(processNumber);
+}
 
 void ProcessParameter::set_Time_Required(double timeRequired) {
-    if (timeRequired > 0) {
-        this->timeRequired = timeRequired;
-        emit update_Time_Required(this->timeRequired);
+    this->timeRequired = timeRequired;
+    notifyTimeUpdate(timeRequired);
+}
+
+double ProcessParameter::get_Time_Required() {
+    return timeRequired;
+}
+
+ProcessParameter ProcessParameter::get_Process_Parmeter() {
+    return *this;
+}
+
+void ProcessParameter::addObserver(std::shared_ptr<ProcessObserver> observer) {
+    if (observer) {
+        observers.push_back(observer);
     }
 }
 
-double ProcessParameter::get_Time_Required() { return timeRequired; }
+void ProcessParameter::removeObserver(std::shared_ptr<ProcessObserver> observer) {
+    auto it = std::find(observers.begin(), observers.end(), observer);
+    if (it != observers.end()) {
+        observers.erase(it);
+    }
+}
 
-// ProcessParameter get_Process_Parmeter() {
-//     // TODO
-// }
+void ProcessParameter::notifyProcessUpdate(double progress) {
+    for (const auto& observer : observers) {
+        observer->onProcessUpdate(progress);
+    }
+}
 
-ProcessParameter::~ProcessParameter() {}
+void ProcessParameter::notifyTimeUpdate(double timeRequired) {
+    for (const auto& observer : observers) {
+        observer->onTimeUpdate(timeRequired);
+    }
+}

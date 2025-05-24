@@ -18,20 +18,35 @@
 #ifndef OPEN_CONVERTER_H
 #define OPEN_CONVERTER_H
 
-#include "../../common/include/info.h"
-#include "../../engine/include/converter.h"
-#include "encode_setting.h"
+#include <QMainWindow>
+#include <QTranslator>
+#include <QMessageBox>
+#include <QAction>
+#include <QEvent>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QIcon>
+#include <QString>
+#include <QUrl>
+#include <QFileInfo>
+#include <QByteArray>
 #include <QFileDialog>
+#include <QToolButton>
+#include <QPushButton>
+#include <QMenu>
+#include <QStatusBar>
+#include <QProgressBar>
+#include <QLabel>
 #include <QLineEdit>
-#include <QMainWindow>
-#include <QMessageBox>
-#include <QMimeData>
 #include <QThread>
-#include <QTranslator>
+#include <QMetaObject>
+#include <QApplication>
+#include <QMimeData>
 
-#include <iostream>
+#include "../../common/include/info.h"
+#include "../../common/include/encode_parameter.h"
+#include "../../common/include/process_parameter.h"
+#include "../../common/include/process_observer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,76 +54,52 @@ class OpenConverter;
 }
 QT_END_NAMESPACE
 
-class OpenConverter : public QMainWindow {
+class EncodeSetting;
+class Converter;
+
+class OpenConverter : public QMainWindow, public ProcessObserver {
     Q_OBJECT
-  protected:
-    // this event is called, when a new translator is loaded or the system
-    // language is changed
-    void changeEvent(QEvent *);
 
-    // this event is called, when the user drags and drops a file onto the
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
-  signals:
-    void activateConverterThread(QString src, QString dst);
-  protected slots:
-    void slotLanguageChanged(QAction *);
-    void slotTranscoderChanged(QAction *);
-  public slots:
-    void apply_Pushed();
-
-    void convert_Pushed();
-
-    void encode_Setting_Pushed();
-
-    void info_Display(QuickInfo *info);
-
-    void update_Process_Bar(double result);
-
-    void update_Time_Required(double result);
-
-    void handle_Converter_Result(bool flag);
-
-  public:
+public:
     explicit OpenConverter(QWidget *parent = nullptr);
     ~OpenConverter();
 
-  private:
-    // intelligent conversion of bit rate units
-    QString formatBitrate(int64_t bitsPerSec);
+    // ProcessObserver interface implementation
+    void onProcessUpdate(double progress) override;
+    void onTimeUpdate(double timeRequired) override;
 
-    // intelligent conversion of frequency units
-    QString formatFrequency(int64_t hertz);
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
-    // loads a language by the given language shortcur (e.g. de, en)
-    void loadLanguage(const QString &rLanguage);
+private slots:
+    void slotLanguageChanged(QAction *action);
+    void slotTranscoderChanged(QAction *action);
+    void apply_Pushed();
+    void convert_Pushed();
+    void encode_Setting_Pushed();
 
-    QTranslator m_translator; // contains the translations for this application
-    //    QTranslator m_translatorQt; // contains the translations for qt
-    QString m_currLang; // contains the currently loaded language
-    QString m_langPath; // Path of language files. This is always fixed to
-                        // /languages.
-
+private:
     Ui::OpenConverter *ui;
-
-    Info *info = NULL;
-
-    EncodeParameter *encodeParameter = NULL;
-
-    EncodeSetting *encodeSetting = NULL;
-
-    ProcessParameter *processParameter = NULL;
-
-    Converter *converter = NULL;
-
-    double processNumber = 0;
-
-    QMessageBox *displayResult = NULL;
-
-    QThread converterThread;
-
+    QTranslator m_translator;
+    QString m_currLang;
+    QString m_langPath;
     QString currentInputPath;
-
     QString currentOutputPath;
+
+    Info *info;
+    EncodeParameter *encodeParameter;
+    EncodeSetting *encodeSetting;
+    ProcessParameter *processParameter;
+    Converter *converter;
+    QMessageBox *displayResult;
+
+    void loadLanguage(const QString &rLanguage);
+    void handle_Converter_Result(bool flag);
+    void info_Display(QuickInfo *info);
+    QString formatBitrate(int64_t bitsPerSec);
+    QString formatFrequency(int64_t hertz);
 };
+
 #endif // OPEN_CONVERTER_H

@@ -18,42 +18,30 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
-#include "../../transcoder/include/transcoder.h" // Include the base class header
-
+#include "../../transcoder/include/transcoder.h"
 #include "../../common/include/encode_parameter.h"
-#include <QObject>
-#include <QString>
+#include <string>
+#include <functional>
 
-class Converter : public QObject {
-    Q_OBJECT;
-
-  public:
+class Converter {
+public:
     Converter();
     Converter(ProcessParameter *processParamter,
               EncodeParameter *encodeParamter);
     ~Converter();
 
     bool set_Transcoder(std::string transcoderName);
+    bool convert_Format(const std::string& src, const std::string& dst);
 
-  private:
+private:
     Transcoder *transcoder = NULL;
-
-    // encoder's parameters
     bool copyVideo;
     bool copyAudio;
 
-  public slots:
-    void convert_Format(QString src, QString dst);
 
-  signals:
-    void return_Value_Converter(bool flag);
-
-  public:
+public:
     ProcessParameter *processParameter = NULL;
-
     EncodeParameter *encodeParameter = NULL;
-
-    bool transcode(char *src, char *dst);
 };
 
 #endif // CONVERTER_H

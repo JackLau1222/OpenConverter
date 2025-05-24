@@ -37,9 +37,10 @@ Converter::Converter(ProcessParameter *processParamter,
 
 bool Converter::set_Transcoder(std::string transcoderName) {
     if (transcoder) {
-        delete (transcoder);
+        delete transcoder;
         transcoder = NULL;
     }
+    
     if (transcoder == NULL) {
         if (transcoderName == "FFMPEG") {
 #if defined(ENABLE_FFMPEG)
@@ -70,7 +71,7 @@ bool Converter::set_Transcoder(std::string transcoderName) {
     return true;
 }
 
-void Converter::convert_Format(QString src, QString dst) {
+bool Converter::convert_Format(const std::string& src, const std::string& dst) {
     if (encodeParameter->get_Video_Codec_Name() == "") {
         copyVideo = true;
     } else {
@@ -82,15 +83,13 @@ void Converter::convert_Format(QString src, QString dst) {
     } else {
         copyAudio = false;
     }
-    QByteArray ba = src.toLocal8Bit();
-    char *sourceFileName = ba.data();
 
-    QByteArray bb = dst.toLocal8Bit();
-    char *destinationFileName = bb.data();
-    // emit return_Value_Converter(transcode(sourceFileName,
-    // destinationFileName));
-    emit return_Value_Converter(
-        transcoder->transcode(src.toStdString(), dst.toStdString()));
+    return transcoder->transcode(src, dst);
 }
 
-Converter::~Converter() {}
+
+Converter::~Converter() {
+    if (transcoder) {
+        delete transcoder;
+    }
+}

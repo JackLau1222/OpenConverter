@@ -1,10 +1,42 @@
+#include <QMainWindow>
+#include <QTranslator>
+#include <QMessageBox>
+#include <QAction>
+#include <QEvent>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QIcon>
+#include <QString>
+#include <QUrl>
+#include <QFileInfo>
+#include <QByteArray>
+#include <QFileDialog>
+#include <QToolButton>
+#include <QPushButton>
+#include <QMenu>
+#include <QStatusBar>
+#include <QProgressBar>
+#include <QLabel>
+#include <QLineEdit>
+#include <QThread>
+#include <QMetaObject>
+#include <QApplication>
+#include <QMimeData>
+
 #include "../include/open_converter.h"
 #include "ui_open_converter.h"
+#include "../include/encode_setting.h"
+#include "../../engine/include/converter.h"
+#include "../../common/include/info.h"
+#include "../../common/include/encode_parameter.h"
+#include "../../common/include/process_parameter.h"
+#include "../../common/include/process_observer.h"
+
+#include <iostream>
 
 OpenConverter::OpenConverter(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::OpenConverter) {
     /* init objects */
-    //    quickInfo = new QuickInfo;
     info = new Info;
     encodeParameter = new EncodeParameter;
     encodeSetting = new EncodeSetting(nullptr, encodeParameter);
@@ -14,29 +46,14 @@ OpenConverter::OpenConverter(QWidget *parent)
     displayResult = new QMessageBox;
 
     ui->setupUi(this);
-
-    // Enable drag and drop
     setAcceptDrops(true);
-
-    /* set the converter thread */
-    converter->moveToThread(&converterThread);
-
-    connect(&converterThread, &QThread::finished, converter,
-            &QObject::deleteLater);
-    connect(this, &OpenConverter::activateConverterThread, converter,
-            &Converter::convert_Format);
-    connect(converter, &Converter::return_Value_Converter, this,
-            &OpenConverter::handle_Converter_Result);
-
-    converterThread.start();
+    setWindowTitle("OpenConverter");
+    setWindowIcon(QIcon(":/icon/icon.png"));
 
     ui->progressBar->setValue(0);
-    /* update the progress bar along with encoding  */
-    connect(processParameter, &ProcessParameter::update_Process_Number, this,
-            &OpenConverter::update_Process_Bar);
-
-    connect(processParameter, &ProcessParameter::update_Time_Required, this,
-            &OpenConverter::update_Time_Required);
+    
+    // Register this class as an observer for process updates
+    processParameter->addObserver(std::shared_ptr<ProcessObserver>(this));
 
     connect(ui->toolButton, &QToolButton::clicked, [&]() {
         QString filename = QFileDialog::getOpenFileName();
@@ -149,24 +166,6 @@ void OpenConverter::loadLanguage(const QString &rLanguage) {
 }
 
 void OpenConverter::changeEvent(QEvent *event) {
-    //    if(0 != event) {
-    //        switch(event->type()) {
-    //        // this event is send if a translator is loaded
-    //        case QEvent::LanguageChange:
-    //            ui->retranslateUi(this);
-    //            qDebug() << "change event emitted";
-    //            break;
-
-    //            // this event is send, if the system, language changes
-    ////        case QEvent::LocaleChange:
-    ////        {
-    ////            QString locale = QLocale::system().name();
-    ////            locale.truncate(locale.lastIndexOf('_'));
-    ////            loadLanguage(locale);
-    ////        }
-    ////        break;
-    //        }
-    //    }
     if (event->type() == QEvent::LanguageChange) {
         // save the current input and output folders
         currentInputPath = ui->lineEdit_inputFile->text();
@@ -179,7 +178,7 @@ void OpenConverter::changeEvent(QEvent *event) {
         ui->lineEdit_outputFile->setText(currentOutputPath);
 
         if (info && info->get_Quick_Info()) {
-            info_Display(info->get_Quick_Info());
+            info_Display(info->get_Quick_Info());  // Convert QuickInfo to string
         }
     }
     QMainWindow::changeEvent(event);
@@ -193,20 +192,18 @@ void OpenConverter::handle_Converter_Result(bool flag) {
         displayResult->setText("Convert failed! Please ensure the file path "
                                "and encode setting is correct");
     }
-    displayResult->exec();
+    displayResult->show();
 }
 
-void OpenConverter::update_Process_Bar(double result) {
-    // static int x = 0;
-    // int process = result * 100;
-    int process = result;
+void OpenConverter::onProcessUpdate(double progress) {
+    int process = progress;
     ui->progressBar->setValue(process);
     ui->label_processResult->setText(QString("%1%").arg(process));
 }
 
-void OpenConverter::update_Time_Required(double result) {
+void OpenConverter::onTimeUpdate(double timeRequired) {
     ui->label_timeRequiredResult->setText(
-        QString("%1s").arg(QString::number(result, 'f', 2)));
+        QString("%1s").arg(QString::number(timeRequired, 'f', 2)));
 }
 
 void OpenConverter::encode_Setting_Pushed() { encodeSetting->show(); }
@@ -251,12 +248,26 @@ void OpenConverter::convert_Pushed() {
         return;
     }
 
-    if (encodeSetting->get_Available()) {
-        encodeSetting->get_Encode_Parameter(converter->encodeParameter);
-    }
+    // Start conversion in worker thread
 
-    emit activateConverterThread(ui->lineEdit_inputFile->text(),
-                                 ui->lineEdit_outputFile->text());
+    // capture everything you need by value
+    auto* thread = QThread::create([=]() {
+        bool ok = converter->convert_Format(
+            inputFilePath.toStdString(),
+            outputFilePath.toStdString()
+        );
+        // When done, marshal back to the GUI thread:
+        QMetaObject::invokeMethod(this, [this, ok]() {
+            handle_Converter_Result(ok);
+        }, Qt::QueuedConnection);
+    });
+
+    // clean up the QThread object once it finishes
+    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
+
+    // fire off
+    thread->start();;
+
 }
 
 // automatically select kbps/Mbps
@@ -280,6 +291,8 @@ QString OpenConverter::formatFrequency(int64_t hertz) {
 }
 
 void OpenConverter::info_Display(QuickInfo *quickInfo) {
+    if (!quickInfo) return;
+    
     // video
     ui->label_videoStreamResult->setText(
         QString("%1").arg(quickInfo->videoIdx));
@@ -311,9 +324,13 @@ void OpenConverter::info_Display(QuickInfo *quickInfo) {
 }
 
 OpenConverter::~OpenConverter() {
-    /* Destory converter thread */
-    converterThread.quit();
-    converterThread.wait();
-    // encodeSetting->close();
     delete ui;
+    delete info;
+    delete encodeParameter;
+    delete encodeSetting;
+    delete processParameter;
+    delete converter;
+    delete displayResult;
 }
+
+#include "open_converter.moc"

@@ -1,3 +1,4 @@
+#include <algorithm> 
 #include "../include/process_parameter.h"
 
 ProcessParameter::ProcessParameter() : processNumber(0), timeRequired(0.0) {}
